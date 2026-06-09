@@ -439,18 +439,7 @@ body[data-modal-open] .nav { opacity: 0; transform: translateY(-110%); pointer-e
 .exp-role { font-family: var(--font-head); font-size: 1.2rem; }
 .exp-org { color: var(--accent); font-weight: 500; }
 .exp-loc { color: var(--muted); font-size: 0.85rem; }
-.exp-arrangement {
-  display: inline-flex; align-items: center; gap: 0.4rem; margin-top: 0.5rem;
-  font-family: var(--font-mono); font-size: 0.7rem; letter-spacing: 0.02em;
-  color: var(--text-soft); border: 1px solid var(--border); border-radius: 999px;
-  padding: 0.16rem 0.55rem;
-}
-.exp-arrangement::before {
-  content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--muted);
-}
-.exp-arrangement[data-mode="Remote"]::before { background: var(--accent); }
-.exp-arrangement[data-mode="Hybrid"]::before { background: color-mix(in srgb, var(--accent) 55%, #f5a623); }
-.exp-arrangement[data-mode="In person"]::before { background: var(--muted); }
+.exp-arrangement { color: var(--text-soft); }
 .exp-bullets { margin-top: 0.8rem; display: flex; flex-direction: column; gap: 0.45rem; }
 .exp-bullets li { color: var(--text-soft); font-size: 0.95rem; padding-left: 1.1rem; position: relative; }
 .exp-bullets li::before { content: "▹"; position: absolute; left: 0; color: var(--accent); }

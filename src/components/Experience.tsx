@@ -41,7 +41,12 @@ export function Experience() {
               className="exp-item"
             >
               <div>
-                <div className="exp-period">{job.period}</div>
+                <div className="exp-period">
+                  {job.period}
+                  {job.arrangement && (
+                    <span className="exp-arrangement"> · {job.arrangement}</span>
+                  )}
+                </div>
                 {job.current && <div className="exp-current">current</div>}
                 <div className="exp-loc">{job.location}</div>
                 {job.arrangement && (
