@@ -39,6 +39,8 @@ export interface Job {
   role: string;
   org: string;
   location: string;
+  /** Work arrangement — how the role was carried out, independent of company HQ. */
+  arrangement?: "In person" | "Hybrid" | "Remote";
   period: string;
   current?: boolean;
   bullets: string[];
@@ -89,6 +91,7 @@ export const experience: Job[] = [
     role: "Finance Developer",
     org: "Quintessence Wealth",
     location: "Toronto, ON",
+    arrangement: "Hybrid",
     period: "May 2026 – Present",
     current: true,
     world: "night",
@@ -101,6 +104,7 @@ export const experience: Job[] = [
     role: "President / VP of Information Technology",
     org: "JA Company Program",
     location: "Brampton, ON",
+    arrangement: "In person",
     period: "Oct 2021 – Jun 2025",
     world: "night",
     bullets: [
@@ -113,7 +117,8 @@ export const experience: Job[] = [
   {
     role: "AI/ML Engineer",
     org: "AIQ Labs LLC",
-    location: "Waterloo, ON",
+    location: "Delaware, US",
+    arrangement: "Remote",
     period: "Mar 2026 – Present",
     current: true,
     world: "day",
@@ -126,6 +131,7 @@ export const experience: Job[] = [
     role: "Software Engineer",
     org: "ZMC",
     location: "Vaughan, ON",
+    arrangement: "Remote",
     period: "Jul 2024 – Dec 2024",
     world: "day",
     bullets: [
@@ -138,6 +144,7 @@ export const experience: Job[] = [
     role: "STEAM Instructor",
     org: "City of Brampton",
     location: "Brampton, ON",
+    arrangement: "In person",
     period: "Oct 2022 – Sep 2025",
     world: "day",
     bullets: [
@@ -149,6 +156,7 @@ export const experience: Job[] = [
     role: "Founder & President",
     org: "Robotics Club & Team",
     location: "Brampton, ON",
+    arrangement: "In person",
     period: "Sep 2023 – Jun 2025",
     world: "day",
     bullets: [
