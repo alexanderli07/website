@@ -12,7 +12,7 @@ type Classifier = (text: string) => Promise<Array<{ label: string; score: number
 const SAMPLES = [
   "Alex ships polished, creative software fast.",
   "This portfolio is unbelievably boring and slow.",
-  "I built a game 100,000 people actually played.",
+  "I built a game 1,000,000 people actually played.",
 ];
 
 /**
@@ -128,7 +128,7 @@ export function MLDemo() {
         <p className="ml-fallback">Couldn't load the model just now — it streams from the Hugging Face CDN and runs locally when reachable.</p>
       )}
 
-      <p className="ml-note">Runs 100% in your browser — the model is downloaded once and never leaves your device.</p>
+      <p className="ml-note">Runs 100% in your browser!</p>
     </div>
   );
 }
