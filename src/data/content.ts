@@ -67,16 +67,16 @@ export const profile = {
   subhead:
     "Computing & Financial Management @ the University of Waterloo · Toronto, ON.",
   oneLiner:
-    "Full-stack & AI developer, 9x hackathon winner, and a Finance Developer at Quintessence Wealth — building at the line between code and capital.",
+    "Full-stack & AI developer, 10x hackathon winner, and a Finance Developer at Quintessence Wealth — building at the line between code and capital.",
   location: "Toronto, Ontario, Canada",
   school: "University of Waterloo — Computing & Financial Management (CFM)",
   // short status chips shown in the hero (replace the old portrait) — same in both worlds
-  chips: ["🎓 CFM @ Waterloo", "🥇 9× hackathon winner", "🎮 1M+ game visits"],
+  chips: ["🎓 CFM @ Waterloo", "🥇 10× hackathon winner", "🎮 1M+ game visits"],
 };
 
 /** Headline stats (Alexander's own claims, from the résumé). */
 export const stats = [
-  { value: "9×", label: "hackathon wins" },
+  { value: "10×", label: "hackathon wins" },
   { value: "1M+", label: "visits across games I've shipped" },
   { value: "10+", label: "languages I code in" },
   { value: "~91%", label: "accuracy on my vision model" },
@@ -437,7 +437,7 @@ export const testimonials: Testimonial[] = [
 export const awards = [
   { tier: "1st place", items: ["Formula Null — UW '25", "DeltaHacks X — McMaster '24", "RythmHacks — UW '23", "MayfieldHacks '23"] },
   { tier: "Podium", items: ["Ignition Hacks v4 '24", "WolfHacks '24"] },
-  { tier: "Special awards", items: ["Best AR/VR — Incubator Hacks '24", "Best AI/ML — HTV9 '24", "Best Game Mechanic — AngelHacks '23"] },
+  { tier: "Special awards", items: ["Best Quant Trading Bot — Hack the 6ix '26", "Best AR/VR — Incubator Hacks '24", "Best AI/ML — HTV9 '24", "Best Game Mechanic — AngelHacks '23"] },
   { tier: "Other", items: ["JA IT Leadership Finalist '22–'23", "2× Best Debate Speaker '22–'24", "Best Table Topics Speaker '21–'22", "National Lifeguard & First Aid '23"] },
 ];
 
