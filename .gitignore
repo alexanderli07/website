@@ -1,0 +1,15 @@
+node_modules
+dist
+dist-ssr
+*.local
+.vercel
+
+# editor / OS
+.DS_Store
+Thumbs.db
+.vscode/*
+!.vscode/extensions.json
+.idea
+
+# my scratch copy of the old template (not part of the new site)
+_reference

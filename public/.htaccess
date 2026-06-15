@@ -1,0 +1,33 @@
+# ── Two Worlds — Apache config for InfinityFree (and any Apache static host) ──
+# Vite copies this file into dist/, so it ends up in htdocs/.htaccess on upload.
+
+# Serve index.html for the root
+DirectoryIndex index.html
+
+# Gzip text assets (big win for the JS/CSS, esp. the lazy ML chunk).
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/plain text/css text/xml \
+    text/javascript application/javascript application/json image/svg+xml
+</IfModule>
+
+# Cache fingerprinted build assets hard; never cache the HTML shell.
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresByType text/css "access plus 1 year"
+  ExpiresByType application/javascript "access plus 1 year"
+  ExpiresByType image/png "access plus 30 days"
+  ExpiresByType image/jpeg "access plus 30 days"
+  ExpiresByType image/svg+xml "access plus 30 days"
+  ExpiresByType image/x-icon "access plus 30 days"
+  ExpiresByType application/pdf "access plus 7 days"
+  ExpiresByType text/html "access plus 0 seconds"
+</IfModule>
+
+# Optional: once your SSL cert is active in the InfinityFree panel, uncomment to
+# force HTTPS. (Leave commented until SSL is installed, or you may get a redirect loop.)
+# <IfModule mod_rewrite.c>
+#   RewriteEngine On
+#   RewriteCond %{HTTP:X-Forwarded-Proto} !https
+#   RewriteCond %{HTTPS} !=on
+#   RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+# </IfModule>
