@@ -1,96 +1,362 @@
 <!doctype html>
-<html lang="en" data-world="day">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="icon" href="/favicon.ico" sizes="32x32" />
-    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-    <link rel="manifest" href="/site.webmanifest" />
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <title>Alexander Li | CFM @ uWaterloo</title>
-    <meta
-      name="description"
-      content="Alexander Li — Computing &amp; Financial Management @ University of Waterloo, Finance Developer at Quintessence Wealth. Games 1,000,000+ people have played, hackathon wins, and ML + full-stack work. Two worlds, one portfolio."
-    />
-    <meta name="author" content="Alexander Li" />
-    <meta name="theme-color" content="#0b1020" />
-    <link rel="canonical" href="https://alexanderli.dev/" />
+<title>Alexander Li — GAMBIT, a playable chess portfolio</title>
+<meta name="description" content="Personal portfolio of Alexander Li — Computing &amp; Financial Management at Waterloo. Hackathon wins, projects, work experience and the résumé." />
+<meta name="author" content="Alexander Li" />
+<!-- one committed light world, like print: stop the UA applying a dark scheme -->
+<meta name="color-scheme" content="light" />
+<meta name="theme-color" content="#f4ecd9" />
+<!-- CHANGE THIS if the page is served anywhere other than the site root -->
+<link rel="canonical" href="https://alexanderli.dev/" />
 
-    <!-- Search-engine ownership verification. After adding the site in Google
-         Search Console / Bing Webmaster Tools, paste the token they give you
-         here and uncomment (or use the DNS-TXT method via Vercel instead):
-    <meta name="google-site-verification" content="PASTE_GOOGLE_TOKEN" />
-    <meta name="msvalidate.01" content="PASTE_BING_TOKEN" /> -->
+<!-- icons: SVG for modern browsers, PNGs for everything else -->
+<link rel="icon" href="favicon.svg" type="image/svg+xml" />
+<link rel="icon" href="favicon-32.png" sizes="32x32" type="image/png" />
+<link rel="icon" href="favicon-16.png" sizes="16x16" type="image/png" />
+<link rel="apple-touch-icon" href="apple-touch-icon.png" />
+<link rel="manifest" href="site.webmanifest" />
 
-    <!-- Open Graph / social sharing -->
-    <meta property="og:type" content="website" />
-    <meta property="og:site_name" content="Alexander Li" />
-    <meta property="og:locale" content="en_US" />
-    <meta property="og:url" content="https://alexanderli.dev/" />
-    <meta property="og:title" content="Alexander Li | CFM @ uWaterloo" />
-    <meta
-      property="og:description"
-      content="Games with 1,000,000+ visits, hackathon wins, ML + full-stack work, and a Finance Developer role at Quintessence Wealth — from a CFM student at the University of Waterloo."
-    />
-    <meta property="og:image" content="https://alexanderli.dev/assets/images/og-card.png" />
-    <meta property="og:image:width" content="1200" />
-    <meta property="og:image:height" content="630" />
-    <meta property="og:image:alt" content="Alexander Li — builder by day, quant by night. CFM @ Waterloo, Finance Developer at Quintessence Wealth." />
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:image" content="https://alexanderli.dev/assets/images/og-card.png" />
-    <meta name="twitter:image:alt" content="Alexander Li — builder by day, quant by night. CFM @ Waterloo, Finance Developer at Quintessence Wealth." />
+<!-- social sharing -->
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="Alexander Li" />
+<meta property="og:locale" content="en_US" />
+<meta property="og:url" content="https://alexanderli.dev/" />
+<meta property="og:title" content="Alexander Li — GAMBIT, a playable chess portfolio" />
+<meta property="og:description" content="Hackathon wins, projects, work experience and the r&eacute;sum&eacute; &mdash; the whole record in one place." />
+<meta property="og:image" content="https://alexanderli.dev/assets/og-card.png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:alt" content="The word GAMBIT with a red chess pawn in place of the letter I, beside a tilted chessboard set up as the Ruy L&oacute;pez. Below it: Personal portfolio &mdash; Alexander Li, CFM @ Waterloo." />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="Alexander Li — GAMBIT, a playable chess portfolio" />
+<meta name="twitter:description" content="Hackathon wins, projects, work experience and the r&eacute;sum&eacute; &mdash; the whole record in one place." />
+<meta name="twitter:image" content="https://alexanderli.dev/assets/og-card.png" />
+<meta name="twitter:image:alt" content="The word GAMBIT with a red chess pawn in place of the letter I, beside a tilted chessboard set up as the Ruy L&oacute;pez. Below it: Personal portfolio &mdash; Alexander Li, CFM @ Waterloo." />
 
-    <!-- Structured data: Person (rich-result / knowledge-panel eligibility) -->
-    <script type="application/ld+json">
-      {
-        "@context": "https://schema.org",
-        "@type": "Person",
-        "name": "Alexander Li",
-        "url": "https://alexanderli.dev/",
-        "image": "https://alexanderli.dev/assets/images/AlexanderLi.png",
-        "jobTitle": "Finance Developer",
-        "worksFor": { "@type": "Organization", "name": "Quintessence Wealth" },
-        "alumniOf": { "@type": "CollegeOrUniversity", "name": "University of Waterloo" },
-        "email": "mailto:a565li@uwaterloo.ca",
-        "address": {
-          "@type": "PostalAddress",
-          "addressLocality": "Toronto",
-          "addressRegion": "ON",
-          "addressCountry": "CA"
-        },
-        "sameAs": [
-          "https://github.com/alexanderli07",
-          "https://www.linkedin.com/in/alexanderli07/",
-          "https://www.instagram.com/_alexanderli/"
-        ]
-      }
-    </script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&family=Playfair+Display:ital,wght@0,500;0,600;0,700;0,900;1,500;1,700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css" />
 
-    <!-- Fonts: Space Grotesk (day headings/UI), Fraunces (night editorial), JetBrains Mono (labels/metrics) -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,300..600&family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap"
-      rel="stylesheet"
-    />
-  </head>
-  <body>
-    <div id="root"></div>
-    <noscript>
-      <div style="max-width: 720px; margin: 12vh auto; padding: 0 24px; font-family: system-ui; color: #e8ecf8; background:#0b1020;">
-        <h1>Alexander Li — Computing &amp; Financial Management @ University of Waterloo</h1>
-        <p>Finance Developer at Quintessence Wealth (Q Wealth Partners) in Toronto — building trading-team
-          infrastructure and quantitative tools on the Bloomberg Terminal. CFM student at the University of Waterloo,
-          10× hackathon winner, and a full-stack / AI developer with games played 1,000,000+ times.</p>
-        <p><strong>Day — Full-stack &amp; AI:</strong> React, Next.js, Node and Flask, plus machine-learning and
-          computer-vision projects (dragonfl.ai, saight, reMindA, SnaipShot) built with TensorFlow, PyTorch and OpenCV.</p>
-        <p><strong>Night — Quant &amp; Finance:</strong> a min-volatility portfolio optimizer for the CFM 101
-          competition, tokenomics and incentive-design builds, with Python / pandas, MATLAB and real-time market data.</p>
-        <p>Please enable JavaScript for the full interactive experience, or reach me at
-          <a style="color:#7cf" href="mailto:a565li@uwaterloo.ca">a565li@uwaterloo.ca</a>.</p>
+<!-- With scripting off, the <noscript> block in the body carries the real
+     content — but the shell around it would still paint: a nav whose buttons do
+     nothing, a full-viewport board with no pieces, and four section headings
+     with empty bodies. Hide the shell and leave only the fallback. Must come
+     after styles.css to win the cascade; !important because several of these
+     set display in rules of equal specificity. -->
+<noscript><style>
+  .skip, .topnav, .arena, main, footer,
+  .cover, .case, .modal, .reveal, .toast{ display: none !important; }
+  .nojs{ padding-top: 40px; }
+</style></noscript>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Person",
+  "name": "Alexander Li",
+  "url": "https://alexanderli.dev/",
+  "email": "mailto:a565li@uwaterloo.ca",
+  "jobTitle": "Finance Developer",
+  "worksFor": { "@type": "Organization", "name": "Quintessence Wealth" },
+  "alumniOf": { "@type": "CollegeOrUniversity", "name": "University of Waterloo" },
+  "address": { "@type": "PostalAddress", "addressLocality": "Toronto", "addressRegion": "ON", "addressCountry": "CA" },
+  "sameAs": [
+    "https://github.com/alexanderli07",
+    "https://www.linkedin.com/in/alexanderli07/",
+    "https://www.instagram.com/_alexanderli/"
+  ]
+}
+</script>
+</head>
+<body>
+
+<a class="skip" href="#board-arena">Skip to the board</a>
+
+<!-- The page's one h1. It is visually hidden rather than absent because the
+     design has no room for a title above the board — but without it the
+     rendered document had NO h1 at all: the noscript one below does not exist
+     when scripting is on, and the cover's used to be the only other, inside a
+     hidden dialog. Screen readers and crawlers both start from this. -->
+<h1 class="vh">Alexander Li &mdash; GAMBIT, a playable chess portfolio</h1>
+
+<!-- Every section's content is injected by app.js, so with scripting off the
+     page would be empty shells. This carries the essentials on its own. -->
+<noscript>
+  <div class="nojs">
+    <h2>Alexander Li</h2>
+    <p class="nojs-lede">
+      Computing &amp; Financial Management @ the University of Waterloo, Toronto.
+      Finance Developer at Quintessence Wealth &mdash; trades-team infrastructure and
+      quantitative tools on the Bloomberg Terminal. 10&times; hackathon winner, most
+      recently Best Quant Trading Bot at Hack the 6ix 2026.
+    </p>
+    <p class="nojs-lede">
+      This page is normally a game: you play chess against a bot and every piece you
+      capture unseals part of the portfolio. That needs JavaScript. The essentials:
+    </p>
+    <ul class="nojs-links">
+      <li><a href="resume.pdf">R&eacute;sum&eacute; (PDF)</a></li>
+      <li><a href="mailto:a565li@uwaterloo.ca">a565li@uwaterloo.ca</a></li>
+      <li><a href="https://github.com/alexanderli07">GitHub</a></li>
+      <li><a href="https://www.linkedin.com/in/alexanderli07/">LinkedIn</a></li>
+      <li><a href="https://www.instagram.com/_alexanderli/">Instagram</a></li>
+    </ul>
+  </div>
+</noscript>
+
+<!-- ======================= INDEX BAR =======================
+     Section links only jump. Unsealing everything is its own explicit
+     button, so nobody skips the game by accident. -->
+<nav class="topnav" aria-label="Sections">
+  <a class="brand" href="#board-arena">GAMBIT<span class="dot">.</span></a>
+
+  <div class="nav-links">
+    <a class="nav-jump" href="#spoils">Wins</a>
+    <a class="nav-jump" href="#projects">Projects</a>
+    <a class="nav-jump" href="#experience">Experience</a>
+    <a class="nav-jump" href="#resume">R&eacute;sum&eacute;</a>
+  </div>
+
+  <div class="nav-right">
+    <!-- One button, two jobs. Once nothing is left sealed it becomes the way
+         back: the glyph and label are swapped by applyUnlocks() and the click
+         handler branches on the same condition. -->
+    <button class="nav-unlock-btn" id="btn-unlock-all" type="button">
+      <span class="nub-key">&#9919;</span><span class="nub-label">Unlock everything</span>
+    </button>
+    <button class="nav-btn" id="btn-rules" type="button" aria-haspopup="dialog">Rules</button>
+  </div>
+</nav>
+
+<!-- ======================= THE BOARD (full screen) ======================= -->
+<section class="arena" id="board-arena" aria-label="Playable chess board">
+
+  <aside class="rail rail-l" aria-label="Bounty — what each captured piece unlocks">
+    <span class="rail-title">Bounty</span>
+    <span class="rail-sub">what each black piece is carrying</span>
+    <ul class="bounty">
+      <li><span class="bg">&#9823;</span><span><b>pawn &times;8</b><i>10&times; hackathon wins</i></span></li>
+      <li><span class="bg">&#9822;&#8202;&#9821;</span><span><b>knight / bishop &times;4</b><i>10&times; projects</i></span></li>
+      <li><span class="bg">&#9820;</span><span><b>rook &times;2</b><i>6&times; work experience</i></span></li>
+      <li><span class="bg r">&#9819;</span><span><b>queen</b><i>r&eacute;sum&eacute; + contact</i></span></li>
+      <li><span class="bg r">&#9818;</span><span><b>checkmate</b><i>opens everything</i></span></li>
+    </ul>
+    <div class="rail-prog" aria-live="polite">
+      <span><i>wins</i><b id="prog-wins">0/10</b></span>
+      <span><i>projects</i><b id="prog-proj">0/10</b></span>
+      <span><i>roles</i><b id="prog-jobs">0/6</b></span>
+      <span><i>the file</i><b id="prog-resume">sealed</b></span>
+      <span><i>all sealed</i><b id="prog-contact">checkmate</b></span>
+    </div>
+  </aside>
+
+  <div class="board-col">
+    <div class="tray tray-bot" id="tray-bot" aria-label="Pieces AL-1200 has captured"></div>
+    <div class="board-wrap">
+      <div id="board" aria-label="Chessboard — click a white piece, then a highlighted square, to move"></div>
+      <canvas id="fx" aria-hidden="true"></canvas>
+    </div>
+    <div class="tray" id="tray-player" aria-label="Pieces you have captured — hover one to see what it unsealed"></div>
+  </div>
+
+  <aside class="rail rail-r" aria-label="Move list and game controls">
+    <span class="rail-title">Scoresheet</span>
+    <span class="rail-sub">W: you &middot; B: AL-1200</span>
+    <div class="sheet-cols"><span>No.</span><span>White</span><span>Black</span></div>
+    <div id="movelist"></div>
+    <div class="rail-foot">
+      <div class="status-line"><span id="status" role="status"></span></div>
+      <!-- the spoken play-by-play; the visible status line stays sparse -->
+      <p class="vh" id="announce" role="status" aria-live="polite"></p>
+      <div class="btn-row">
+        <button class="gbtn" id="btn-new" type="button">New game</button>
+        <button class="gbtn" id="btn-take" type="button">Takeback</button>
+        <button class="gbtn" id="btn-hint" type="button">Hint</button>
       </div>
-    </noscript>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+      <!-- The engine credit, at the foot of the scoresheet. It sits here rather
+           than in the page footer because this rail is the one place already
+           naming AL-1200, so it reads as a note about your opponent. -->
+      <span class="rail-note">AL-1200 is a home-grown engine</span>
+    </div>
+  </aside>
+</section>
+
+<!-- Print only. On paper the nav, board and dialogs are all hidden, so without
+     this the first page opened on "Bounty I — pawns" with nothing to say whose
+     record it is or how to reach them. -->
+<div class="print-head">
+  <p class="ph-name">Alexander Li</p>
+  <p class="ph-meta">Computing &amp; Financial Management, University of Waterloo &middot; Toronto, ON</p>
+  <p class="ph-meta">a565li@uwaterloo.ca &middot; alexanderli.dev &middot; github.com/alexanderli07 &middot; linkedin.com/in/alexanderli07</p>
+</div>
+
+<main>
+
+  <!-- ======================= WINS ======================= -->
+  <section id="spoils" aria-label="Hackathon wins">
+    <div class="sec-head">
+      <span class="sec-phase">Bounty I &mdash; pawns</span>
+      <h2>Spoils of War</h2>
+      <span class="sec-sub">8 pawns carry 10 wins</span>
+    </div>
+    <div class="captures" id="wins-grid"></div>
+  </section>
+
+  <!-- ======================= PROJECTS ======================= -->
+  <section id="projects" aria-label="Projects">
+    <div class="sec-head">
+      <span class="sec-phase">Bounty II &mdash; minor pieces</span>
+      <h2>The Middlegame</h2>
+      <span class="sec-sub">4 minors carry 10 projects</span>
+    </div>
+    <div class="dgrid" id="proj-grid"></div>
+  </section>
+
+  <!-- ======================= EXPERIENCE ======================= -->
+  <section id="experience" aria-label="Experience">
+    <div class="sec-head">
+      <span class="sec-phase">Bounty III &mdash; rooks</span>
+      <h2>The Heavy Pieces</h2>
+      <span class="sec-sub">2 rooks carry 6 roles</span>
+    </div>
+    <ol class="moves" id="jobs-list"></ol>
+  </section>
+
+  <!-- ======================= THE FILE (résumé + contact) =======================
+       One card, not two: the résumé and how to reach him are the same envelope,
+       and the queen carries it. Checkmate is no longer a gate of its own — it
+       opens whatever is still sealed anywhere on the page. -->
+  <section id="resume" aria-label="Résumé and contact">
+    <div class="sec-head">
+      <span class="sec-phase">Bounty IV &mdash; the queen</span>
+      <h2>The File</h2>
+      <span class="sec-sub">the r&eacute;sum&eacute;, and how to reach me</span>
+    </div>
+    <div class="adjourn ucard" id="resume-card">
+      <div class="u-back">
+        <span class="lock">&#128274;</span>
+        <span class="sealed-lbl">Sealed</span>
+        <span class="need">falls with the <span class="bgx">&#9819;</span> queen &mdash; or any capture once the rest is open</span>
+      </div>
+      <div class="u-front">
+        <div class="seal">AL</div>
+        <p class="note">The whole record, on one page &mdash; and the fastest way to me.</p>
+        <a class="resume-cta" href="resume.pdf" target="_blank" rel="noreferrer">
+          <span class="rc-doc">&#9878;</span>
+          <span class="rc-text">
+            <b>Open the r&eacute;sum&eacute;</b>
+            <i>PDF &middot; Alexander Li &middot; CFM @ Waterloo</i>
+          </span>
+          <span class="rc-go">&#8599;</span>
+        </a>
+        <!-- three tiers, no list: the résumé is the filled action, the email is
+             an outlined one beneath it, the socials are a row of three. -->
+        <a class="file-mail" href="mailto:a565li@uwaterloo.ca">
+          <span class="fm-ico">&#9993;</span>a565li@uwaterloo.ca
+        </a>
+        <div class="file-social">
+          <a href="https://github.com/alexanderli07" target="_blank" rel="noreferrer">GitHub &#8599;</a>
+          <a href="https://www.linkedin.com/in/alexanderli07/" target="_blank" rel="noreferrer">LinkedIn &#8599;</a>
+          <a href="https://www.instagram.com/_alexanderli/" target="_blank" rel="noreferrer">Instagram &#8599;</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  GAMBIT <span class="r">&middot;</span> made with <span class="r" aria-hidden="true">&hearts;</span><span class="vh">love</span> by Alex
+  <span class="r">&middot;</span> <a href="#" id="reset-link">reset unlocks</a>
+</footer>
+
+<!-- ======================= COVER / RULES (dialog) ======================= -->
+<div class="cover" id="cover" role="dialog" aria-modal="true" aria-labelledby="cover-title" hidden>
+  <div class="cover-card">
+    <button class="cover-x" id="cover-x" type="button" aria-label="Close the rules">&times;</button>
+
+    <div class="sc-kicker">
+      <span>Official Tournament Scoresheet</span>
+      <span class="red">Win material, read the file</span>
+    </div>
+    <div class="sc-fields">
+      <div class="sc-field"><span class="lbl">Event</span><span class="val">ALEXANDERLI.DEV — GAMBIT</span></div>
+      <div class="sc-field"><span class="lbl">White</span><span class="val">You</span></div>
+      <div class="sc-field"><span class="lbl">Black</span><span class="val">AL-1200</span></div>
+      <div class="sc-field"><span class="lbl">Site</span><span class="val">Toronto 2026</span></div>
+    </div>
+
+    <h2 class="sc-name" id="cover-title">GAMBIT<span class="dot">.</span></h2>
+    <p class="sc-role">
+      This portfolio is <b>sealed</b>. Across the board sits <b>AL-1200</b> &mdash; a bot guarding
+      Alexander Li's record. Every black piece you capture unseals real content below.
+    </p>
+
+    <ul class="cover-bounty">
+      <li><span class="bg">&#9823;</span><b>pawn &times;8</b><i>10&times; hackathon wins</i></li>
+      <li><span class="bg">&#9822;&#8202;&#9821;</span><b>knight / bishop &times;4</b><i>10&times; projects</i></li>
+      <li><span class="bg">&#9820;</span><b>rook &times;2</b><i>6&times; work experience</i></li>
+      <li><span class="bg r">&#9819;</span><b>queen</b><i>r&eacute;sum&eacute; + contact</i></li>
+      <li><span class="bg r">&#9818;</span><b>checkmate</b><i>opens everything</i></li>
+    </ul>
+
+    <button class="cover-play" id="cover-play" type="button">Take White &mdash; begin</button>
+  </div>
+</div>
+
+<!-- ======================= PROJECT CASE SHEET (dialog) ======================= -->
+<div class="case" id="case" role="dialog" aria-modal="true" aria-labelledby="case-title" hidden>
+  <div class="case-card">
+    <button class="case-x" id="case-x" type="button" aria-label="Close this case sheet">&times;</button>
+    <div class="case-shot" id="case-shot"></div>
+    <div class="case-body">
+      <div class="case-head">
+        <span class="case-no" id="case-no"></span>
+        <span class="case-yr" id="case-yr"></span>
+      </div>
+      <h3 id="case-title"></h3>
+      <p class="case-hl" id="case-hl"></p>
+      <div id="case-clauses"></div>
+      <div class="case-tags" id="case-tags"></div>
+      <div class="case-links" id="case-links"></div>
+    </div>
+  </div>
+</div>
+
+<!-- reveal card -->
+<div class="reveal" id="reveal" aria-live="polite">
+  <div class="reveal-card" id="reveal-card">
+    <span class="rv-stamp">CAPTURED</span>
+    <p class="rv-kicker" id="rv-kicker"></p>
+    <div id="rv-items"></div>
+    <p class="rv-hint">click or Esc to dismiss &middot; auto-closes</p>
+  </div>
+</div>
+
+<!-- game-over modal -->
+<div class="modal" id="gameover" role="dialog" aria-modal="true" aria-labelledby="go-title">
+  <div class="modal-card">
+    <!-- on a win: the piece that actually delivered mate runs the king through,
+         full width of the card. Built by app.js; empty otherwise. -->
+    <div class="gs" id="go-slice" aria-hidden="true"></div>
+    <span class="mres" id="go-res"></span>
+    <h3 id="go-title"></h3>
+    <p id="go-note"></p>
+    <div class="modal-btns">
+      <button class="gbtn" id="go-rematch" type="button">Rematch</button>
+      <button class="gbtn" id="go-open" type="button">Open the portfolio anyway</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="engine.js"></script>
+<script src="app.js"></script>
+</body>
 </html>

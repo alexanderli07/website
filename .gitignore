@@ -1,8 +1,13 @@
+# The site is static and has no build step. node_modules only ever holds sharp,
+# for regenerating the icons and the social card by hand — see scripts/.
 node_modules
-dist
-dist-ssr
 *.local
 .vercel
+
+# Left over on disk from the React app this replaced. Nothing writes it now;
+# it stays ignored so a stale build can never be committed by accident.
+dist
+dist-ssr
 
 # editor / OS
 .DS_Store
@@ -10,6 +15,3 @@ Thumbs.db
 .vscode/*
 !.vscode/extensions.json
 .idea
-
-# my scratch copy of the old template (not part of the new site)
-_reference

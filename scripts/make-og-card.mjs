@@ -1,120 +1,195 @@
 /**
- * Generates the 1200x630 social-share card (Open Graph / Twitter "summary_large_image").
+ * Generates the 1200×630 social-share card (Open Graph / Twitter
+ * "summary_large_image").
  *
- *   node scripts/make-og-card.mjs   ->  public/assets/images/og-card.png
+ *   node scripts/make-og-card.mjs   ->  assets/og-card.png
  *
- * Pure SVG rasterised with sharp — no design tool, no network, fully reproducible.
- * Colours mirror the site's day/night tokens (src/styles/global.css). Edit the
- * COPY block below to retune the text. Uses system fonts (Segoe UI / Georgia /
- * Consolas) so it renders identically without installing the Google webfonts.
+ * Pure SVG rasterised with sharp — no design tool, no network, reproducible.
+ * Colours are the site's tokens. Text uses SYSTEM fonts (Georgia / Consolas)
+ * rather than the Google webfonts, so it renders the same without installing
+ * anything; Playfair and IBM Plex Mono are not available to the rasteriser.
+ *
+ * The pieces on the board are NOT hand-placed. The position is played out
+ * through the project's own engine and read back off `game.board`, so the card
+ * can only ever show a legal position — a wrong one is the sort of detail a
+ * chess player notices immediately. See POSITION below.
+ *
+ * The "I" in GAMBIT is a pawn glyph. Chess glyphs rasterise fine here (verified
+ * across every candidate family — fontconfig resolves them all to one fallback
+ * that has the pieces), unlike at favicon sizes where the shapes are too small
+ * to read.
+ *
+ * sharp is only needed to regenerate this card; see the resolution note below.
+ * Re-run only when the card changes.
  */
-import sharp from "sharp";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
+import { createRequire } from "node:module";
+import { mkdirSync } from "node:fs";
 
-const OUT = join(
-  dirname(fileURLToPath(import.meta.url)),
-  "..", "public", "assets", "images", "og-card.png",
-);
+const HERE = dirname(fileURLToPath(import.meta.url));
+const OUT_DIR = join(HERE, "..", "assets");
+const OUT = join(OUT_DIR, "og-card.png");
+const require = createRequire(import.meta.url);
+/* sharp is not a dependency of the site — nothing it produces is needed to
+   serve the page, only to regenerate this artwork by hand. Resolved from this
+   file, so a plain `npm i --no-save sharp` in the repo root is enough. */
+let sharp;
+try {
+  sharp = require("sharp");
+} catch {
+  console.error("sharp is not installed. It is only needed to regenerate this artwork:");
+  console.error("  npm i --no-save sharp");
+  process.exit(1);
+}
+const engine = require(join(HERE, "..", "engine.js"));
 
-// ---- copy (edit me) --------------------------------------------------------
+const PAPER = "#f4ecd9";
+const BOARD_DARK = "#c8a878";
+const BOARD_LIGHT = "#f3e8cf";
+const WALNUT = "#5b3a24";
+const WALNUT_3 = "#9a7a52";
+const INK = "#241a0f";
+const RED = "#a4211b";
+
 const COPY = {
-  eyebrow: "alexanderli.dev",
-  name: "Alexander Li",
-  day: "Builder by day,",
-  night: "quant by night.",
-  line1: "CFM @ Waterloo · Finance Developer @ Quintessence Wealth",
-  line2: "1,000,000+ game visits · 9× hackathon wins · ML + full-stack",
+  eyebrow: "ALEXANDERLI.DEV",
+  /* Deliberately plain. This is the surface a recruiter meets in a LinkedIn or
+     Slack preview, where "beat AL-1200 at chess to read the file" asked them to
+     get the joke before knowing what the link even was. The board art already
+     says chess; the words don't need to. */
+  tagline: "Personal portfolio.",
+  foot: "Alexander Li  ·  CFM @ Waterloo",
 };
 
-// ---- sun rays (computed) ---------------------------------------------------
-const sun = { cx: 178, cy: 162, r1: 60, r2: 86 };
-let rays = "";
-for (let i = 0; i < 8; i++) {
-  const a = (Math.PI / 4) * i;
-  const x1 = (sun.cx + Math.cos(a) * sun.r1).toFixed(1);
-  const y1 = (sun.cy + Math.sin(a) * sun.r1).toFixed(1);
-  const x2 = (sun.cx + Math.cos(a) * sun.r2).toFixed(1);
-  const y2 = (sun.cy + Math.sin(a) * sun.r2).toFixed(1);
-  rays += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"/>`;
+/* The Ruy López, 1.e4 e5 2.Nf3 Nc6 3.Bb5 — a real opening rather than a cute
+   mate, and one any player recognises at a glance. Played through the engine
+   below so the drawn position is legal by construction. */
+const POSITION = ["e2e4", "e7e5", "g1f3", "b8c6", "f1b5"];
+
+const PIECE_GLYPH = {          /* the solid (black-piece) glyphs for both sides; */
+  1: "♟", 2: "♞",    /* White is the same shape in paper with an ink   */
+  3: "♝", 4: "♜",    /* outline, which is how pieces are drawn on      */
+  5: "♛", 6: "♚",    /* paper anyway.                                  */
+};
+const GLYPH_FONT = "'Segoe UI Symbol', 'Noto Sans Symbols 2', 'DejaVu Sans', serif";
+
+/** Play POSITION through the engine and return [{file, rank, type, white}]. */
+function position() {
+  const game = new engine.Game();
+  for (const uci of POSITION) {
+    const move = engine.uciToMove(game, uci);
+    if (!move) throw new Error(`illegal move in POSITION: ${uci}`);
+    game.make(move);
+  }
+  const out = [];
+  for (let rank = 0; rank < 8; rank++) {
+    for (let file = 0; file < 8; file++) {
+      const p = game.board[rank * 16 + file];   /* 0x88: square = rank*16+file */
+      if (p === 0) continue;
+      out.push({ file, rank, type: Math.abs(p), white: p > 0 });
+    }
+  }
+  return out;
 }
 
-// ---- stars (top-right night sky) -------------------------------------------
-const stars = [
-  [770, 175, 2.4], [880, 220, 1.8], [712, 255, 1.6], [965, 170, 2.0],
-  [1150, 250, 2.2], [1085, 320, 1.7], [1010, 285, 1.5], [905, 360, 2.1],
-]
-  .map(([x, y, r]) => `<circle cx="${x}" cy="${y}" r="${r}" fill="#cfe0ff" opacity="0.85"/>`)
-  .join("");
-
-// ---- clouds (puff of overlapping circles on a flat ellipse base) -----------
-function cloud(x, y, s, fill, op) {
-  const r = (n) => (n * s).toFixed(1);
-  return `<g fill="${fill}" opacity="${op}">`
-    + `<ellipse cx="${x}" cy="${y}" rx="${r(62)}" ry="${r(20)}"/>`
-    + `<circle cx="${(x - 32 * s).toFixed(1)}" cy="${(y - 4 * s).toFixed(1)}" r="${r(20)}"/>`
-    + `<circle cx="${x}" cy="${(y - 16 * s).toFixed(1)}" r="${r(27)}"/>`
-    + `<circle cx="${(x + 34 * s).toFixed(1)}" cy="${(y - 5 * s).toFixed(1)}" r="${r(21)}"/>`
-    + `</g>`;
+/* an 8×8 board sitting off the right edge, angled like a sheet on a desk */
+const CELL = 62;
+function board() {
+  let out = "";
+  for (let r = 0; r < 8; r++) {
+    for (let c = 0; c < 8; c++) {
+      const light = (r + c) % 2 === 0;
+      out += `<rect x="${c * CELL}" y="${r * CELL}" width="${CELL}" height="${CELL}" ` +
+             `fill="${light ? BOARD_LIGHT : BOARD_DARK}"/>`;
+    }
+  }
+  return out;
 }
-// warm white on the day band; faint blue-grey in the night sky (mirrors the site's --cloud tokens)
-const dayClouds = cloud(450, 98, 1.0, "#ffffff", 0.85) + cloud(740, 70, 0.66, "#ffffff", 0.7);
-const nightClouds = cloud(1055, 360, 0.95, "#b8c4e6", 0.16) + cloud(905, 250, 0.7, "#b8c4e6", 0.14);
 
-const svg = `<svg width="1200" height="630" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg">
+/**
+ * Both sides use the same (black) glyph, distinguished by fill — but a fill
+ * alone is not enough. The font that resolves here draws its "black" pieces as
+ * outline line-art rather than solid silhouettes, so an ink-filled black pawn
+ * measured exactly as light as a paper-filled white one (mean grey 194 vs 191)
+ * and the two sides were indistinguishable. Stroking the black pieces in their
+ * OWN colour closes up the internal detail into a solid mass, which is what
+ * separates them. Don't raise it much further: at ~6px the shapes bloat and the
+ * queen's crown merges into a blob.
+ */
+function pieces() {
+  const fs = CELL * 0.86;
+  let out = "";
+  for (const { file, rank, type, white } of position()) {
+    const cx = file * CELL + CELL / 2;
+    /* rank 0 is White's home rank and belongs at the BOTTOM of the drawn board */
+    const cy = (7 - rank) * CELL + CELL / 2;
+    const paint = white
+      ? `fill="${BOARD_LIGHT}" stroke="${INK}" stroke-width="${(fs * 0.023).toFixed(2)}"`
+      : `fill="${INK}" stroke="${INK}" stroke-width="${(fs * 0.075).toFixed(2)}"`;
+    out += `<text x="${cx}" y="${cy + CELL * 0.34}" text-anchor="middle" ` +
+           `font-family="${GLYPH_FONT}" font-size="${fs}" stroke-linejoin="round" ` +
+           `${paint}>${PIECE_GLYPH[type]}</text>`;
+  }
+  return out;
+}
+
+/* Wordmark: GAMB(pawn)T. Three things the plain "I" did not need:
+   - the pawn is set smaller than the caps, because the glyph's design height
+     runs taller than a serif cap and matching font-size leaves it towering;
+   - it is pulled in with dx on both sides, because the glyph's side bearings
+     are far wider than an "I"'s, which otherwise reads as "GAMB _ T";
+   - there is no red full stop after the T any more. The pawn already carries
+     the one red accent, and at this width the stop landed on the board's
+     leading edge.
+   Clearance to the board is ~45px at the cap line. It is the tightest thing on
+   the card, so re-render and look at it if you retune the size. */
+const wordmark =
+  `<text x="70" y="300" font-family="Georgia, 'Times New Roman', serif" font-weight="700" ` +
+  `font-size="140" letter-spacing="-1" fill="${INK}">GAMB` +
+  `<tspan font-family="${GLYPH_FONT}" font-size="124" font-weight="400" fill="${RED}" ` +
+  `dx="-22">${PIECE_GLYPH[1]}</tspan>` +
+  `<tspan dx="-22">T</tspan></text>`;
+
+const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
   <defs>
-    <linearGradient id="night" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#0f1733"/>
-      <stop offset="1" stop-color="#070b18"/>
-    </linearGradient>
-    <radialGradient id="glow" cx="0.86" cy="0.08" r="0.85">
-      <stop offset="0" stop-color="#6ee7ff" stop-opacity="0.20"/>
-      <stop offset="0.55" stop-color="#6ee7ff" stop-opacity="0"/>
+    <radialGradient id="warm" cx="0.28" cy="0.1" r="0.9">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.55"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
     </radialGradient>
-    <linearGradient id="day" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#fff6ec"/>
-      <stop offset="1" stop-color="#ffe2c4"/>
-    </linearGradient>
-    <radialGradient id="sunglow" cx="0.5" cy="0.5" r="0.5">
-      <stop offset="0" stop-color="#ffb703" stop-opacity="0.5"/>
-      <stop offset="1" stop-color="#ffb703" stop-opacity="0"/>
-    </radialGradient>
-    <mask id="crescent">
-      <circle cx="1055" cy="236" r="64" fill="#fff"/>
-      <circle cx="1085" cy="218" r="56" fill="#000"/>
-    </mask>
   </defs>
 
-  <!-- night base + cyan glow -->
-  <rect width="1200" height="630" fill="url(#night)"/>
-  <rect width="1200" height="630" fill="url(#glow)"/>
+  <rect width="1200" height="630" fill="${PAPER}"/>
+  <rect width="1200" height="630" fill="url(#warm)"/>
 
-  <!-- day band: full-width diagonal across the top (sun side); text + moon sit below it -->
-  <polygon points="0,0 1200,0 0,310" fill="url(#day)"/>
-  <line x1="1200" y1="0" x2="0" y2="310" stroke="#ffb703" stroke-width="3" stroke-opacity="0.45"/>
+  <!-- the board, rotated, bleeding off the right edge -->
+  <g transform="translate(742 96) rotate(-9)" opacity="0.97">
+    ${board()}
+    ${pieces()}
+    <rect x="0" y="0" width="${CELL * 8}" height="${CELL * 8}" fill="none" stroke="${WALNUT}" stroke-width="5"/>
+  </g>
 
-  <!-- day clouds -->
-  ${dayClouds}
+  <!-- ruled left column, like the scoresheet -->
+  <line x1="74" y1="150" x2="620" y2="150" stroke="${WALNUT}" stroke-width="3"/>
+  <line x1="74" y1="536" x2="620" y2="536" stroke="${WALNUT}" stroke-width="3"/>
 
-  <!-- sun -->
-  <circle cx="${sun.cx}" cy="${sun.cy}" r="118" fill="url(#sunglow)"/>
-  <g stroke="#ff7a33" stroke-width="7" stroke-linecap="round">${rays}</g>
-  <circle cx="${sun.cx}" cy="${sun.cy}" r="46" fill="#ff6b35"/>
+  <text x="74" y="126" font-family="Consolas, 'Courier New', monospace" font-size="23"
+        letter-spacing="7" fill="${WALNUT_3}">${COPY.eyebrow}</text>
 
-  <!-- stars, night clouds, moon (moon sits lower than the sun) -->
-  ${stars}
-  ${nightClouds}
-  <circle cx="1055" cy="236" r="64" fill="#e8eeff" mask="url(#crescent)"/>
+  ${wordmark}
 
-  <!-- text -->
-  <text x="80" y="332" font-family="Consolas, 'Courier New', monospace" font-size="26" letter-spacing="5" fill="#6ee7ff">${COPY.eyebrow}</text>
-  <text x="76" y="426" font-family="'Segoe UI', Arial, sans-serif" font-weight="700" font-size="106" letter-spacing="-2" fill="#f4f7ff">${COPY.name}</text>
-  <text x="80" y="504" font-family="'Segoe UI', Arial, sans-serif" font-size="48">
-    <tspan fill="#ff9a4d" font-weight="600">${COPY.day}</tspan><tspan dx="18" fill="#7fe9ff" font-style="italic" font-family="Georgia, 'Times New Roman', serif">${COPY.night}</tspan>
-  </text>
-  <text x="80" y="566" font-family="Consolas, 'Courier New', monospace" font-size="25" fill="#b9c4e8">${COPY.line1}</text>
-  <text x="80" y="600" font-family="Consolas, 'Courier New', monospace" font-size="25" fill="#8f9cc6">${COPY.line2}</text>
+  <!-- one line now, so it is centred in the band between the wordmark and the
+       footer rather than left hanging where the first of two used to sit -->
+  <text x="74" y="415" font-family="Georgia, 'Times New Roman', serif" font-style="italic"
+        font-size="44" fill="${WALNUT}">${COPY.tagline}</text>
+
+  <text x="74" y="514" font-family="Consolas, 'Courier New', monospace" font-size="22"
+        letter-spacing="2" fill="${WALNUT_3}">${COPY.foot}</text>
+
+  <!-- No SEALED stamp. With the tagline plain, it was the last thing on the card
+       asking to be decoded — and "sealed" reads as "this link is locked". -->
 </svg>`;
 
-await sharp(Buffer.from(svg)).png({ quality: 90 }).toFile(OUT);
+mkdirSync(OUT_DIR, { recursive: true });
+await sharp(Buffer.from(svg)).png({ compressionLevel: 9 }).toFile(OUT);
 console.log("Wrote", OUT);

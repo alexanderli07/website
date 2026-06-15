@@ -1,0 +1,6 @@
+# Everything here is repo furniture, not part of the site. The deployment is
+# only index.html, the three scripts it loads, the assets and the résumé.
+README.md
+test/
+scripts/
+.gitignore

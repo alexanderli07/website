@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>404 &mdash; off the board &middot; Alexander Li</title>
+<meta name="robots" content="noindex" />
+<meta name="color-scheme" content="light" />
+<meta name="theme-color" content="#f4ecd9" />
+<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+<link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png" />
+<link rel="icon" href="/favicon.ico" sizes="32x32" />
+<!-- Deliberately self-contained: no stylesheet, no webfonts. A 404 is the one
+     page that has to render when something else has already gone wrong, and it
+     is served for missing asset paths too. System serif and mono only. -->
+<style>
+  *{ margin: 0; box-sizing: border-box; }
+  html, body{ height: 100%; }
+  body{
+    display: flex; align-items: center; justify-content: center;
+    padding: 28px 20px;
+    background: #f4ecd9;
+    color: #241a0f;
+    font-family: Georgia, "Times New Roman", serif;
+  }
+  .card{
+    width: min(560px, 100%);
+    background: #f4ecd9;
+    border: 1px solid #5b3a24;
+    box-shadow: 4px 4px 0 rgba(36,26,15,.20);
+    padding: 30px 30px 26px;
+  }
+  .eyebrow{
+    font-family: Consolas, "Courier New", monospace;
+    font-size: 10px; letter-spacing: .26em; text-transform: uppercase;
+    color: #7a5230;
+  }
+  h1{
+    margin-top: 14px;
+    font-size: clamp(2.1rem, 8vw, 3.2rem);
+    font-weight: 700; line-height: 1.04; letter-spacing: -.01em;
+  }
+  h1 .dot{ color: #a4211b; }
+  p{
+    margin-top: 14px;
+    font-size: 16.5px; line-height: 1.6; color: #5b3a24;
+    max-width: 46ch;
+  }
+  .rule{ margin-top: 22px; border-top: 1px solid #9a7a52; }
+  a.home{
+    display: inline-block; margin-top: 20px;
+    font-family: Consolas, "Courier New", monospace;
+    font-size: 11px; font-weight: 600;
+    letter-spacing: .16em; text-transform: uppercase;
+    text-decoration: none;
+    color: #f4ecd9; background: #241a0f;
+    border: 1px solid #241a0f;
+    box-shadow: 2px 2px 0 rgba(36,26,15,.20);
+    padding: 9px 15px 8px;
+    transition: background .18s ease, transform .14s cubic-bezier(.2,.7,.2,1),
+                box-shadow .18s ease;
+  }
+  a.home:hover{
+    background: #a4211b; border-color: #a4211b;
+    transform: translate(-1px,-1px);
+    box-shadow: 3px 3px 0 rgba(36,26,15,.26);
+  }
+  a.home:active{ transform: translate(2px,2px); box-shadow: 0 0 0 rgba(36,26,15,0); }
+  a.home:focus-visible{ outline: 3px solid #241a0f; outline-offset: 2px; }
+  @media (prefers-reduced-motion: reduce){
+    a.home{ transition: none; }
+    a.home:hover, a.home:active{ transform: none; }
+  }
+</style>
+</head>
+<body>
+  <main class="card">
+    <span class="eyebrow">404 &middot; illegal move</span>
+    <h1>Off the board<span class="dot">.</span></h1>
+    <p>
+      There is nothing on this square. The file you were after may have moved,
+      or the link that sent you here was never a legal one.
+    </p>
+    <div class="rule"></div>
+    <a class="home" href="/">Back to the board &#8594;</a>
+  </main>
+</body>
+</html>

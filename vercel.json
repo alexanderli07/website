@@ -1,8 +1,9 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "framework": "vite",
-  "buildCommand": "npm run build",
-  "outputDirectory": "dist",
+  "framework": null,
+  "buildCommand": null,
+  "installCommand": null,
+  "outputDirectory": ".",
   "headers": [
     {
       "source": "/(.*)",
@@ -13,6 +14,10 @@
     },
     {
       "source": "/assets/images/(.*)",
+      "headers": [{ "key": "Cache-Control", "value": "public, max-age=2592000" }]
+    },
+    {
+      "source": "/assets/og-card.png",
       "headers": [{ "key": "Cache-Control", "value": "public, max-age=2592000" }]
     }
   ]

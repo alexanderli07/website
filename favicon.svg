@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512"  fill="#f4ecd9"/>
+  <g><rect x="0" y="0" width="128" height="128" fill="#f3e8cf"/><rect x="128" y="0" width="128" height="128" fill="#c8a878"/><rect x="256" y="0" width="128" height="128" fill="#f3e8cf"/><rect x="384" y="0" width="128" height="128" fill="#c8a878"/><rect x="0" y="128" width="128" height="128" fill="#c8a878"/><rect x="128" y="128" width="128" height="128" fill="#f3e8cf"/><rect x="256" y="128" width="128" height="128" fill="#c8a878"/><rect x="384" y="128" width="128" height="128" fill="#f3e8cf"/><rect x="0" y="256" width="128" height="128" fill="#f3e8cf"/><rect x="128" y="256" width="128" height="128" fill="#c8a878"/><rect x="256" y="256" width="128" height="128" fill="#f3e8cf"/><rect x="384" y="256" width="128" height="128" fill="#c8a878"/><rect x="0" y="384" width="128" height="128" fill="#c8a878"/><rect x="128" y="384" width="128" height="128" fill="#f3e8cf"/><rect x="256" y="384" width="128" height="128" fill="#c8a878"/><rect x="384" y="384" width="128" height="128" fill="#f3e8cf"/></g>
+  <text x="260" y="355" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-weight="700" font-size="279" fill="#241a0f">AL</text>
+  <rect x="8" y="8" width="496" height="496"
+         fill="none" stroke="#5b3a24" stroke-width="16"/>
+</svg>

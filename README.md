@@ -1,111 +1,188 @@
-# Two Worlds — Alexander Li's portfolio
+# GAMBIT
 
-A personal portfolio built around a single idea: **one person, two modes.**
-A sun/moon switch (and a circular reveal) flips the whole site between two worlds:
+A playable portfolio. The visitor takes White against **AL-1200**, a chess bot
+guarding the record; every black piece they capture unseals real content.
 
-- ☀ **Day — Full-stack & AI:** the software/engineering side — apps, ML/AI, games (1,000,000+ visits).
-- ☾ **Night — Quant & Finance:** the markets side — the Finance Developer role at Quintessence Wealth, CFM, business/quant work.
+| capture | unseals |
+| --- | --- |
+| pawn ×8 | the 10 hackathon wins, revealed newest first (first pawn = Best Quant Trading Bot, Hack the 6ix '26) |
+| knight / bishop ×4 | the 10 projects |
+| rook ×2 | the 6 roles |
+| queen | **the file** — résumé, email and socials, all one card |
+| **checkmate** | opens anything still sealed anywhere on the page |
 
-The concept riffs on Alexander's own award-winning game *Opposite Odyssey* (the day/night
-mechanic) — so it can't be mistaken for a template. Flipping the world doesn't just recolor
-the page; it **switches which experience, projects and skills surface**, swaps the headline
-font (geometric → editorial serif), and re-themes the atmosphere (detailed sun + warm motes ↔
-cratered moon + starfield, both drifting on scroll).
+Checkmate is not a gate of its own; it is the catch-all for whatever you missed.
+Anyone who would rather read than play can hit **Unlock everything** in the index
+bar — the section links there only navigate. Unlocks persist in `localStorage`
+(`gambit-unlocks`); a new game keeps them, and "reset unlocks" in the footer
+clears them.
 
-## Stack
+## Files
 
-- **Vite + React + TypeScript** (single-page, static build)
-- **Framer Motion** — the world-flip reveal, headline swap, scroll reveals, modal
-- **Lenis** — smooth scrolling (auto-disabled under `prefers-reduced-motion`)
-- **Hand-written CSS** with `data-world` theming (no UI framework, full art-direction control)
-- Fonts: Space Grotesk (day), Fraunces (night), JetBrains Mono (labels) via Google Fonts
+    index.html          markup only (every section body is injected by app.js)
+    styles.css          all styling
+    engine.js           chess engine — pure, DOM-free, also a CommonJS module
+    app.js              UI, content, unlock plumbing, animations
+    site.webmanifest    icon + theme metadata
+    favicon.svg         icon mark — a chessboard stamped AL; favicon-16/32,
+                        apple-touch-icon, icon-192/512 alongside
+    assets/og-card.png  1200×630 social preview
+    assets/images/      project screenshots
+    resume.pdf          the résumé, served at /resume.pdf
+    404.html            self-contained; no stylesheet, no webfonts
+    robots.txt          points at sitemap.xml
+    vercel.json         security headers; explicitly NO build step
+    scripts/            regenerate the icons and the social card (see below)
+    test/perft.js       move-generation test suite
+    test/tactics.js     search, weakness-model and draw test suite
 
-Two "live" widgets, one per world (both lazy / on-demand, both degrade gracefully):
-- ☀ **Day — in-browser ML** ([`MLDemo`](src/components/MLDemo.tsx)): a real DistilBERT sentiment
-  model running **100% client-side** via **`@xenova/transformers`**. Code-split into its own
-  chunk and only fetched (model from the HF CDN) when you press the button — never in the
-  initial load.
-- ☾ **Night — live markets** ([`LiveMarkets`](src/components/LiveMarkets.tsx)): real BTC/ETH/SOL
-  prices from the free, no-key **CoinGecko** API, refreshing every 60s.
+Content lives in `app.js` (`WINS`, `PROJECTS`, `JOBS`). It was copied verbatim
+from the previous React site's `src/data/content.ts`, which this replaced — see
+the git history for it. Nothing here is invented; where the old source marked a
+figure as a placeholder it is omitted rather than shown.
 
-No backend. All content lives in [`src/data/content.ts`](src/data/content.ts).
+## Running
 
-## Run it locally
+No build step. Open `index.html`, or serve the folder:
 
-```bash
-npm install
-npm run dev        # http://localhost:5173
-npm run build      # type-check + production build to dist/
-npm run preview     # preview the production build
-```
+    python -m http.server 5191
 
-## Deploy (Vercel + custom domain)
+## Deploying
 
-1. Push this repo to GitHub.
-2. On [vercel.com](https://vercel.com) → **New Project** → import the repo. Vercel auto-detects
-   Vite (build `npm run build`, output `dist`). Click **Deploy**.
-3. **Custom domain:** buy `alexli.dev` / `alexanderli.dev` (~$10–15/yr), then in Vercel →
-   Project → **Settings → Domains** → add it and follow the DNS steps. Free SSL is automatic.
-4. Every push to `main` redeploys; pull requests get preview URLs.
+This repo *is* alexanderli.dev. It is served static on Vercel straight from
+the root — `vercel.json` sets `framework: null` and no build command, so a
+push to `main` is the whole deployment. There is nothing to compile.
 
-> This replaces the old InfinityFree (`rf.gd`) host, whose anti-bot JavaScript challenge was
-> slow and could break on locked-down recruiter networks.
+`index.html` hard-codes `https://alexanderli.dev/` in its canonical URL,
+`og:url`, `og:image`, `twitter:image` and the JSON-LD. **All five must agree
+with whatever the host actually serves** — one choice of www vs non-www, one
+trailing-slash form. A wrong `og:image` host means no preview at all when the
+link is shared.
 
-## ⚠️ Personalize before publishing (search the code for `TODO`)
+## Regenerating the icons and the social card
 
-The content is real (drawn from the résumé / existing site). These are the only spots left to make it fully yours:
+    node scripts/make-icons.mjs      # favicon.svg + the PNG icon set
+    node scripts/make-og-card.mjs    # assets/og-card.png
 
-| What | Where |
-|------|-------|
-| **CFM 101 real results** — the optimizer's `outcome` still uses illustrative numbers (flagged with a `TODO`). Replace with your real competition results, or state methodology only. | `cfm101.outcome` in `src/data/content.ts` |
-| **Project links** — add a live demo / repo where a project still has none (e.g. Opposite Odyssey has `links: []`). | `links` in `src/data/content.ts` |
-| **Résumé PDF** — confirm `public/resume.pdf` is your latest. | `public/resume.pdf` |
+Both rasterise inline SVG with `sharp`. The site itself has no dependencies and
+nothing sharp produces is needed to serve the page — it is only for regenerating
+this artwork by hand, so it is deliberately not in a `package.json`:
 
-### Images
-Project art and avatars are optimized to right-sized **WebP** (~15 MB of PNGs → ~0.3 MB). To re-run after adding new art: drop the source file in `public/assets/images/`, add it to the `JOBS` list, then run
+    npm i --no-save sharp
 
-```bash
-node scripts/optimize-images.mjs
-```
+Only re-run them when the artwork changes. The card's text uses system fonts
+(Georgia / Consolas), not the Google webfonts, because the rasteriser cannot see
+those.
 
-**Social-share card** — the 1200×630 link preview (`og-card.png`) is generated from pure SVG. Edit the `COPY` block in the script and re-run:
+Neither script prints anything useful about how the art came out, and both have
+been wrong in ways only a look would catch — so **render and look at the output**
+after changing either. Two things in particular:
 
-```bash
-node scripts/make-og-card.mjs
-```
+- The icon is sized off *measured* Georgia metrics ("AL" inks 1.47× the
+  font-size wide). Guessing that number is what once made the letters burst out
+  through the frame.
+- On the card, the wordmark clears the board by ~45px and nothing else is close.
+  A pawn glyph is much wider than the "I" it replaces, so resizing the wordmark
+  is the one edit that can push type onto the board.
 
-`AlexanderLi.png` is kept (untouched) as the `Person` photo in the JSON-LD structured data.
+The card's position is played through `engine.js` rather than hand-placed, so it
+cannot show an illegal board. Both sides use the same glyphs distinguished by
+fill — and the black ones also carry a same-colour stroke, because the font that
+resolves here draws its "black" pieces as outlines, which left an ink-filled
+black pawn measuring exactly as light as a white one.
 
-**Favicons / app icons** — the full set (`favicon.svg`, `.ico`, PNGs, `apple-touch-icon`, maskable `icon-192/512`) is generated from one SVG mark (day/night split + `A` monogram). Regenerate with:
+`index.html` hard-codes `https://alexanderli.dev/` in its canonical URL and
+`og:image`. **Change those if it is served anywhere else** — a wrong `og:image`
+host means no preview at all when the link is shared.
 
-```bash
-node scripts/make-favicons.mjs
-```
+## Testing
 
-**404** — `public/404.html` is a self-contained themed page (served by Vercel for unmatched routes; no SPA rewrite, since the site has no client-side router).
+    node test/perft.js
+    node test/tactics.js
 
-### Notes on what was intentionally changed
-- **Privacy:** your phone number and exact birthday (both public on the old site) were **left
-  out** on purpose. Add them back only if you want them public.
-- **Copy was rewritten and proofread** (the old site had typos like "peices", "sigh up").
-- **Accessibility:** honours `prefers-reduced-motion` (the flip becomes an instant cut, smooth
-  scroll and animations are disabled), keyboard-operable cards/modal, focus styles, alt text, a
-  skip-to-content link, and an `aria-live` region that announces each world flip to screen readers.
+`engine.js` must stay DOM-free so Node can require it. **Run both after any
+engine edit.**
 
-## Structure
+`perft.js` guards move *generation*: published perft counts for five positions
+(startpos, kiwipete, promotion and en-passant traps), colour-mirror symmetry,
+make/unmake invariants over random self-play, and that `bestMove` stays
+deterministic. A movegen regression is otherwise invisible until someone plays
+an illegal game.
 
-```
-index.html               # meta/SEO/OG, fonts, no-JS fallback
-src/
-  main.tsx               # entry
-  App.tsx                # composition + providers
-  data/content.ts        # ← all content lives here
-  styles/global.css      # design system: two-world tokens + every component style
-  world/
-    WorldContext.tsx     # day/night state + the circular flip reveal
-    useLenis.ts          # smooth scroll (reduced-motion aware)
-    useReducedMotion.ts
-  components/             # Hero, Nav, WorldToggle, Work, ProjectCard, CaseStudy,
-                         # Signal, SignalChart, Skills, Voices, Contact, Footer, Atmosphere, Reveal
-scripts/make-placeholder-resume.mjs
-```
+`tactics.js` guards what the *search* understands: that it sees mates delivered
+against it, that mate scores carry their distance, that quiescence resolves
+exchanges instead of scoring mid-trade, that the weakness model never walks
+into a mate or gives away a rook, that draws are detected without movegen
+noticing, that the incremental Zobrist key never drifts from a recomputation,
+and that a search stays inside its time budget.
+
+## Search
+
+`bestMove()` is a 4-ply negamax with alpha-beta, PVS, quiescence (captures,
+queen promotions and check evasions), MVV-LVA + killer + history +
+transposition-table move ordering, and mate-distance-aware scores. It contains
+no randomness and no clock, so the Hint button is real advice and never wobbles.
+Draw detection (threefold repetition via Zobrist keys, the fifty-move rule,
+insufficient material) is exposed as `Game#isDraw()` and scored as 0 inside the
+search; it deliberately does **not** touch `moves()`/`legal()`, so perft is
+unaffected.
+
+Quiescence searches **every** capture — there is no delta pruning. That cutoff
+is not a true bound (a capture can also win the next piece), so a pruned score
+depends on the window it was searched under, and the transposition table then
+spreads that inconsistency: 12.4% of root-move scores disagreed with a cold
+re-search of the same move, some by 460cp. Since `BOT_MAX_LOSS` is enforced by
+comparing scores from *different* searches, that had to go; without it the same
+1255 root moves agree exactly, every time.
+
+Measured in Node: botMove ~4ms median from the opening, ~90ms p95 in a dense
+middlegame, 167ms worst observed across deliberately hostile positions — and
+within a few percent of `bestMove` on the same position, because choosing weakly
+no longer costs extra search. It runs synchronously on the main thread, so that
+matters.
+
+## Difficulty
+
+Every knob is at the top of `engine.js` with a comment. The search depth is
+`SEARCH_DEPTH`; how badly AL-1200 plays is `BOT_TEMP` (softmax temperature —
+lower is stronger) and `BOT_MAX_LOSS` (the hard ceiling on how much worse than
+best a played move may be).
+
+AL-1200 searches at full strength and is weak only in how it *chooses*: it
+softmax-samples among its scored moves, after hard-excluding anything that
+allows a forced mate or loses more than `BOT_MAX_LOSS` centipawns. Its average
+loss against its own best move measures ~46cp against a shallow opponent and
+rises in sharper positions, so treat it as a band rather than a constant — the
+figure moves with the opposition. Either way it can never shed a rook or a queen
+for nothing, and it can never walk into a mate it can see. It always plays a
+mate it does see.
+
+**Estimated strength: ~1200**, hence the name. Measured on a self-consistent
+ladder (fixed-depth opponents built from the same `searchRoot`): it beats a
+random mover 30–0, scores 12% against its own depth-1+quiescence search, and 0%
+against depth 2 and above. It only drops a piece outright on 0.2% of moves. So:
+tactically safe in the ways that punish beginners, positionally thin (the
+evaluation is material + piece-square tables, with no king safety, pawn
+structure or mobility term), and it folds against any consistent searcher.
+Engine-vs-engine scores do not map cleanly onto human ratings, and centipawn
+loss measured against its *own* weak evaluation understates its true error, so
+1200 is a defensible estimate rather than a measured Elo.
+
+The sampling never prices the whole `BOT_MAX_LOSS` band, because a wide root
+window costs about four times a narrow one. It samples from an envelope built
+out of the narrow search's upper bounds and buys the true score of the one move
+it drew, accepting it with probability true/envelope; a rejected move keeps its
+now-exact weight, which leaves the distribution untouched and costs one or two
+extra single-move searches instead of forty.
+
+Because that ceiling also forbids AL-1200 from ever handing over a rook or a
+queen, a player who only takes what is offered will rarely capture one: over 100
+games a purely greedy White wins 5.4 pawns and 2.0 minors per game but only 0.47
+rooks and 0.09 queens. So captures **roll up** (`app.js`): once a tier is full,
+the next capture pays into the tier above it, and every tier opens within two or
+three games for any playstyle. Order is preserved — nothing rolls up until every
+cheaper seal is already open, so taking the queen still opens the file first.
+
+Do not "fix" the queen drought by raising `BOT_MAX_LOSS` to a queen's value: it
+restores the captures but also gives the queen away for free in ~12% of sampled
+positions, which reads as a broken opponent rather than a beatable one.
