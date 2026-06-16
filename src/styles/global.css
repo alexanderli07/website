@@ -289,10 +289,20 @@ main { position: relative; z-index: 1; }
 }
 .nav-link:hover { color: var(--text); background: var(--surface); }
 .nav-cta { display: flex; gap: 0.5rem; align-items: center; }
+.nav-social { display: inline-flex; align-items: center; gap: 0.1rem; }
+
+/* brand-icon links (nav + footer) */
+.icon-link {
+  display: inline-grid; place-items: center; width: 34px; height: 34px; border-radius: 50%;
+  color: var(--text-soft);
+  transition: color var(--theme) ease, background-color var(--theme) ease;
+}
+.icon-link:hover { color: var(--accent); background: var(--surface); }
+.icon-link svg { width: 18px; height: 18px; display: block; }
 .nav-brand { white-space: nowrap; }
 @media (max-width: 760px) { .nav-links { display: none; } }
 @media (max-width: 520px) {
-  .nav-resume, .nav-world-label { display: none; }
+  .nav-resume, .nav-world-label, .nav-social { display: none; }
   .nav-inner { padding-left: 1rem; }
 }
 
@@ -537,7 +547,9 @@ main { position: relative; z-index: 1; }
 .contact-card .display { margin: 1rem 0; }
 .contact-socials { display: flex; gap: 0.8rem; justify-content: center; flex-wrap: wrap; margin-top: 2rem; }
 .footer { margin-top: 4rem; padding: 2rem 0 3rem; border-top: 1px solid var(--border); color: var(--muted); font-family: var(--font-mono); font-size: 0.82rem; }
-.footer-inner { display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+.footer-inner { display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; }
+.footer-right { display: inline-flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
+.footer-social { display: inline-flex; align-items: center; gap: 0.3rem; }
 
 /* =============================================================================
    SCROLLBAR
