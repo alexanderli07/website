@@ -136,8 +136,8 @@ export function CaseStudy({ project, onClose }: Props) {
 
               <div className="cs-links">
                 {project.links.length > 0 ? (
-                  project.links.map((l) => (
-                    <a key={l.href} href={l.href} target="_blank" rel="noopener" className="btn btn-primary">
+                  project.links.map((l, i) => (
+                    <a key={l.href} href={l.href} target="_blank" rel="noopener" className={`btn ${i === 0 ? "btn-primary" : "btn-ghost"}`}>
                       {l.label} ↗
                     </a>
                   ))
