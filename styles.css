@@ -368,8 +368,14 @@
   .cover-bounty .bg.r{ color: var(--red); }
   .cover-bounty b{ font-weight: 600; color: var(--ink); }
   .cover-bounty i{ font-style: normal; color: var(--walnut-2); }
+  /* two glyphs on the knight/bishop row, so the cell must never wrap */
+  .cover-bounty .bg{ white-space: nowrap; }
   @media (max-width: 520px){
-    .cover-bounty li{ grid-template-columns: 28px 1fr; }
+    /* The glyph column stays 34px. At 28px the knight/bishop row's PAIR of
+       glyphs wrapped onto two lines inside the cell — 27x43 against 27x21 for
+       every other row — which alone made that row 84px tall against 62px, and
+       was the one thing breaking the alignment down the list. */
+    .cover-bounty li{ grid-template-columns: 34px 1fr; }
     .cover-bounty i{ grid-column: 2; }
   }
   .cover-play{
@@ -955,6 +961,15 @@
   @keyframes flipIn{
     from{ transform: rotateX(-64deg); opacity: 0; }
     to{ transform: none; opacity: 1; }
+  }
+  /* Resealing used to happen in a single frame: every card simply lost .open and
+     vanished. This is flipIn run backwards, so putting the seals back reads as
+     the opposite of taking them off rather than as the page blinking. app.js
+     staggers it and strips both classes when the beat is done. */
+  .ucard.sealing .u-front{ display: block; animation: flipOut .3s ease both; }
+  @keyframes flipOut{
+    from{ transform: none; opacity: 1; }
+    to{ transform: rotateX(-64deg); opacity: 0; }
   }
   .u-back{
     min-height: 118px; height: 100%;
@@ -1804,6 +1819,9 @@
 
   @media (prefers-reduced-motion: reduce){
     .ucard.open .u-front{ animation: none; }
+    /* the reseal keeps its stagger but not the flip; app.js also skips the
+       cascade entirely when this is set, so this is the belt to that braces */
+    .ucard.sealing .u-front{ animation: none; }
     /* freeze the stamp, don't hide it: the rule here is keep the state, drop the
        motion, and `opacity: 0` inverted that */
     .sq-stamp{ animation: none; }

@@ -297,12 +297,41 @@
       }
     }
   }
-  function resealAll() {
+  /* Cancel a reseal that is still running, without closing anything. Used before
+     unlocking, so clicking "unlock everything" mid-reset doesn't leave stale
+     timers that would slam cards shut again a beat later. */
+  function stopSealing() {
     for (var t = 0; t < revealTimers.length; t++) clearTimeout(revealTimers[t]);
     revealTimers = [];
+    var s = document.querySelectorAll(".ucard.sealing");
+    for (var i = 0; i < s.length; i++) s[i].classList.remove("sealing");
+  }
+  /**
+   * Put every seal back.
+   * @param cascade animate it — the unlock's 70ms beat, run in reverse. Without
+   *   this every card simply lost .open in one frame, which read as the page
+   *   blinking rather than as the opposite of unsealing. Programmatic callers
+   *   (the QA hook) leave it off and get the instant version, so tests stay
+   *   synchronous; only the two user-facing controls animate.
+   */
+  function resealAll(cascade) {
+    stopSealing();
     clearMateModalTimer();
-    var els = document.querySelectorAll(".ucard.open");
-    for (var i = 0; i < els.length; i++) els[i].classList.remove("open");
+    var els = [].slice.call(document.querySelectorAll(".ucard.open"));
+    if (!cascade || reduced) {
+      for (var i = 0; i < els.length; i++) els[i].classList.remove("open");
+      return;
+    }
+    /* reversed: the last seal broken is the first one put back */
+    els.reverse();
+    els.forEach(function (el, i) {
+      revealTimers.push(setTimeout(function () {
+        el.classList.add("sealing");
+        revealTimers.push(setTimeout(function () {
+          el.classList.remove("open", "sealing");
+        }, 300));                        /* matches flipOut's duration */
+      }, i * 40));
+    });
   }
   /* reseal only what the current counts no longer cover (used by takeback refunds) */
   function resealBeyond() {
@@ -844,14 +873,15 @@
     if (hintSquares) { hintSquares = null; renderBoard(); }
   }
   function unlockAll() {
+    stopSealing();          /* a reset may still be closing cards */
     state.all = true;
     saveState();
     applyUnlocks(true);
   }
-  function hardReset() {
+  function hardReset(cascade) {
     try { localStorage.removeItem(LS_KEY); } catch (e) {}
     state = blankState();
-    resealAll();
+    resealAll(cascade);
     applyUnlocks(false);
     newGame();
   }
@@ -1176,12 +1206,12 @@
      open, the same button is how you put it all back. Branches on the same flag
      applyUnlocks() uses to set the label, so the two can never disagree. */
   $("btn-unlock-all").addEventListener("click", function () {
-    if (allDone) { hardReset(); return; }
+    if (allDone) { hardReset(true); return; }
     unlockAll();
     jumpTo("spoils");
   });
 
-  $("reset-link").addEventListener("click", function (e) { e.preventDefault(); hardReset(); });
+  $("reset-link").addEventListener("click", function (e) { e.preventDefault(); hardReset(true); });
   /* =============== focus trap =============== */
   /* All three panels are aria-modal="true", which tells a screen reader that
      nothing outside them exists — but Tab still walked the whole page behind
@@ -1240,7 +1270,8 @@
       };
     },
     unlockAll: unlockAll,
-    reset: hardReset
+    /* instant, not the animated reseal: callers assert straight after */
+    reset: function () { hardReset(false); }
   };
 
   /* =============== init =============== */
