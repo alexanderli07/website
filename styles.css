@@ -1446,12 +1446,21 @@
   }
   .file-social a{
     flex: 1 1 0; min-width: 118px;
+    /* inline-flex to sit the mark beside the label; the row was already centred
+       by an inherited text-align, and centring here keeps it that way */
+    display: inline-flex; align-items: center; justify-content: center; gap: 7px;
     font-family: var(--mono); font-size: 10.5px; font-weight: 600;
     letter-spacing: .12em; text-transform: uppercase;
     color: var(--walnut); text-decoration: none;
     border: 1px solid var(--walnut-3);
     padding: 9px 10px 8px;
     transition: color .16s ease, background .16s ease, border-color .16s ease;
+  }
+  /* The letter-spacing above adds a trailing gap after the last character, so the
+     mark looks shifted left of centre unless that space is paid back. */
+  .file-social a .si{
+    width: 14px; height: 14px; flex: none;
+    margin-left: .12em;
   }
   .file-social a:hover{
     color: var(--paper); background: var(--red); border-color: var(--red);
