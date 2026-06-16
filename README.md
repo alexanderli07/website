@@ -3,7 +3,7 @@
 A personal portfolio built around a single idea: **one person, two modes.**
 A sun/moon switch (and a circular reveal) flips the whole site between two worlds:
 
-- ☀ **Day — Full-stack & AI:** the software/engineering side — apps, ML/AI, games (100,000+ visits).
+- ☀ **Day — Full-stack & AI:** the software/engineering side — apps, ML/AI, games (1,000,000+ visits).
 - ☾ **Night — Quant & Finance:** the markets side — the Finance Developer role at Quintessence Wealth, CFM, business/quant work.
 
 The concept riffs on Alexander's own award-winning game *Opposite Odyssey* (the day/night

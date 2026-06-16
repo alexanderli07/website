@@ -68,19 +68,16 @@ export const profile = {
     "Full-stack & AI developer, 4× first-place hackathon winner, and a Finance Developer at Quintessence Wealth — building at the line between code and capital.",
   location: "Toronto, Ontario, Canada",
   school: "University of Waterloo — Computing & Financial Management (CFM)",
-  // short status chips shown in the hero (replace the old portrait), per world
-  chips: {
-    day: ["🎮 100,000+ game visits", "🥇 4× 1st-place hackathons", "📱 shipped iOS apps"],
-    night: ["💼 Finance Dev @ Quintessence Wealth", "🎓 CFM @ Waterloo", "📊 Bloomberg Terminal"],
-  },
+  // short status chips shown in the hero (replace the old portrait) — same in both worlds
+  chips: ["🎓 CFM @ Waterloo", "🥇 9× hackathon winner", "🎮 1M+ game visits"],
 };
 
 /** Headline stats (Alexander's own claims, from the résumé). */
 export const stats = [
-  { value: "100K+", label: "visits across games I've shipped" },
-  { value: "4×", label: "1st-place hackathon wins" },
-  { value: "100+", label: "students taught to code" },
-  { value: "$1K+", label: "revenue from a venture I led" },
+  { value: "9×", label: "hackathon wins" },
+  { value: "1M+", label: "visits across games I've shipped" },
+  { value: "10+", label: "languages I code in" },
+  { value: "~91%", label: "accuracy on my vision model" },
 ];
 
 /* ============================================================================
@@ -166,42 +163,6 @@ export const experience: Job[] = [
    ========================================================================== */
 export const dayProjects: Project[] = [
   {
-    id: "alphia",
-    title: "Alphia",
-    blurb:
-      "A Chrome extension that reads any store's products and uses AI to generate realistic outfit previews on your own photo.",
-    highlight: "Sub-300 ms AI previews",
-    problem:
-      "Online shopping makes you imagine how something looks on you. I wanted to remove the imagining.",
-    approach:
-      "Built a Manifest Chrome extension that scrapes product metadata from arbitrary e-commerce sites via dynamic DOM parsing, with an Express.js proxy securely calling the Gemini API to compose your photo with product images.",
-    outcome:
-      "AI outfit previews and styling feedback in the browser — and after optimizing data flow across extension, frontend and backend, sub-300 ms latency.",
-    tags: ["JavaScript", "React", "Vite", "Express.js", "Gemini API"],
-    year: "2026 – present",
-    image: "", // TODO: add a screenshot / demo GIF
-    links: [], // TODO: add repo / demo
-    world: "day",
-  },
-  {
-    id: "saight",
-    title: "saight",
-    blurb:
-      "Hands-free assistive vision: a CV model that recognizes objects and answers spoken queries about your surroundings.",
-    highlight: "🥇 1st Place — DeltaHacks X",
-    problem:
-      "Could a camera + a voice be eyes for someone who can't rely on their own?",
-    approach:
-      "Implemented a computer-vision model with TensorFlow and OpenCV, with offline speech-to-text so it works hands-free via voice commands.",
-    outcome:
-      "~91% object-recognition accuracy, end-to-end latency cut by ~35%, supporting 100+ unique object queries on stage — and 1st place at DeltaHacks X.",
-    tags: ["Python", "OpenCV", "TensorFlow", "Computer Vision"],
-    year: "Jan 2024",
-    image: "/assets/images/dragonflai.png",
-    links: [],
-    world: "day",
-  },
-  {
     id: "dragonflai",
     title: "dragonfl.ai",
     blurb:
@@ -220,41 +181,6 @@ export const dayProjects: Project[] = [
     world: "day",
   },
   {
-    id: "mediscan",
-    title: "MediScan",
-    blurb:
-      "A free web tool that flags possible pneumonia from chest X-rays using a model trained on collected scans.",
-    highlight: "ML on medical imaging",
-    problem:
-      "Radiology isn't equally accessible everywhere. Could a model give a fast, free first-pass read of a chest X-ray?",
-    approach:
-      "Users sign up and upload an X-ray; a model trained on collected chest scans returns real-time analysis and highlights areas to check.",
-    outcome:
-      "A working, accessible classifier — and my first lesson in the discipline ML really demands. [TODO: add your real test accuracy / AUC.]",
-    tags: ["Machine Learning", "Medical Imaging", "Classification"],
-    year: "Dec 2022",
-    image: "/assets/images/MediScan.png",
-    links: [],
-    world: "day",
-  },
-  {
-    id: "freshvision",
-    title: "FreshVision",
-    blurb:
-      "Cameras in your fridge photograph produce on a schedule; an ML model flags ripeness and suggests recipes before food is wasted.",
-    highlight: "Cuts food waste with CV",
-    problem: "Food goes bad at the back of the fridge because we forget it's there. What if the fridge kept watch?",
-    approach:
-      "Cameras photograph produce every few hours and send images to an ML model and web app that determine ripeness and suggest recipes.",
-    outcome:
-      "An end-to-end system on a real, global problem — sensing, a model, and an app that turns a prediction into an action.",
-    tags: ["Machine Learning", "Computer Vision", "IoT"],
-    year: "Aug 2023",
-    image: "/assets/images/FreshVision.png",
-    links: [],
-    world: "day",
-  },
-  {
     id: "invisibilis",
     title: "invīsibilis",
     blurb:
@@ -264,7 +190,7 @@ export const dayProjects: Project[] = [
     approach:
       "Engineered lidar-based visibility mechanics in Lua, optimizing game logic and rendering loops so the maze and monsters only exist for a moment after each scan.",
     outcome:
-      "10,000+ players on this prototype alone — part of 100,000+ visits across my games — and Best Game Mechanic at AngelHacks. Its reveal mechanic is the metaphor behind this site.",
+      "10,000+ players on this prototype alone — part of 1,000,000+ visits across my games — and Best Game Mechanic at AngelHacks. Its reveal mechanic is the metaphor behind this site.",
     tags: ["Roblox Studio", "Lua", "Game Mechanic"],
     year: "2022 – present",
     image: "/assets/images/invisibilis.png",
@@ -286,58 +212,20 @@ export const dayProjects: Project[] = [
     world: "day",
   },
   {
-    id: "journeymate",
-    title: "JourneyMate",
-    blurb: "A Discord bot that plans whole trips — destinations, hotels, attractions and budget — via the GPT API.",
-    highlight: "GPT-powered trip planning",
-    problem: "Planning a trip means juggling a dozen tabs. I wanted it to be one conversation where people already hang out.",
-    approach: "Built with JavaScript and Discord.js, wired to OpenAI's GPT API to turn preferences into a full itinerary and budget.",
-    outcome: "Turns a vague 'somewhere warm, not too pricey' into an actual plan.",
-    tags: ["JavaScript", "Discord.js", "OpenAI API", "LLM"],
-    year: "Apr 2023",
-    image: "/assets/images/JourneyMate.png",
-    links: [],
-    world: "day",
-  },
-  {
-    id: "hopelink",
-    title: "HopeLink",
-    blurb: "A low-bandwidth communication system for disaster zones — locate food, water and safe areas when infrastructure is gone.",
-    highlight: "Engineering under hard constraints",
-    problem: "How do people coordinate when the network is barely there?",
-    approach: "Built a system using minimal data services so users anywhere can find resources, flag safe/unsafe areas, and chat on almost no bandwidth.",
-    outcome: "A study in designing for the worst case: graceful degradation and resilience as a first-class feature.",
-    tags: ["Systems", "Networking", "Full-stack"],
-    year: "May 2023",
-    image: "/assets/images/HopeLink.png",
-    links: [],
-    world: "day",
-  },
-  {
-    id: "turner-fenton-sac",
-    title: "Turner Fenton SAC",
-    blurb: "The official website for my school's Student Activity Council — team, events, gallery and applications.",
-    highlight: "Shipped & maintained for the school",
-    problem: "Our Student Activity Council had no central home — events and applications were scattered.",
-    approach: "As an exec I designed and built the site: team intro, events, photo gallery, contact and an application section.",
-    outcome: "A live product the whole school uses, which I still manage and update.",
-    tags: ["Web Development", "Frontend"],
-    year: "2022 – present",
-    image: "/assets/images/Turner-Fenton-SAC.png",
-    links: [],
-    world: "day",
-  },
-  {
-    id: "nova",
-    title: "Nova — The Book Suggester",
-    blurb: "My very first hackathon project: book recommendations from your borrowing history.",
-    highlight: "Where it started — 2020",
-    problem: "My first hackathon, and my first taste of using data about the past to suggest something for the future.",
-    approach: "Built a recommender that suggests books from a reader's borrow history.",
-    outcome: "Modest — but the origin point of everything that followed.",
-    tags: ["Recommendation", "Data", "First Project"],
-    year: "Aug 2020",
-    image: "/assets/images/nova.png",
+    id: "saight",
+    title: "saight",
+    blurb:
+      "Hands-free assistive vision: a CV model that recognizes objects and answers spoken queries about your surroundings.",
+    highlight: "🥇 1st Place — DeltaHacks X",
+    problem:
+      "Could a camera + a voice be eyes for someone who can't rely on their own?",
+    approach:
+      "Implemented a computer-vision model with TensorFlow and OpenCV, with offline speech-to-text so it works hands-free via voice commands.",
+    outcome:
+      "~91% object-recognition accuracy, end-to-end latency cut by ~35%, supporting 100+ unique object queries on stage — and 1st place at DeltaHacks X.",
+    tags: ["Python", "OpenCV", "TensorFlow", "Computer Vision"],
+    year: "Jan 2024",
+    image: "",
     links: [],
     world: "day",
   },
@@ -463,5 +351,5 @@ export const contact = {
 export const bridgeCopy = {
   kicker: "One person, two modes",
   title: "I write the code. I'm learning the markets.",
-  body: "By day I'm a builder — full-stack apps, AI/ML, and games 100,000+ people have played. By night I'm in finance — a Finance Developer at Quintessence Wealth and a CFM student chasing the quant side. Flip the switch; both halves are real.",
+  body: "By day I'm a builder — full-stack apps, AI/ML, and games 1,000,000+ people have played. By night I'm in finance — a Finance Developer at Quintessence Wealth and a CFM student chasing the quant side. Flip the switch; both halves are real.",
 };

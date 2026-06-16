@@ -5,7 +5,7 @@ import { profile, contact } from "../data/content";
 export function Hero() {
   const { world } = useWorld();
   const h = profile.headline[world];
-  const chips = profile.chips[world];
+  const chips = profile.chips;
 
   return (
     <section className="hero container" id="top">

@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import type { Project } from "../data/content";
+import { lenisRef } from "../world/lenis";
 
 interface Props {
   project: Project | null;
@@ -48,9 +49,18 @@ export function CaseStudy({ project, onClose }: Props) {
 
     document.addEventListener("keydown", onKey);
     document.body.style.overflow = "hidden";
+    // The fixed nav lives outside <main>'s stacking context, so it would otherwise
+    // float over the dialog — hide it while open (CSS slides it away).
+    document.body.dataset.modalOpen = "true";
+    // Lenis hijacks wheel events on the window and ignores `body { overflow }`,
+    // so freeze it while the dialog is open — otherwise the page scrolls behind.
+    // (The modal itself is tagged data-lenis-prevent so it still scrolls natively.)
+    lenisRef.current?.stop();
     return () => {
       document.removeEventListener("keydown", onKey);
       document.body.style.overflow = "";
+      delete document.body.dataset.modalOpen;
+      lenisRef.current?.start();
       previouslyFocused?.focus?.(); // restore focus to the card that opened it
     };
   }, [project, onClose]);
@@ -73,6 +83,7 @@ export function CaseStudy({ project, onClose }: Props) {
             ref={modalRef}
             tabIndex={-1}
             className="modal"
+            data-lenis-prevent
             initial={{ opacity: 0, y: 30, scale: 0.97 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.98 }}
