@@ -3,14 +3,15 @@ import { useWorld } from "../world/WorldContext";
 import { experience } from "../data/content";
 
 const COPY = {
-  day: { kicker: "☀ On the clock — engineering", title: "Where I've built software." },
-  night: { kicker: "☾ On the clock — finance", title: "Where I've worked in finance." },
+  day: { kicker: "☀ On the clock — engineering", title: "Where I've built software.", otherSide: "finance", flipTo: "night" },
+  night: { kicker: "☾ On the clock — finance", title: "Where I've worked in finance.", otherSide: "engineering", flipTo: "day" },
 };
 
 export function Experience() {
-  const { world } = useWorld();
+  const { world, toggle } = useWorld();
   const jobs = experience.filter((j) => j.world === world);
   const copy = COPY[world];
+  const otherCount = experience.filter((j) => j.world !== world).length;
 
   return (
     <section className="section container" id="experience">
@@ -59,6 +60,16 @@ export function Experience() {
           ))}
         </AnimatePresence>
       </motion.ul>
+
+      <button
+        type="button"
+        className="exp-flip-hint font-mono"
+        onClick={(e) => toggle({ clientX: e.clientX, clientY: e.clientY })}
+        aria-label={`Flip to the ${copy.flipTo} world to see ${otherCount} more roles`}
+      >
+        <span className="exp-flip-icon" aria-hidden>⇄</span>
+        {otherCount} more {otherCount === 1 ? "role" : "roles"} on the {copy.otherSide} side — flip to {copy.flipTo}
+      </button>
     </section>
   );
 }
