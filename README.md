@@ -76,6 +76,14 @@ node scripts/make-og-card.mjs
 
 `AlexanderLi.png` is kept (untouched) as the `Person` photo in the JSON-LD structured data.
 
+**Favicons / app icons** — the full set (`favicon.svg`, `.ico`, PNGs, `apple-touch-icon`, maskable `icon-192/512`) is generated from one SVG mark (day/night split + `A` monogram). Regenerate with:
+
+```bash
+node scripts/make-favicons.mjs
+```
+
+**404** — `public/404.html` is a self-contained themed page (served by Vercel for unmatched routes; no SPA rewrite, since the site has no client-side router).
+
 ### Notes on what was intentionally changed
 - **Privacy:** your phone number and exact birthday (both public on the old site) were **left
   out** on purpose. Add them back only if you want them public.
