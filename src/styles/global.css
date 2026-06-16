@@ -271,7 +271,9 @@ main { position: relative; z-index: 1; }
 /* =============================================================================
    NAV
    ========================================================================== */
-.nav { position: fixed; inset: 0 0 auto 0; z-index: 50; padding-top: 0.9rem; }
+.nav { position: fixed; inset: 0 0 auto 0; z-index: 50; padding-top: 0.9rem; transition: opacity 0.3s ease, transform 0.3s ease; }
+/* hide the nav while a case-study dialog is open (it sits outside the modal's stacking context) */
+body[data-modal-open] .nav { opacity: 0; transform: translateY(-110%); pointer-events: none; }
 .nav-inner {
   display: flex; align-items: center; justify-content: space-between; gap: 1rem;
   padding: 0.55rem 0.7rem 0.55rem 1.2rem;

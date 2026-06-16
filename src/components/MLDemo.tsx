@@ -12,7 +12,7 @@ type Classifier = (text: string) => Promise<Array<{ label: string; score: number
 const SAMPLES = [
   "Alex ships polished, creative software fast.",
   "This portfolio is unbelievably boring and slow.",
-  "I built a game 100,000 people actually played.",
+  "I built a game 1,000,000 people actually played.",
 ];
 
 /**
