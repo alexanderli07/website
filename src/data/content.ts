@@ -63,10 +63,10 @@ export const profile = {
   } as Record<World, Array<Array<{ t: string; a?: boolean }>>>,
   eyebrow: { day: "☀ Full-stack & AI", night: "☾ Quant & Finance" },
   subhead:
-    "Computing & Financial Management @ the University of Waterloo · Brampton → Waterloo, ON.",
+    "Computing & Financial Management @ the University of Waterloo · Toronto, ON.",
   oneLiner:
     "Full-stack & AI developer, 4× first-place hackathon winner, and a Finance Developer at Quintessence Wealth — building at the line between code and capital.",
-  location: "Brampton & Waterloo, Ontario, Canada",
+  location: "Toronto, Ontario, Canada",
   school: "University of Waterloo — Computing & Financial Management (CFM)",
   // short status chips shown in the hero (replace the old portrait), per world
   chips: {
