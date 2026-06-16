@@ -47,7 +47,7 @@ export interface Job {
 
 export const profile = {
   name: "Alexander Li",
-  portrait: "/assets/images/AlexanderLi.png",
+  portrait: "/assets/images/AlexanderLi-portrait.webp",
   // headline = explicit lines (each renders on its own line); `a` marks gradient-accent
   // segments. Controlling the breaks keeps each title to 2 lines and keeps
   // "code meets capital" together on one line.
@@ -65,7 +65,7 @@ export const profile = {
   subhead:
     "Computing & Financial Management @ the University of Waterloo · Toronto, ON.",
   oneLiner:
-    "Full-stack & AI developer, 4× first-place hackathon winner, and a Finance Developer at Quintessence Wealth — building at the line between code and capital.",
+    "Full-stack & AI developer, 9x hackathon winner, and a Finance Developer at Quintessence Wealth — building at the line between code and capital.",
   location: "Toronto, Ontario, Canada",
   school: "University of Waterloo — Computing & Financial Management (CFM)",
   // short status chips shown in the hero (replace the old portrait) — same in both worlds
@@ -176,7 +176,7 @@ export const dayProjects: Project[] = [
       "Won 1st overall at RythmHacks 2023 — the project that turned ML from a buzzword into something I wanted to truly understand.",
     tags: ["Machine Learning", "Computer Vision", "OCR", "Full-stack"],
     year: "Sep 2023",
-    image: "/assets/images/dragonflai.png",
+    image: "/assets/images/dragonflai.webp",
     links: [
       { label: "GitHub", href: "https://github.com/SpiritByte/dragonfl.ai" },
       { label: "Devpost", href: "https://devpost.com/software/dragonfl-ai" },
@@ -196,7 +196,7 @@ export const dayProjects: Project[] = [
       "10,000+ players on this prototype alone — part of 1,000,000+ visits across my games — and Best Game Mechanic at AngelHacks. Its reveal mechanic is the metaphor behind this site.",
     tags: ["Roblox Studio", "Lua", "Game Mechanic"],
     year: "2022 – present",
-    image: "/assets/images/invisibilis.png",
+    image: "/assets/images/invisibilis.webp",
     links: [{ label: "Play on Roblox", href: "https://www.roblox.com/games/13512108865/inv-sibilis" }],
     world: "day",
   },
@@ -210,7 +210,7 @@ export const dayProjects: Project[] = [
     outcome: "Most Creative and 1st individually at MayfieldHacks — and the day/night idea behind this whole portfolio.",
     tags: ["Game Dev", "Level Design", "Mechanics"],
     year: "Dec 2023",
-    image: "/assets/images/OppositeOdyssey.png",
+    image: "/assets/images/OppositeOdyssey.webp",
     links: [],
     world: "day",
   },
@@ -228,7 +228,7 @@ export const dayProjects: Project[] = [
       "~91% object-recognition accuracy, end-to-end latency cut by ~35%, supporting 100+ unique object queries on stage — and 1st place at DeltaHacks X.",
     tags: ["Python", "OpenCV", "TensorFlow", "Computer Vision"],
     year: "Jan 2024",
-    image: "/assets/images/saight.png",
+    image: "/assets/images/saight.webp",
     links: [
       { label: "GitHub", href: "https://github.com/HetavP2/saight-public" },
       { label: "Video", href: "https://youtu.be/SYaEiVhIqtg" },
@@ -250,7 +250,7 @@ export const dayProjects: Project[] = [
       "2nd Place Overall at Ignition Hacks 2024 — assistive hardware and ML that puts a name to a face in real time, easing the load on patients and families alike.",
     tags: ["Computer Vision", "Facial Recognition", "Arduino / ESP32", "Flask"],
     year: "Aug 2024",
-    image: "/assets/images/reminda.png",
+    image: "/assets/images/reminda.webp",
     links: [
       { label: "GitHub", href: "https://github.com/DevTechJr/reminda" },
       { label: "Video", href: "https://youtu.be/jonY-y7NVz0" },
@@ -272,7 +272,7 @@ export const dayProjects: Project[] = [
       "Won Best Use of AI at Hack the Valley 9 — assistive hardware + LLM summarization that lifts cognitive load instead of piling onto it.",
     tags: ["ESP32 / Arduino", "OpenAI", "Streamlit", "Text-to-Speech"],
     year: "Oct 2024",
-    image: "/assets/images/snaipshot.jpg",
+    image: "/assets/images/snaipshot.webp",
     links: [
       { label: "GitHub", href: "https://github.com/SpiritByte/Hack-The-Valley" },
       { label: "Demo", href: "https://hack-the-valley.streamlit.app/" },
@@ -297,7 +297,7 @@ export const nightProjects: Project[] = [
       "3rd at WolfHacks — and my first build where the interesting part was the economics, not just the code.",
     tags: ["Tokenomics", "Crypto", "AI", "Full-stack"],
     year: "May 2024",
-    image: "/assets/images/BAC.png",
+    image: "/assets/images/BAC.webp",
     links: [{ label: "GitHub", href: "https://github.com/alexanderli07/Brampton-Arts-and-Culture-Coin" }],
     world: "night",
   },
@@ -315,7 +315,7 @@ export const nightProjects: Project[] = [
       "Built at StarterHacks 2024 — my first real go at incentive design: modelling how a currency reshapes what people choose to do.",
     tags: ["Incentive Design", "Flask", "SQLAlchemy", "Full-stack"],
     year: "Jul 2024",
-    image: "/assets/images/ecoin.png",
+    image: "/assets/images/ecoin.webp",
     links: [
       { label: "GitHub", href: "https://github.com/HetavP2/Ecoin" },
       { label: "Devpost", href: "https://devpost.com/software/ecoin-p0t9l1" },
@@ -404,21 +404,21 @@ export const testimonials: Testimonial[] = [
     role: "Relationship Manager @ Royal Bank of Canada",
     quote:
       "Alex was VP of Technology in our Company Program. He's forward-thinking and strategic, not afraid to challenge popular thinking — and what makes him great is his ability to rally others around his ideas.",
-    avatar: "/assets/images/Roosevelt.png",
+    avatar: "/assets/images/Roosevelt.webp",
   },
   {
     name: "Darren Roopnarain",
     role: "Advisor — Junior Achievement Company",
     quote:
       "Alex is one of the most impressive individuals I have met. In only Grade 11, he has accomplished more in a few years than most accomplish in double the time. He is a well-respected and capable leader whom his peers look up to.",
-    avatar: "/assets/images/Darren.png",
+    avatar: "/assets/images/Darren.webp",
   },
   {
     name: "Carol Taverner",
     role: "National Public Relations Officer @ ACTRA",
     quote:
       "Alexander is dependable and trustworthy, and thrives in demanding, fast-paced environments — from strategic top-tier hockey to award-winning video-game projects. He is bound for success.",
-    avatar: "/assets/images/CarolTaverner.png",
+    avatar: "/assets/images/CarolTaverner.webp",
   },
 ];
 
@@ -444,6 +444,6 @@ export const contact = {
 
 export const bridgeCopy = {
   kicker: "One person, two modes",
-  title: "I write the code. I'm learning the markets.",
-  body: "By day I'm a builder — full-stack apps, AI/ML, and games 1,000,000+ people have played. By night I'm in finance — a Finance Developer at Quintessence Wealth and a CFM student chasing the quant side. Flip the switch; both halves are real.",
+  title: "I write the code. I work the markets.",
+  body: "By day I'm a builder — full-stack apps, AI/ML, and games with 1,000,000+ visits. By night I'm in finance — a Finance Developer at Quintessence Wealth and a CFM student deepening the quant side. Flip the switch; both halves are real.",
 };

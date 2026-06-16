@@ -16,9 +16,12 @@ function Site() {
   useLenis();
   return (
     <>
+      <a href="#main-content" className="skip-link">
+        Skip to content
+      </a>
       <Atmosphere />
       <Nav />
-      <main>
+      <main id="main-content" tabIndex={-1}>
         <Hero />
         <Bridge />
         <Experience />

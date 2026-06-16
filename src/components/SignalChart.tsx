@@ -5,7 +5,7 @@ import { useReducedMotion } from "../world/useReducedMotion";
 /**
  * A thematic "noise -> signal" chart. This is an illustration of the idea, not a
  * claim about a specific model's results — so it never misrepresents a metric.
- * When you have a real eval to show (e.g. MediScan's ROC), swap this for it.
+ * When you have a real eval to show (e.g. a model's ROC / accuracy curve), swap this for it.
  */
 export function SignalChart() {
   const reduced = useReducedMotion();
