@@ -53,21 +53,36 @@ npm run preview     # preview the production build
 
 ## ⚠️ Personalize before publishing (search the code for `TODO`)
 
-Everything below uses only facts from your existing site. These are the spots to make it fully yours:
+The content is real (drawn from the résumé / existing site). These are the only spots left to make it fully yours:
 
 | What | Where |
 |------|-------|
-| **Project images** — Alphia & SnaipShot use a monogram placeholder; add screenshots | `image: ""` in `src/data/content.ts` (drop files in `public/assets/images/`) |
-| **Project links** — add a live demo and/or GitHub repo per project | `links: []` in `src/data/content.ts` |
-| **MediScan real metrics** — add your true test accuracy / AUC (no fabricated numbers were added) | `mediscan.outcome` in `content.ts` |
-| **Optimize images** — several are 2–4 MB (`BAC.png`, `CarolTaverner.png`, `OppositeOdyssey.png`). Compress/resize to keep Lighthouse green | `public/assets/images/` |
+| **CFM 101 real results** — the optimizer's `outcome` still uses illustrative numbers (flagged with a `TODO`). Replace with your real competition results, or state methodology only. | `cfm101.outcome` in `src/data/content.ts` |
+| **Project links** — add a live demo / repo where a project still has none (e.g. Opposite Odyssey has `links: []`). | `links` in `src/data/content.ts` |
+| **Résumé PDF** — confirm `public/resume.pdf` is your latest. | `public/resume.pdf` |
+
+### Images
+Project art and avatars are optimized to right-sized **WebP** (~15 MB of PNGs → ~0.3 MB). To re-run after adding new art: drop the source file in `public/assets/images/`, add it to the `JOBS` list, then run
+
+```bash
+node scripts/optimize-images.mjs
+```
+
+**Social-share card** — the 1200×630 link preview (`og-card.png`) is generated from pure SVG. Edit the `COPY` block in the script and re-run:
+
+```bash
+node scripts/make-og-card.mjs
+```
+
+`AlexanderLi.png` is kept (untouched) as the `Person` photo in the JSON-LD structured data.
 
 ### Notes on what was intentionally changed
 - **Privacy:** your phone number and exact birthday (both public on the old site) were **left
   out** on purpose. Add them back only if you want them public.
 - **Copy was rewritten and proofread** (the old site had typos like "peices", "sigh up").
 - **Accessibility:** honours `prefers-reduced-motion` (the flip becomes an instant cut, smooth
-  scroll and animations are disabled), keyboard-operable cards/modal, focus styles, alt text.
+  scroll and animations are disabled), keyboard-operable cards/modal, focus styles, alt text, a
+  skip-to-content link, and an `aria-live` region that announces each world flip to screen readers.
 
 ## Structure
 

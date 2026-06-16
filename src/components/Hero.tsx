@@ -3,7 +3,7 @@ import { useWorld } from "../world/WorldContext";
 import { profile, contact } from "../data/content";
 
 export function Hero() {
-  const { world } = useWorld();
+  const { world, toggle } = useWorld();
   const h = profile.headline[world];
   const chips = profile.chips;
 
@@ -63,9 +63,13 @@ export function Hero() {
           <a href={contact.resumeHref} target="_blank" rel="noopener" className="btn btn-ghost">
             Résumé ↗
           </a>
-          <span className="font-mono" style={{ alignSelf: "center", fontSize: "0.78rem", color: "var(--muted)" }}>
-            flip the switch&nbsp;↗
-          </span>
+          <button
+            type="button"
+            className="hero-flip font-mono"
+            onClick={(e) => toggle({ clientX: e.clientX, clientY: e.clientY })}
+          >
+            flip to {world === "day" ? "night" : "day"}&nbsp;→ <span aria-hidden>{world === "day" ? "☾" : "☀"}</span>
+          </button>
         </div>
       </div>
 
