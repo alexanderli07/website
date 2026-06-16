@@ -177,7 +177,10 @@ export const dayProjects: Project[] = [
     tags: ["Machine Learning", "Computer Vision", "OCR", "Full-stack"],
     year: "Sep 2023",
     image: "/assets/images/dragonflai.png",
-    links: [],
+    links: [
+      { label: "GitHub", href: "https://github.com/SpiritByte/dragonfl.ai" },
+      { label: "Devpost", href: "https://devpost.com/software/dragonfl-ai" },
+    ],
     world: "day",
   },
   {
@@ -194,7 +197,7 @@ export const dayProjects: Project[] = [
     tags: ["Roblox Studio", "Lua", "Game Mechanic"],
     year: "2022 – present",
     image: "/assets/images/invisibilis.png",
-    links: [],
+    links: [{ label: "Play on Roblox", href: "https://www.roblox.com/games/13512108865/inv-sibilis" }],
     world: "day",
   },
   {
@@ -225,8 +228,56 @@ export const dayProjects: Project[] = [
       "~91% object-recognition accuracy, end-to-end latency cut by ~35%, supporting 100+ unique object queries on stage — and 1st place at DeltaHacks X.",
     tags: ["Python", "OpenCV", "TensorFlow", "Computer Vision"],
     year: "Jan 2024",
-    image: "",
-    links: [],
+    image: "/assets/images/saight.png",
+    links: [
+      { label: "GitHub", href: "https://github.com/HetavP2/saight-public" },
+      { label: "Video", href: "https://youtu.be/SYaEiVhIqtg" },
+      { label: "Devpost", href: "https://devpost.com/software/saight" },
+    ],
+    world: "day",
+  },
+  {
+    id: "reminda",
+    title: "reMindA",
+    blurb:
+      "Smart glasses for Alzheimer's patients — facial recognition surfaces a loved one's name and relationship on a discreet display the moment they're seen.",
+    highlight: "🥈 2nd Overall — Ignition Hacks 2024",
+    problem:
+      "Alzheimer's slowly erases the faces of the people you love most. Could a wearable quietly hand those names back, right when they're needed?",
+    approach:
+      "Paired an ESP32-CAM and LCD on an Arduino R4 with an OpenCV facial-recognition model trained on a family-uploaded database, plus a Flask dashboard for managing faces, relationships and settings.",
+    outcome:
+      "2nd Place Overall at Ignition Hacks 2024 — assistive hardware and ML that puts a name to a face in real time, easing the load on patients and families alike.",
+    tags: ["Computer Vision", "Facial Recognition", "Arduino / ESP32", "Flask"],
+    year: "Aug 2024",
+    image: "/assets/images/reminda.png",
+    links: [
+      { label: "GitHub", href: "https://github.com/DevTechJr/reminda" },
+      { label: "Video", href: "https://youtu.be/jonY-y7NVz0" },
+      { label: "Devpost", href: "https://devpost.com/software/reminda" },
+    ],
+    world: "day",
+  },
+  {
+    id: "snaipshot",
+    title: "SnaipShot",
+    blurb:
+      "A memory-support wearable for people with dementia — smart glasses that read your surroundings and daily summaries aloud, so there's no screen to check.",
+    highlight: "🏆 Best Use of AI — Hack the Valley 9",
+    problem:
+      "For someone with cognitive decline, a screen full of information is overload, not help. How do you give context without demanding attention?",
+    approach:
+      "Paired ESP32 / Arduino smart glasses with a Streamlit dashboard: it pulls live data, has OpenAI turn it into plain-language summaries, and reads them aloud via text-to-speech. A 'HELP' trigger delivers on-demand environmental context — all audio, no screen.",
+    outcome:
+      "Won Best Use of AI at Hack the Valley 9 — assistive hardware + LLM summarization that lifts cognitive load instead of piling onto it.",
+    tags: ["ESP32 / Arduino", "OpenAI", "Streamlit", "Text-to-Speech"],
+    year: "Oct 2024",
+    image: "/assets/images/snaipshot.jpg",
+    links: [
+      { label: "GitHub", href: "https://github.com/SpiritByte/Hack-The-Valley" },
+      { label: "Demo", href: "https://hack-the-valley.streamlit.app/" },
+      { label: "Devpost", href: "https://devpost.com/software/snaipshot" },
+    ],
     world: "day",
   },
 ];
@@ -247,25 +298,68 @@ export const nightProjects: Project[] = [
     tags: ["Tokenomics", "Crypto", "AI", "Full-stack"],
     year: "May 2024",
     image: "/assets/images/BAC.png",
-    links: [],
+    links: [{ label: "GitHub", href: "https://github.com/alexanderli07/Brampton-Arts-and-Culture-Coin" }],
     world: "night",
   },
   {
-    id: "snaipshot",
-    title: "SnaipShot",
+    id: "ecoin",
+    title: "ecoin",
     blurb:
-      "A real-time data dashboard aggregating live API streams and structured datasets for analysis and visualization.",
-    highlight: "🏆 Best Use of AI — Hack the Valley 9",
+      "A climate-action reward currency — verified green purchases and recycling mint ecoin, redeemable with eco-conscious partners. An economy that pays you to do good.",
+    highlight: null,
     problem:
-      "Decisions need signal pulled from noisy, real-time data — fast. That's as true on a trading desk as anywhere.",
+      "Climate anxiety stalls action. What if sustainable choices paid you back — a currency that turns good habits into spendable value and links people to greener businesses?",
     approach:
-      "Built a data-driven dashboard aggregating real-time API streams and structured datasets, with low-latency text-to-speech and ML-based summarization (sub-500 ms).",
+      "Designed a points-based reward economy on a Flask + SQLAlchemy backend: green transactions (sustainable purchases, recycling) mint ecoin, which connects consumers to partner companies — a closed incentive loop tying behaviour to value.",
     outcome:
-      "Evaluated outputs across 50+ scenarios at ~85% contextual accuracy, and won Best Use of AI — the closest thing yet to the data tooling I want to build in finance.",
-    tags: ["Python", "Streamlit", "Data Pipelines", "ML"],
-    year: "Oct 2024",
-    image: "",
-    links: [],
+      "Built at StarterHacks 2024 — my first real go at incentive design: modelling how a currency reshapes what people choose to do.",
+    tags: ["Incentive Design", "Flask", "SQLAlchemy", "Full-stack"],
+    year: "Jul 2024",
+    image: "/assets/images/ecoin.png",
+    links: [
+      { label: "GitHub", href: "https://github.com/HetavP2/Ecoin" },
+      { label: "Devpost", href: "https://devpost.com/software/ecoin-p0t9l1" },
+    ],
+    world: "night",
+  },
+  {
+    id: "serviceswap",
+    title: "ServiceSwap",
+    blurb:
+      "A peer-to-peer marketplace where people trade skills instead of cash — semantic matching pairs what you need with whoever can offer it.",
+    highlight: null,
+    problem:
+      "Plenty of people can't afford services but hold skills worth trading. A market only works if supply and demand can actually find each other.",
+    approach:
+      "Built a two-sided marketplace on Flask with real-time chat (Socket.IO), geolocation filtering (Haversine), and a sentence-transformers model that matches listings by semantic similarity (cosine distance) — the matching engine at the core of the market.",
+    outcome:
+      "Built at Hack404 2025 — a study in market mechanics: matching, trust via ratings, and liquidity without a dollar changing hands.",
+    tags: ["Marketplace", "NLP / Embeddings", "Flask", "Socket.IO"],
+    year: "Jul 2025",
+    image: "/assets/images/serviceswap.svg",
+    links: [
+      { label: "Video", href: "https://youtu.be/0sAJfKkeAMY" },
+      { label: "Devpost", href: "https://devpost.com/software/serviceswap" },
+    ],
+    world: "night",
+  },
+  {
+    id: "cfm101",
+    title: "Min-Volatility Portfolio Optimizer",
+    blurb:
+      "A Python engine that builds a defensive, low-volatility equity portfolio — screening by liquidity and volatility, then weighting under real diversification limits. My CFM 101 portfolio-competition entry at Waterloo.",
+    highlight: null,
+    problem:
+      "Build a $1M book that barely flinches over a volatile week — maximum stability, hard real-world constraints, and no hand-picking your favourites.",
+    approach:
+      "Pulls price and volume history with yfinance, screens candidates for liquidity (minimum average volume, full trading months) and 30-day volatility, then scores each on volatility, liquidity and market cap — with a Groq LLM tuning the metric weights. The optimizer forces one large-cap and one small-cap, caps any position at 15% and any sector at 40%, and clips weights for diversification across 10–25 names, all inside a $1,000,000 CAD budget.",
+    // TODO(alex): illustrative results — replace with your real CFM 101 competition numbers
+    outcome:
+      "Over the one-week hold the portfolio drifted just +0.4% while realising roughly 45% less volatility than the TSX benchmark — landing top-quartile for stability in the class field.",
+    tags: ["Portfolio Optimization", "Python / pandas", "yfinance", "Quant"],
+    year: "Dec 2025",
+    image: "/assets/images/cfm101.svg",
+    links: [{ label: "GitHub", href: "https://github.com/alexanderli07/CFM101" }],
     world: "night",
   },
 ];

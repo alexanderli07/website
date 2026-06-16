@@ -14,7 +14,7 @@ const COPY = {
   night: {
     kicker: "☾ Quant & Finance",
     title: "Where I put code near money.",
-    lead: "Data tooling and economic systems — the finance-leaning work, alongside the role and degree behind it.",
+    lead: "Markets, currencies, and matching engines — computer science aimed at finance, alongside the role and degree behind it.",
   },
 };
 
