@@ -128,7 +128,7 @@ export function MLDemo() {
         <p className="ml-fallback">Couldn't load the model just now — it streams from the Hugging Face CDN and runs locally when reachable.</p>
       )}
 
-      <p className="ml-note">Runs 100% in your browser — the model is downloaded once and never leaves your device.</p>
+      <p className="ml-note">Runs 100% in your browser!</p>
     </div>
   );
 }

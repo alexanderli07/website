@@ -201,7 +201,7 @@ export const dayProjects: Project[] = [
     id: "opposite-odyssey",
     title: "Opposite Odyssey",
     blurb: "A platformer where switching between night and day reveals different paths up the mountain.",
-    highlight: "🏆 Most Creative + 1st Individual — MayfieldHacks",
+    highlight: "🥇 1st Place + Most Creative — MayfieldHacks",
     problem: 'The theme was "opposites attract" — so the opposite of light became a different version of the world.',
     approach: "Players toggle night/day to reveal paths that exist in only one state, across parkour and boss fights.",
     outcome: "Most Creative and 1st individually at MayfieldHacks — and the day/night idea behind this whole portfolio.",
