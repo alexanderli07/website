@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>404 — Lost in the void · Alexander Li</title>
+    <meta name="robots" content="noindex" />
+    <meta name="theme-color" content="#03050b" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@1,9..144,400..600&family=JetBrains+Mono:wght@500&family=Space+Grotesk:wght@500;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      * { margin: 0; box-sizing: border-box; }
+      html, body { height: 100%; }
+      body { overflow: hidden; background: radial-gradient(circle at 50% 50%, #0a1028 0%, #05070f 58%, #020308 100%); }
+      /* starfield */
+      body::before {
+        content: ""; position: fixed; inset: 0; pointer-events: none; opacity: 0.85;
+        background-image:
+          radial-gradient(1.6px 1.6px at 8% 16%, #fff, transparent),
+          radial-gradient(1.4px 1.4px at 19% 72%, #cfe0ff, transparent),
+          radial-gradient(1.3px 1.3px at 27% 30%, #fff, transparent),
+          radial-gradient(1.5px 1.5px at 33% 88%, #bcd0ff, transparent),
+          radial-gradient(1.2px 1.2px at 41% 12%, #fff, transparent),
+          radial-gradient(1.5px 1.5px at 48% 60%, #e9f1ff, transparent),
+          radial-gradient(1.3px 1.3px at 55% 92%, #fff, transparent),
+          radial-gradient(1.4px 1.4px at 63% 24%, #cfe0ff, transparent),
+          radial-gradient(1.2px 1.2px at 71% 78%, #fff, transparent),
+          radial-gradient(1.6px 1.6px at 78% 40%, #fff, transparent),
+          radial-gradient(1.3px 1.3px at 84% 9%, #bcd0ff, transparent),
+          radial-gradient(1.4px 1.4px at 90% 66%, #fff, transparent),
+          radial-gradient(1.2px 1.2px at 95% 30%, #cfe0ff, transparent),
+          radial-gradient(1.3px 1.3px at 4% 48%, #fff, transparent),
+          radial-gradient(1.5px 1.5px at 14% 92%, #fff, transparent),
+          radial-gradient(1.2px 1.2px at 58% 6%, #cfe0ff, transparent),
+          radial-gradient(1.4px 1.4px at 88% 88%, #fff, transparent),
+          radial-gradient(1.2px 1.2px at 36% 50%, #e9f1ff, transparent),
+          radial-gradient(1.3px 1.3px at 73% 54%, #fff, transparent),
+          radial-gradient(1.5px 1.5px at 23% 6%, #fff, transparent),
+          radial-gradient(1.2px 1.2px at 67% 96%, #cfe0ff, transparent),
+          radial-gradient(1.3px 1.3px at 99% 80%, #fff, transparent);
+      }
+      .scene { position: fixed; inset: 0; width: 100%; height: 100%; }
+      .aura { transform-origin: center; animation: pulse 7s ease-in-out infinite; }
+      .btn-bg { transition: fill 0.15s ease; }
+      a:hover .btn-bg { fill: #ffe6b8; }
+      a { cursor: pointer; }
+      .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+      @keyframes pulse { 0%, 100% { opacity: 0.85; } 50% { opacity: 1; } }
+      @media (prefers-reduced-motion: reduce) { .aura { animation: none; } }
+    </style>
+  </head>
+  <body>
+    <h1 class="sr-only">404 — Lost in the void</h1>
+    <svg class="scene" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid meet" role="img"
+         aria-label="404 — this page fell past the horizon">
+      <defs>
+        <radialGradient id="bigglow" cx="0.5" cy="0.5" r="0.5"><stop offset="0.28" stop-color="#ff7a2a" stop-opacity="0" /><stop offset="0.55" stop-color="#ff7a2a" stop-opacity="0.24" /><stop offset="1" stop-color="#ff7a2a" stop-opacity="0" /></radialGradient>
+        <radialGradient id="ring" cx="0.5" cy="0.5" r="0.5">
+          <stop offset="0.5" stop-color="#ff8a2e" stop-opacity="0" />
+          <stop offset="0.555" stop-color="#ff8a2e" />
+          <stop offset="0.585" stop-color="#ffd27a" />
+          <stop offset="0.605" stop-color="#fff3df" />
+          <stop offset="0.66" stop-color="#ffac4d" />
+          <stop offset="0.80" stop-color="#d2500f" />
+          <stop offset="0.92" stop-color="#6e2206" stop-opacity="0.45" />
+          <stop offset="1" stop-color="#000" stop-opacity="0" />
+        </radialGradient>
+        <radialGradient id="core" cx="0.5" cy="0.45" r="0.55"><stop offset="0.62" stop-color="#020308" /><stop offset="1" stop-color="#0a1020" /></radialGradient>
+        <filter id="soft" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="6" /></filter>
+        <filter id="softer" x="-120%" y="-120%" width="340%" height="340%"><feGaussianBlur stdDeviation="50" /></filter>
+      </defs>
+
+      <circle class="aura" cx="800" cy="450" r="600" fill="url(#bigglow)" filter="url(#softer)" />
+      <circle cx="800" cy="450" r="460" fill="url(#ring)" filter="url(#soft)" />
+      <circle cx="800" cy="450" r="265" fill="url(#core)" />
+      <circle cx="800" cy="450" r="267" fill="none" stroke="#ffe9c8" stroke-width="2.5" stroke-opacity="0.85" />
+
+      <text x="800" y="330" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="22" letter-spacing="7" fill="#ffce95">LOST IN THE VOID</text>
+      <text x="800" y="486" text-anchor="middle" font-family="'Space Grotesk', system-ui, sans-serif" font-weight="800" font-size="172" letter-spacing="-5" fill="#f3f6ff">404</text>
+      <text x="800" y="548" text-anchor="middle" font-family="'Fraunces', Georgia, serif" font-style="italic" font-size="26" fill="#dfe6f5">This page fell past the horizon.</text>
+
+      <a href="/" aria-label="Back to alexanderli.dev home">
+        <rect class="btn-bg" x="645" y="582" width="310" height="50" rx="25" fill="#f6dcab" />
+        <text x="800" y="614" text-anchor="middle" font-family="'Space Grotesk', system-ui, sans-serif" font-weight="600" font-size="18" fill="#1a0e02">← Escape to alexanderli.dev</text>
+      </a>
+    </svg>
+  </body>
+</html>
