@@ -65,13 +65,13 @@ export const profile = {
   subhead:
     "Computing & Financial Management @ the University of Waterloo · Brampton → Waterloo, ON.",
   oneLiner:
-    "Full-stack & AI developer, 4× first-place hackathon winner, and a Finance Developer at a wealth-management firm — building at the line between code and capital.",
+    "Full-stack & AI developer, 4× first-place hackathon winner, and a Finance Developer at Quintessence Wealth — building at the line between code and capital.",
   location: "Brampton & Waterloo, Ontario, Canada",
   school: "University of Waterloo — Computing & Financial Management (CFM)",
   // short status chips shown in the hero (replace the old portrait), per world
   chips: {
     day: ["🎮 100,000+ game visits", "🥇 4× 1st-place hackathons", "📱 shipped iOS apps"],
-    night: ["💼 Finance Developer @ Q Wealth", "🎓 CFM @ Waterloo", "📈 $1K+ venture revenue"],
+    night: ["💼 Finance Dev @ Quintessence Wealth", "🎓 CFM @ Waterloo", "📊 Bloomberg Terminal"],
   },
 };
 
@@ -90,14 +90,14 @@ export const experience: Job[] = [
   // ---- NIGHT (Quant & Finance) ----
   {
     role: "Finance Developer",
-    org: "Q Wealth Partners",
-    location: "Ontario, Canada", // TODO: confirm office location
-    period: "2026 – Present",
+    org: "Quintessence Wealth",
+    location: "Toronto, ON",
+    period: "May 2026 – Present",
     current: true,
     world: "night",
     bullets: [
-      "Building software and data tooling at a wealth-management firm — working at the intersection of engineering and finance.",
-      "TODO: add 1–2 specific accomplishments (what you built, the impact, any numbers).",
+      "Optimizing internal infrastructure for the trades team — improving the reliability and execution efficiency of trading workflows.",
+      "Building quantitative tools on the Bloomberg Terminal to support investment research and decision-making.",
     ],
   },
   {
@@ -114,14 +114,14 @@ export const experience: Job[] = [
   },
   // ---- DAY (Full-stack & AI) ----
   {
-    role: "iOS App Developer",
+    role: "AI/ML Engineer",
     org: "AIQ Labs LLC",
     location: "Waterloo, ON",
     period: "Mar 2026 – Present",
     current: true,
     world: "day",
     bullets: [
-      "Engineered interactive, gamified learning modules in Swift & SwiftUI, including a user progression system.",
+      "Trained an AI model on user preferences to recommend quizzes, improving content relevance and engagement.",
       "Integrated asynchronous REST APIs to fetch dynamic question banks and synchronize user streak data.",
     ],
   },
@@ -133,6 +133,7 @@ export const experience: Job[] = [
     world: "day",
     bullets: [
       "Designed and built a SwiftUI iOS app serving 100+ customers with 6,000+ impressions.",
+      "Rebuilt the app for Android with Node.js, extending the platform's reach to a broader user base.",
       "Worked weekly sprint cycles, resolving 95%+ of reported issues before release milestones.",
     ],
   },
@@ -386,7 +387,7 @@ export const allProjects = [...dayProjects, ...nightProjects];
 /** The quant/finance direction — now grounded in a real, current role. */
 export const nightThesis = {
   title: "Where code meets capital",
-  body: "I'm already a Finance Developer at Q Wealth Partners and a CFM student at Waterloo — so I live at the intersection of engineering and markets, not just aspire to it. Now I'm deepening the quant side: data pipelines, modeling, and the math under the markets.",
+  body: "I'm already a Finance Developer at Quintessence Wealth and a CFM student at Waterloo — building trading-team infrastructure and quant tools on the Bloomberg Terminal, not just aspiring to it. Now I'm deepening the quant side: data pipelines, modeling, and the math under the markets.",
   vizCaption: "From noise to signal — a study in progress.",
 };
 
@@ -404,7 +405,7 @@ export const skills: SkillGroup[] = [
   { label: "Cloud / Tools", world: "day", items: ["Docker", "Kubernetes", "GitHub Actions", "Firebase", "Supabase", "Git"] },
   // NIGHT — Quant & Finance
   { label: "Quant / Data", world: "night", items: ["Python", "SQL", "MATLAB", "Pandas", "NumPy", "SciPy", "Matplotlib"] },
-  { label: "Finance", world: "night", items: ["Computing & Financial Mgmt (CFM)", "Financial modeling", "Real-time market data", "Tokenomics"] },
+  { label: "Finance", world: "night", items: ["Computing & Financial Mgmt (CFM)", "Bloomberg Terminal (BQNT)", "Financial modeling", "Real-time market data"] },
   { label: "Data engineering", world: "night", items: ["Streamlit", "Apache Airflow", "PostgreSQL", "REST APIs", "Selenium"] },
 ];
 
@@ -448,7 +449,7 @@ export const awards = [
 ];
 
 export const socials = [
-  { label: "GitHub", handle: "SpiritByte", href: "https://github.com/SpiritByte" },
+  { label: "GitHub", handle: "alexanderli07", href: "https://github.com/alexanderli07" },
   { label: "LinkedIn", handle: "alexanderli07", href: "https://www.linkedin.com/in/alexanderli07/" },
   { label: "Instagram", handle: "_alexanderli", href: "https://www.instagram.com/_alexanderli/" },
 ];
@@ -462,5 +463,5 @@ export const contact = {
 export const bridgeCopy = {
   kicker: "One person, two modes",
   title: "I write the code. I'm learning the markets.",
-  body: "By day I'm a builder — full-stack apps, AI/ML, and games 100,000+ people have played. By night I'm in finance — a Finance Developer at a wealth-management firm and a CFM student chasing the quant side. Flip the switch; both halves are real.",
+  body: "By day I'm a builder — full-stack apps, AI/ML, and games 100,000+ people have played. By night I'm in finance — a Finance Developer at Quintessence Wealth and a CFM student chasing the quant side. Flip the switch; both halves are real.",
 };

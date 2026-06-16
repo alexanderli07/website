@@ -1,4 +1,5 @@
 import { WorldToggle } from "./WorldToggle";
+import { SocialLinks } from "./Social";
 import { contact } from "../data/content";
 import { useWorld } from "../world/WorldContext";
 
@@ -28,6 +29,7 @@ export function Nav() {
           </nav>
 
           <div className="nav-cta">
+            <SocialLinks className="nav-social" />
             <a
               className="nav-link nav-resume"
               href={contact.resumeHref}

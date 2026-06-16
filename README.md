@@ -4,7 +4,7 @@ A personal portfolio built around a single idea: **one person, two modes.**
 A sun/moon switch (and a circular reveal) flips the whole site between two worlds:
 
 - ☀ **Day — Full-stack & AI:** the software/engineering side — apps, ML/AI, games (100,000+ visits).
-- ☾ **Night — Quant & Finance:** the markets side — the Finance Developer role at Q Wealth, CFM, business/quant work.
+- ☾ **Night — Quant & Finance:** the markets side — the Finance Developer role at Quintessence Wealth, CFM, business/quant work.
 
 The concept riffs on Alexander's own award-winning game *Opposite Odyssey* (the day/night
 mechanic) — so it can't be mistaken for a template. Flipping the world doesn't just recolor
@@ -57,14 +57,10 @@ Everything below uses only facts from your existing site. These are the spots to
 
 | What | Where |
 |------|-------|
-| **Q Wealth role details** — add 1–2 specific accomplishments + confirm location/dates | `experience` → Finance Developer in `src/data/content.ts` |
 | **Project images** — Alphia & SnaipShot use a monogram placeholder; add screenshots | `image: ""` in `src/data/content.ts` (drop files in `public/assets/images/`) |
-| **Your real résumé** — replace the placeholder PDF | `public/resume.pdf` (regenerate the placeholder with `node scripts/make-placeholder-resume.mjs`) |
 | **Project links** — add a live demo and/or GitHub repo per project | `links: []` in `src/data/content.ts` |
 | **MediScan real metrics** — add your true test accuracy / AUC (no fabricated numbers were added) | `mediscan.outcome` in `content.ts` |
-| **The "noise → signal" chart** is a *thematic illustration*, not a real result. Swap in a real eval when you have one | `src/components/SignalChart.tsx` |
 | **Optimize images** — several are 2–4 MB (`BAC.png`, `CarolTaverner.png`, `OppositeOdyssey.png`). Compress/resize to keep Lighthouse green | `public/assets/images/` |
-| **OG / social image** — currently your portrait | `index.html` (`og:image`) |
 
 ### Notes on what was intentionally changed
 - **Privacy:** your phone number and exact birthday (both public on the old site) were **left
