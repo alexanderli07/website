@@ -418,6 +418,15 @@ body[data-modal-open] .nav { opacity: 0; transform: translateY(-110%); pointer-e
 .exp-bullets li::before { content: "▹"; position: absolute; left: 0; color: var(--accent); }
 .exp-todo { color: var(--muted); font-style: italic; }
 @media (max-width: 680px) { .exp-item { grid-template-columns: 1fr; gap: 0.6rem; } }
+/* clickable nudge: there are more roles on the other side of the switch */
+.exp-flip-hint {
+  display: inline-flex; align-items: center; gap: 0.5rem; margin-top: 1.8rem;
+  font-size: 0.85rem; color: var(--muted); cursor: pointer;
+  background: none; border: 1px solid var(--border); border-radius: 999px; padding: 0.55rem 1rem;
+  transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease, transform 0.2s ease;
+}
+.exp-flip-hint:hover { color: var(--text); border-color: var(--accent); background: var(--surface); transform: translateY(-1px); }
+.exp-flip-hint .exp-flip-icon { color: var(--accent); font-size: 1rem; }
 
 /* =============================================================================
    AWARDS

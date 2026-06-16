@@ -91,8 +91,11 @@ export function WorldProvider({ children }: { children: ReactNode }) {
     if (!el) return;
     // reading layout here forces the new fonts to apply before we measure
     const newTop = docTop(el);
-    // keep the same depth into the section, clamped so a shorter section can't overshoot
-    const off = Math.max(0, Math.min(a.offset, Math.max(0, el.offsetHeight - 40)));
+    // Keep the exact same depth into the section. The offset can be slightly negative
+    // (the section's heading was sitting just under the fixed nav) — preserve that so we
+    // don't snap down by the nav's height. Only clamp the top end so a section that's
+    // shorter in the other world can't overshoot past its end.
+    const off = Math.min(a.offset, Math.max(0, el.offsetHeight - 40));
     const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
     const target = Math.max(0, Math.min(newTop + off, maxScroll));
     if (lenisRef.current) {
