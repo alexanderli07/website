@@ -13,7 +13,14 @@
     --red:     #a4211b;
     --serif: "Playfair Display", Georgia, serif;
     --mono:  "IBM Plex Mono", "Courier New", monospace;
-    --pieces: "Segoe UI Symbol", "Noto Sans Symbols 2", "DejaVu Sans", "Arial Unicode MS", sans-serif;
+    /* "Apple Symbols" is here for iOS and macOS, and it is load-bearing: every
+       other family in this list is Windows- or Linux-only, so an iPhone fell
+       through to system fallback and resolved the pawn (U+265F, the one piece
+       with an emoji presentation) to Apple Color Emoji. That is a colour bitmap
+       font — `color` and -webkit-text-stroke do nothing to it — so White's pawns
+       came out identical to Black's. Keep a text font that has these glyphs
+       ahead of any emoji fallback. */
+    --pieces: "Segoe UI Symbol", "Apple Symbols", "Noto Sans Symbols 2", "DejaVu Sans", "Arial Unicode MS", sans-serif;
   }
   *{ margin:0; padding:0; box-sizing:border-box; }
   /* overflow-x guard belongs on the root, not on body: on body it computes to
@@ -91,6 +98,20 @@
      so what it has to contrast against is the surface behind the control, not
      the control — and every focusable thing here sits on paper, including the
      ink-on-paper skip link and the buttons inside the dialogs' paper cards. */
+
+  /* ---------- symbols that are type, not pictures ----------
+     Everything listed here is a glyph meant to be set in ink and tinted by CSS.
+     Asking for the text presentation keeps it off the colour-emoji font, which
+     is a bitmap and ignores `color` — that is what made White's pawns identical
+     to Black's on iOS. The U+FE0E selectors in the markup are the mechanism that
+     works today; this is the CSS equivalent, and it inherits, so it also covers
+     glyphs injected by app.js.
+     Deliberately NOT listed: .lock and the win-screen handshake. Those two are
+     pictures and should stay in colour. */
+  .sq .pc, .t-pc, .bg, .bgx, .cover-bounty .bg, .nub-key,
+  .rc-doc, .rc-go, .fm-ico, .gs-half, .gs-piece{
+    font-variant-emoji: text;
+  }
 
   /* Visually hidden but still read out and still indexed. Clip-rect rather than
      display:none or visibility:hidden, both of which remove it from the

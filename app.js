@@ -127,7 +127,12 @@
   var PAWN_CUM = [1, 2, 3, 4, 5, 6, 8, 10];
   var MINOR_CUM = [2, 4, 7, 10];
   var ROOK_CUM = [3, 6];
-  var GLYPH = { 1: "♟", 2: "♞", 3: "♝", 4: "♜", 5: "♛", 6: "♚" };
+  /* The pawn carries U+FE0E, the text-presentation selector, written as an escape
+     so it is visible in source. U+265F is the only piece with an emoji form, and
+     without this an iPhone can still resolve it to Apple Color Emoji — a colour
+     bitmap font, which ignores `color`, so both sides came out identical. The
+     other five have no emoji form and need nothing. */
+  var GLYPH = { 1: "\u265F\uFE0E", 2: "♞", 3: "♝", 4: "♜", 5: "♛", 6: "♚" };
 
   /* =============== unlock state (persists) =============== */
   var LS_KEY = "gambit-unlocks";

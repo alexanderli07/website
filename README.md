@@ -116,6 +116,31 @@ into a mate or gives away a rook, that draws are detected without movegen
 noticing, that the incremental Zobrist key never drifts from a recomputation,
 and that a search stays inside its time budget.
 
+## Piece glyphs, and one iOS trap
+
+Both sides use the same chess characters, tinted by CSS: White is the glyph
+filled light with a dark stroke, Black is the same glyph in ink. That only
+works while the glyph comes from a TEXT font.
+
+U+265F, the pawn, is the one piece with an emoji presentation. Every family in
+the `--pieces` stack was Windows- or Linux-only, so an iPhone fell through to
+system fallback and resolved the pawn to Apple Color Emoji — a colour bitmap
+font, which ignores `color` and `-webkit-text-stroke`. Result: both sides drew
+the same dark pawn, and only the pawn. Two things prevent it, and both matter:
+
+- `"Apple Symbols"` is in the `--pieces` stack, so iOS has a text font that
+  actually contains these glyphs.
+- The pawn carries `U+FE0E`, the text-presentation selector (written as an
+  escape in `app.js` so it is visible), as do the arrow, envelope and scales in
+  the markup. `font-variant-emoji: text` covers the same ground in CSS.
+
+The lock and the win-screen handshake are deliberately left as colour emoji —
+they are pictures, not type.
+
+If a pawn ever renders as an empty box instead, no available text font has the
+glyph: give White the outline codepoints (U+2654–2659) instead of tinting the
+solid ones, so the two sides differ in shape rather than only in colour.
+
 ## Search
 
 `bestMove()` is a 4-ply negamax with alpha-beta, PVS, quiescence (captures,
