@@ -6,7 +6,7 @@
   "description": "Two Worlds — the personal portfolio of Alexander Li (day: builder/game-dev, night: ML/quant).",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "tsc -b && vite build && node scripts/prerender.mjs",
     "preview": "vite preview",
     "typecheck": "tsc -b --noEmit"
   },
