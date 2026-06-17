@@ -408,20 +408,20 @@ export const testimonials: Testimonial[] = [
     avatar: "/assets/images/Roosevelt.webp",
   },
   {
-    name: "Darren Roopnarain",
-    role: "Advisor — Junior Achievement Company",
-    // verbatim from the reference (alexanderli.rf.gd) — do not paraphrase
-    quote:
-      "As an advisor in the Junior Achievement program, I've observed Alex excel in his role as President of our Company, Tea Time. Alex is one of the most impressive individuals I have met. In only Grade 11, Alex has accomplished more in a few years than most accomplished in double that time. Alex brings a vast wealth of experience and knowledge to our company both from his previous JA experiences and fro his other activities. He is a well respected and capable leader who his peers have a get deal of respect for and whom they look up too.",
-    avatar: "/assets/images/Darren.webp",
-  },
-  {
     name: "Carol Taverner",
     role: "National Public Relations Officer @ ACTRA",
     // verbatim from the reference (alexanderli.rf.gd) — do not paraphrase
     quote:
       "Alexander Li is a dependable, trustworthy person who thrives in demanding and fast-paced environments. From witnessing his strategic top-tier hockey skills, to marveling at his award-winning video game projects, I can attest firsthand to his kind-hearted nature. Regardless of the path he chooses, Alexander is bound for success in every endeavor he undertakes.",
     avatar: "/assets/images/CarolTaverner.webp",
+  },
+  {
+    name: "Darren Roopnarain",
+    role: "Advisor — Junior Achievement Company",
+    // verbatim from the reference (alexanderli.rf.gd) — do not paraphrase
+    quote:
+      "As an advisor in the Junior Achievement program, I've observed Alex excel in his role as President of our Company, Tea Time. Alex is one of the most impressive individuals I have met. In only Grade 11, Alex has accomplished more in a few years than most accomplished in double that time. Alex brings a vast wealth of experience and knowledge to our company both from his previous JA experiences and fro his other activities. He is a well respected and capable leader who his peers have a get deal of respect for and whom they look up too.",
+    avatar: "/assets/images/Darren.webp",
   },
 ];
 

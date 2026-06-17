@@ -566,9 +566,10 @@ body[data-modal-open] .nav { opacity: 0; transform: translateY(-110%); pointer-e
    ========================================================================== */
 .testi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.2rem; }
 @media (max-width: 900px) { .testi-grid { grid-template-columns: 1fr; } }
-.testimonial { padding: 1.6rem; border-radius: var(--radius); border: 1px solid var(--border); background: var(--surface); }
+.testimonial { padding: 1.6rem; border-radius: var(--radius); border: 1px solid var(--border); background: var(--surface); display: flex; flex-direction: column; }
 .testimonial p { color: var(--text-soft); font-style: italic; }
-.testimonial .who { display: flex; align-items: center; gap: 0.8rem; margin-top: 1.2rem; }
+/* push the avatar row to the bottom so it aligns across equal-height cards */
+.testimonial .who { display: flex; align-items: center; gap: 0.8rem; margin-top: auto; padding-top: 1.2rem; }
 .testimonial .who img { width: 46px; height: 46px; border-radius: 50%; object-fit: cover; border: 1px solid var(--border); }
 .testimonial .who b { display: block; font-family: var(--font-head); }
 .testimonial .who span { color: var(--muted); font-size: 0.8rem; }
