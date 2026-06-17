@@ -402,22 +402,25 @@ export const testimonials: Testimonial[] = [
   {
     name: "Roosevelt Fernandes",
     role: "Relationship Manager @ Royal Bank of Canada",
+    // verbatim from the reference (alexanderli.rf.gd) — do not paraphrase
     quote:
-      "Alex was VP of Technology in our Company Program. He's forward-thinking and strategic, not afraid to challenge popular thinking — and what makes him great is his ability to rally others around his ideas.",
+      "Alex was the VP of technology for the last year in our Company Program as Sproutz. I have previously nominated him for the VP of Tech in 2022-2023 and he moved on to the next stage of the Award process. He definitely deserved the accolades and the nomination. In my recollection Alex is forward thinking and very strategic. He is not afraid to go against the grain and to challenge popular thinking. These are attributes of a fair leader. What makes him great is his ability to work with others and rally others around his thinking.",
     avatar: "/assets/images/Roosevelt.webp",
   },
   {
     name: "Darren Roopnarain",
     role: "Advisor — Junior Achievement Company",
+    // verbatim from the reference (alexanderli.rf.gd) — do not paraphrase
     quote:
-      "Alex is one of the most impressive individuals I have met. In only Grade 11, he has accomplished more in a few years than most accomplish in double the time. He is a well-respected and capable leader whom his peers look up to.",
+      "As an advisor in the Junior Achievement program, I've observed Alex excel in his role as President of our Company, Tea Time. Alex is one of the most impressive individuals I have met. In only Grade 11, Alex has accomplished more in a few years than most accomplished in double that time. Alex brings a vast wealth of experience and knowledge to our company both from his previous JA experiences and fro his other activities. He is a well respected and capable leader who his peers have a get deal of respect for and whom they look up too.",
     avatar: "/assets/images/Darren.webp",
   },
   {
     name: "Carol Taverner",
     role: "National Public Relations Officer @ ACTRA",
+    // verbatim from the reference (alexanderli.rf.gd) — do not paraphrase
     quote:
-      "Alexander is dependable and trustworthy, and thrives in demanding, fast-paced environments — from strategic top-tier hockey to award-winning video-game projects. He is bound for success.",
+      "Alexander Li is a dependable, trustworthy person who thrives in demanding and fast-paced environments. From witnessing his strategic top-tier hockey skills, to marveling at his award-winning video game projects, I can attest firsthand to his kind-hearted nature. Regardless of the path he chooses, Alexander is bound for success in every endeavor he undertakes.",
     avatar: "/assets/images/CarolTaverner.webp",
   },
 ];
