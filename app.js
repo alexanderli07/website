@@ -134,6 +134,78 @@
      other five have no emoji form and need nothing. */
   var GLYPH = { 1: "\u265F\uFE0E", 2: "♞", 3: "♝", 4: "♜", 5: "♛", 6: "♚" };
 
+  var PIECE_LETTER = { 1: "p", 2: "n", 3: "b", 4: "r", 5: "q", 6: "k" };
+
+  /* =============== piece proportions =============== */
+  /* The pieces are font glyphs, and symbol fonts do not agree on how to draw
+     them. Segoe UI Symbol (Windows) is the reference below. Apple Symbols — the
+     only family in our stack that exists on macOS and iOS — draws the king and
+     queen flatter, which is the "squished" look on those platforms.
+     No per-platform number is worth hard-coding here: we cannot test every font,
+     and guessing is what produced two rounds of this bug already. Instead measure
+     the glyphs AS THIS DEVICE RENDERS THEM and stretch each piece back to the
+     reference proportion. On Windows every correction lands at 1 and nothing
+     moves; anywhere else it self-tunes.
+     Reference is width/height of the inked glyph at 86px in Segoe UI Symbol. */
+  var REF_ASPECT = { p: 0.710, n: 0.844, b: 0.667, r: 0.885, q: 1.094, k: 0.845 };
+  var ASPECT_TOLERANCE = 0.05;   /* inside this, leave the glyph alone */
+
+  /** Ink bounding box of one glyph, in the font the page actually resolves. */
+  function inkBox(ctx, ch, size, family) {
+    var S = ctx.canvas.width;
+    ctx.clearRect(0, 0, S, S);
+    ctx.fillStyle = "#000";
+    ctx.font = size + "px " + family;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText(ch, S / 2, S / 2);
+    var d = ctx.getImageData(0, 0, S, S).data;
+    var minX = S, maxX = -1, minY = S, maxY = -1;
+    for (var i = 0; i < S * S; i++) {
+      if (d[i * 4 + 3] > 40) {
+        var x = i % S, y = (i / S) | 0;
+        if (x < minX) minX = x;
+        if (x > maxX) maxX = x;
+        if (y < minY) minY = y;
+        if (y > maxY) maxY = y;
+      }
+    }
+    if (maxX < 0) return null;                    /* nothing drew */
+    return { w: maxX - minX + 1, h: maxY - minY + 1 };
+  }
+
+  /**
+   * Compare each piece with REF_ASPECT and publish a scaleY that restores it.
+   * A glyph drawn too wide for its height reads as squashed, so stretch it
+   * vertically by exactly the amount it is out. Written to the root element as
+   * --pcy-<letter>; the stylesheet applies it per piece type.
+   */
+  function normalisePieces() {
+    var canvas = document.createElement("canvas");
+    canvas.width = canvas.height = 160;
+    var ctx = canvas.getContext && canvas.getContext("2d", { willReadFrequently: true });
+    if (!ctx) return null;
+    var family = getComputedStyle(document.documentElement)
+      .getPropertyValue("--pieces").trim();
+    if (!family) return null;
+    var report = {};
+    for (var t = 1; t <= 6; t++) {
+      var letter = PIECE_LETTER[t];
+      var box = inkBox(ctx, GLYPH[t], 110, family);
+      if (!box || !box.h) continue;
+      var ratio = (box.w / box.h) / REF_ASPECT[letter];
+      /* ratio > 1: this font drew the piece wider relative to its height than the
+         reference — squashed — so stretch Y back by that factor */
+      var scaleY = Math.abs(ratio - 1) < ASPECT_TOLERANCE ? 1 : ratio;
+      /* Never distort beyond a quarter. Past that the font is drawing something
+         so different that stretching would look worse than leaving it alone. */
+      scaleY = Math.max(0.8, Math.min(1.25, scaleY));
+      document.documentElement.style.setProperty("--pcy-" + letter, scaleY.toFixed(3));
+      report[letter] = { measured: +(box.w / box.h).toFixed(3), scaleY: scaleY };
+    }
+    return report;
+  }
+
   /* =============== unlock state (persists) =============== */
   var LS_KEY = "gambit-unlocks";
   function blankState() { return { pawns: 0, minors: 0, rooks: 0, queen: 0, mate: false, all: false }; }
@@ -393,7 +465,12 @@
         if (hintSquares && (hintSquares[0] === s || hintSquares[1] === s)) cls += " hint";
         sqEls[s].className = cls;
         pcEls[s].textContent = p ? GLYPH[p > 0 ? p : -p] : "";
-        pcEls[s].className = p ? "pc " + (p > 0 ? "w" : "b") : "pc";
+        /* the pt-* class carries the piece TYPE, which the proportion
+           correction below keys off. Not a bare letter: .pc.b already means
+           black, and 'b' would collide with bishop. */
+        pcEls[s].className = p
+          ? "pc " + (p > 0 ? "w" : "b") + " pt-" + PIECE_LETTER[p > 0 ? p : -p]
+          : "pc";
       }
     }
   }
@@ -1271,10 +1348,21 @@
     },
     unlockAll: unlockAll,
     /* instant, not the animated reseal: callers assert straight after */
-    reset: function () { hardReset(false); }
+    reset: function () { hardReset(false); },
+    /* what this device measured, and the correction applied per piece — the only
+       way to see on a Mac or iPhone what the fix actually decided */
+    pieceMetrics: normalisePieces
   };
 
   /* =============== init =============== */
+  /* Before the first render, so pieces are never drawn at the wrong proportion
+     and then corrected visibly. The pieces come from a system font, so nothing
+     needs to load first — but re-measure once fonts settle anyway, in case the
+     family resolved differently than it did on the first paint. */
+  normalisePieces();
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(normalisePieces).catch(function () {});
+  }
   applyUnlocks(false);
   sizeFx();
   render();
