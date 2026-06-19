@@ -835,23 +835,8 @@
     font-size: calc(var(--board, 420px) / 8 * 0.78);
     line-height: 1;
     pointer-events: none;
-    /* translateY is the optical centring; scaleY is the proportion correction
-       app.js measures for whatever symbol font this device resolved (see
-       normalisePieces). It is 1 wherever the font already matches the reference,
-       so on Windows this is exactly the transform it always was — and since the
-       translate already put every glyph on its own layer, the scale costs no
-       extra compositing. */
-    transform: translateY(-2%) scaleY(var(--pcy, 1));
+    transform: translateY(-2%);
   }
-  /* each piece takes its own correction; the fallback keeps them at 1 if the
-     measurement never ran (no canvas, or the glyphs did not render) */
-  .sq .pc.pt-p{ --pcy: var(--pcy-p, 1); }
-  .sq .pc.pt-n{ --pcy: var(--pcy-n, 1); }
-  .sq .pc.pt-b{ --pcy: var(--pcy-b, 1); }
-  .sq .pc.pt-r{ --pcy: var(--pcy-r, 1); }
-  .sq .pc.pt-q{ --pcy: var(--pcy-q, 1); }
-  .sq .pc.pt-k{ --pcy: var(--pcy-k, 1); }
-
   .sq .pc.w{
     color: #fbf4e0;
     -webkit-text-stroke: 1px rgba(36,26,15,.9);
