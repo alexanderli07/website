@@ -169,6 +169,12 @@
     flex: none;
   }
   .topnav .brand .dot{ color: var(--red); }
+  /* One typeface for the whole lockup — mixing mono into a 19px nav item reads
+     busy at this size. The hierarchy comes from weight and colour instead: the
+     name steps back to walnut at 700, the wordmark keeps ink at 900, and the red
+     stays on the full stop so there is still only one accent in the bar. */
+  .topnav .brand .bn{ font-weight: 700; color: var(--walnut); }
+  .topnav .brand .bx{ font-weight: 700; color: var(--walnut-3); margin: 0 .04em; }
   .nav-links{ display: flex; gap: 6px; flex-wrap: wrap; min-width: 0; }
   /* These used to snap a 1px red rectangle around the label on hover, with no
      transition declared at all — an outlined box appearing instantly, which read
@@ -279,6 +285,13 @@
   @media (max-width: 720px){
     .topnav{ flex-wrap: wrap; gap: 6px 10px; padding: 6px 12px 5px; }
     .topnav .brand{ font-size: 15px; }
+    /* Below ~360px the name no longer fits beside the two action buttons: the
+       brand went 68px -> 114px when ALEX: was added, which pushed the bar to the
+       three ragged rows the comment above says to avoid. Drop back to the bare
+       wordmark there — the document title still carries the name. */
+    @media (max-width: 360px){
+      .topnav .brand .bn, .topnav .brand .bx{ display: none; }
+    }
     .nav-right{ margin-left: auto; gap: 6px; }
     .nav-links{
       order: 3; flex: 1 0 100%;
