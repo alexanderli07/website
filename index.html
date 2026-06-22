@@ -163,6 +163,46 @@
     <div class="board-wrap">
       <div id="board" aria-label="Chessboard — click a white piece, then a highlighted square, to move"></div>
       <canvas id="fx" aria-hidden="true"></canvas>
+      <!-- THE WAITING PLAQUE. Static markup, because the window it covers is the
+           one BEFORE app.js exists: #board is 64 buttons built by buildBoard and
+           only checkered by renderBoard, so until the scripts run the arena was a
+           big empty ruled square — which one background-image on #board now
+           paints as an empty printed diagram instead.
+           Not a dialog and not a layer over the page: z-index 4 keeps it inside
+           the board's own footprint, under #fx (5) and .sq-stamp (6) and far
+           under .cover (140); pointer-events:none means the squares are
+           clickable straight through it; and nothing in it is focusable while it
+           is invisible. Both cards start invisible behind DELAYED animations, so
+           a page ready in 200ms paints neither of them.
+           The LAST line of app.js's init removes this — its disappearance is
+           proof the page actually works, not merely that a script downloaded.
+           Inside .arena on purpose: <noscript> and @media print already hide
+           .arena wholesale, so scripting-off and paper both cost nothing here
+           and need no new selector. -->
+      <div class="setting-up" id="setting-up">
+        <div class="su-plaque">
+          <!-- aria-hidden, and deliberately NOT a live region: a caption that
+               usually never exists has no business being announced and then
+               retracted a tenth of a second later. -->
+          <span class="su-note" aria-hidden="true">
+            <span class="su-kicker">Round 1 &middot; Board 1</span>
+            <span class="su-line">Setting the position</span>
+            <span class="su-rule"></span>
+          </span>
+          <!-- Six seconds in, the scripts are not coming. This is the only thing
+               on the page that survives app.js failing while scripting is
+               ENABLED — the case <noscript> cannot reach. visibility:hidden
+               until its keyframe flips it, so until then it is out of the tab
+               order AND the accessibility tree: nobody on a working page should
+               ever hear this. -->
+          <p class="su-fallback">
+            The board has not arrived &mdash; something is blocking the scripts.
+            The record itself does not need them:
+            <a href="resume.pdf">the r&eacute;sum&eacute; (PDF)</a> &middot;
+            <a href="mailto:a565li@uwaterloo.ca">a565li@uwaterloo.ca</a>
+          </p>
+        </div>
+      </div>
     </div>
     <div class="tray" id="tray-player" aria-label="Pieces you have captured — hover one to see what it unsealed"></div>
   </div>

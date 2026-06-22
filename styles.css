@@ -832,6 +832,19 @@
     outline: 3px double var(--walnut); outline-offset: 3px;
     box-shadow: 0 14px 34px -14px rgba(36,26,15,.4);
     user-select: none;
+    /* The board paints itself as a printed diagram from CSS alone, with no script
+       at all — so the pre-JS shell is a chessboard rather than an empty frame,
+       and a page whose scripts die shows a board instead of a hole.
+       PHASE IS LOAD-BEARING: renderBoard gives the top-left square .light
+       (r=7, f=0 -> ((7-7)+0) % 2 === 0), and a conic tile puts its FIRST colour
+       in the top-RIGHT quadrant — so the first colour named here is the DARK one.
+       Each tile covers a 2x2 block of squares, hence 25%.
+       Unconditional rather than scoped to a boot class: once the 64 .sq buttons
+       exist they are opaque and cover this exactly, so it is only ever seen
+       before them. Both colours are .sq.light / .sq.dark verbatim — keep all
+       four in step. */
+    background-image: repeating-conic-gradient(#c8a878 0 25%, #f3e8cf 0 50%);
+    background-size: 25% 25%;
   }
   .sq{
     position: relative;
@@ -907,6 +920,138 @@
     78%{ opacity: 1; }
     100%{ opacity: 0; transform: translate(-50%,-52%) rotate(-12deg) scale(.96); }
   }
+
+  /* ============================================================
+     THE BOARD BEFORE THE SCRIPTS — "SETTING THE POSITION"
+     Two things, and neither is a curtain over the page. #board above is already
+     a full diagram; this is the arbiter's card sitting on it while the scripts
+     land, plus the beat the pieces settle on once they have. Nothing here waits
+     on a font, an image, or a timer.
+     ============================================================ */
+  .setting-up{
+    position: absolute; inset: 0; z-index: 4;   /* under #fx (5), .sq-stamp (6) */
+    display: flex; align-items: center; justify-content: center;
+    padding: 0 14px;
+    pointer-events: none;
+  }
+  .su-plaque{
+    position: relative;
+    width: min(calc(var(--board, 420px) * .78), 320px);
+    display: flex; flex-direction: column; align-items: center;
+    padding: 13px 15px 14px;
+    text-align: center;
+    /* the rails' own box: 1px walnut, paper, a hard offset shadow. A new frame
+       here would be a fourth kind of card on a page that has three. No blur. */
+    background: rgba(244,236,217,.94);
+    border: 1px solid var(--walnut);
+    box-shadow: 3px 3px 0 rgba(91,58,36,.16);
+    /* THE WHOLE MECHANISM: a 600ms delay on an element app.js deletes. Ready in
+       200ms and this never paints, so there is no "skip the loader" branch to
+       get wrong — the fast path IS the animation never starting. The appearance
+       is a snap, not a fade, so opacity is only ever 0 or 1, which is what lets
+       suOut hard-code from{opacity:1} without ever popping. */
+    opacity: 0;
+    animation: suIn 1ms linear 600ms forwards;
+  }
+  @keyframes suIn{ to{ opacity: 1; } }
+
+  .su-note{ display: flex; flex-direction: column; align-items: center; gap: 7px; }
+  .su-kicker{
+    font-family: var(--mono); font-size: 9px; font-weight: 600;
+    letter-spacing: .26em; text-transform: uppercase; color: var(--walnut-2);
+  }
+  /* Mono, not Playfair, deliberately: the plaque only exists while the load is
+     slow, which is exactly when the webfonts are still in flight (display=swap).
+     A display-serif line would visibly re-set itself mid-wait; mono in the
+     Courier fallback is a shift you cannot see. This is .status-line's register,
+     which is also the right voice — the plaque IS a status. */
+  .su-line{
+    font-family: var(--mono); font-weight: 600;
+    font-size: clamp(11px, calc(var(--board, 420px) / 26), 12.5px);
+    letter-spacing: .1em; color: var(--ink);
+  }
+  /* The site's one gesture for a line being ruled (.nav-links a::after) used as
+     an honest indeterminate bar: it claims no percentage, only that work is
+     still happening. Ruled on from the left, wiped away to the right — the
+     origin flips at 54%->55% while scaleX is 1, so the switch is invisible.
+     FOUR runs, not infinite, for the reason .sq.check is capped at three:
+     nothing here animates past five seconds without a stop. suRest then pins the
+     pen at full width. The page's single red accent lives here, in the waiting,
+     and not in the set: red means pending, ink means game. */
+  .su-rule{
+    display: block; width: 118px; height: 2px; background: var(--red);
+    transform: scaleX(0); transform-origin: left center;
+    animation: suRule 1.5s cubic-bezier(.2,.7,.2,1) 600ms 4,
+               suRest 1ms   linear                  6600ms forwards;
+  }
+  @keyframes suRule{
+    0%, 4%    { transform: scaleX(0); transform-origin: left center; }
+    46%, 54%  { transform: scaleX(1); transform-origin: left center; }
+    55%       { transform: scaleX(1); transform-origin: right center; }
+    96%, 100% { transform: scaleX(0); transform-origin: right center; }
+  }
+  @keyframes suRest{ to{ transform: scaleX(1); transform-origin: left center; } }
+
+  /* THE FAILURE CARD. Absolutely positioned off the plaque's bottom edge, so it
+     costs no layout while hidden and nothing moves when it arrives. Its own
+     paper, because it hangs over the board's dark squares and 10.5px mono on
+     #c8a878 is not readable.
+     `visibility`, not opacity alone: hidden keeps it and its two links out of the
+     accessibility tree AND the tab order. With `forwards` and no backwards fill,
+     nothing applies during the 6s delay, so the declared hidden holds — then the
+     `from` frame flips it visible and it fades. */
+  .su-fallback{
+    position: absolute; top: calc(100% + 12px); left: -18px; right: -18px;
+    padding: 10px 14px 11px;
+    background: rgba(244,236,217,.94);
+    border: 1px solid var(--walnut);
+    box-shadow: 3px 3px 0 rgba(91,58,36,.16);
+    font-family: var(--mono); font-size: 10.5px; line-height: 1.7;
+    color: var(--walnut-2);
+    pointer-events: auto;                      /* the wrapper turned them off */
+    visibility: hidden; opacity: 0;
+    animation: suFall .4s ease 6s forwards;
+  }
+  @keyframes suFall{
+    from{ visibility: visible; opacity: 0; }
+    to  { visibility: visible; opacity: 1; }
+  }
+  .su-fallback a{ color: var(--ink); text-decoration: underline; text-underline-offset: 2px; }
+  .su-fallback a:hover{ color: var(--red); }
+
+  /* THE EXIT, only ever added when the plaque was genuinely on screen — app.js
+     asks the element's own animation clock. Lifted on coverOut's curve, and the
+     -2% is stampIn's terminal frame: things leave this board that way. */
+  .setting-up.going .su-plaque{
+    animation: suOut .2s cubic-bezier(.4,.03,.7,.2) both;
+  }
+  @keyframes suOut{
+    from{ opacity: 1; transform: translateY(0) scale(1); }
+    to  { opacity: 0; transform: translateY(-2%) scale(.97); }
+  }
+
+  /* ---------- THE SET ----------
+     Not a curtain going up: the pieces sitting down. Every glyph is ALREADY on
+     its final square when this starts — render() has run, the handlers are
+     bound, legalCache is populated, and the glyphs are pointer-events:none — and
+     nothing here touches opacity, so reading and clicking the board are delayed
+     by exactly zero. All that is staggered is landTap, the 220ms settle a real
+     move already gets, on the 70ms beat applyUnlocks uses for a reveal cascade.
+     buildBoard appends in visual order, so children 1-8 are rank 8: black's back
+     rank settles first and YOURS last, a beat before you are asked to move. Only
+     the four ranks that hold pieces get a beat; spending one on each empty middle
+     rank would buy two dead beats in the middle of the ripple.
+     NO FILL-MODE, for the reason the tray chips document: a filled animation
+     outranks the cascade AND inline styles, and slide() moves a piece by writing
+     el.style.transform while settleGlyph clears transition and transform but
+     never animation — a filled landTap would silently swallow the FLIP.
+     :not(.landed) matters too: this is (1,4,0) and would otherwise swallow the
+     land tap of a real move played inside the window, which a returning visitor
+     can do because they get no cover. */
+  #board.setting .sq .pc:not(.landed)                 { animation: landTap .22s ease-out; }
+  #board.setting .sq:nth-child(n+9)  .pc:not(.landed) { animation-delay:  70ms; }  /* rank 7 */
+  #board.setting .sq:nth-child(n+49) .pc:not(.landed) { animation-delay: 140ms; }  /* rank 2 */
+  #board.setting .sq:nth-child(n+57) .pc:not(.landed) { animation-delay: 210ms; }  /* rank 1 */
 
   .status-line{
     margin: 0; min-width: 0;
@@ -1844,6 +1989,24 @@
     /* the reseal keeps its stagger but not the flip; app.js also skips the
        cascade entirely when this is set, so this is the belt to that braces */
     .ucard.sealing .u-front{ animation: none; }
+
+    /* ---- the waiting plaque and the set ----
+       app.js also refuses to add .setting when this query matches, and takes the
+       instant plaque removal, so these are the belt to that braces.
+       suIn and suFall are deliberately NOT listed. They are opacity and
+       visibility only — no travel — and they are not decoration: the 600ms delay
+       is HOW the plaque knows whether it is needed at all, and the 6s fade is the
+       only escape hatch when the scripts never arrive. Killing them would either
+       pin the plaque invisible and hide that message from slow reduced-motion
+       visitors forever, or pin it visible and flash it at every fast one. Both
+       invert the rule. Keep the state, drop the motion — and the motion here is
+       the travel: the pen stops travelling and rests at full width, and the
+       pieces just sit there instead of sitting down. Both .pc forms are named
+       because a media query adds no specificity and (1,3,0) never beats (1,4,0). */
+    .su-rule{ animation: none; transform: scaleX(1); transform-origin: left center; }
+    .setting-up.going .su-plaque{ animation: none; }
+    #board.setting .sq .pc,
+    #board.setting .sq .pc:not(.landed){ animation: none; }
     /* freeze the stamp, don't hide it: the rule here is keep the state, drop the
        motion, and `opacity: 0` inverted that */
     .sq-stamp{ animation: none; }

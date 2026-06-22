@@ -538,6 +538,53 @@
     }
   }
 
+  /* =============== the board sets itself =============== */
+  /* index.html ships #setting-up inside .board-wrap, because the window it covers
+     is the one BEFORE this file exists. Two functions: one takes the plaque away,
+     one settles the board. Neither waits on a timer, a font, an image or the
+     network — the only signal is the last line of init, which is the board
+     genuinely being set. */
+  var setupRun = false;
+
+  /* Removing the plaque is the LAST thing init does, on purpose: its
+     disappearance is then a liveness proof — this file ran to the end — rather
+     than a "a script downloaded" proof. That is what covers app.js loading but
+     throwing. */
+  function clearWaiting() {
+    var n = $("setting-up");
+    if (!n || !n.parentNode) return;
+    /* Was it ever actually on screen? The plaque's OWN animation clock is the
+       honest answer: it starts when the element is first styled, not when this
+       file ran, and its keyframe does not begin until 600ms. Under that, nothing
+       was ever painted and there is nothing to animate away — take it out in one
+       frame. No getAnimations support falls back to the same instant path, which
+       is a hard cut, acceptable in a design whose buttons press flat. */
+    var p = n.querySelector(".su-plaque");
+    var a = (p && p.getAnimations) ? p.getAnimations()[0] : null;
+    var seen = !!(a && typeof a.currentTime === "number" && a.currentTime >= 600);
+    if (!seen || reduced) { n.parentNode.removeChild(n); return; }
+    n.classList.add("going");
+    setTimeout(function () { if (n.parentNode) n.parentNode.removeChild(n); }, 200);
+  }
+
+  /* The set is a reward for arriving, never a tax: it runs AFTER the one gate
+     this page has, over a board that is already live and already correct.
+     Removing one class cancels all four beats in a single frame, which is exactly
+     what the first click does. */
+  function startSetup() {
+    if (setupRun || reduced) return;      /* once per load, whichever path wins */
+    setupRun = true;
+    boardEl.classList.add("setting");
+    setTimeout(endSetup, 520);            /* the last beat ends at 430ms */
+  }
+  /* MUST run before any slide(): there is no fill-mode, so nothing holds a
+     transform after the 220ms — but a landTap still LIVE outranks the inline
+     transform slide() is about to write, and settleGlyph clears transition and
+     transform, never animation. */
+  function endSetup() {
+    boardEl.classList.remove("setting");
+  }
+
   /* =============== capture -> unlock plumbing =============== */
   /* black pawns still standing — drives the promotion top-up below */
   function blackPawnsLeft() {
@@ -646,6 +693,7 @@
 
   /* =============== move flow =============== */
   function afterPlayerMove(m, instantBot) {
+    endSetup();          /* a live landTap would outrank slide()'s inline transform */
     clearHint();
     sel = -1;
     sans.push(san(game, m));
@@ -797,6 +845,7 @@
   }
 
   function onSquareClick(e) {
+    endSetup();          /* first touch cancels all four beats in one frame */
     var s = +e.currentTarget.dataset.s;
     if (gameOver || game.turn !== WHITE) return;
     if (sel >= 0) {
@@ -1104,6 +1153,7 @@
       if (coverPrev && coverPrev.focus) coverPrev.focus();
       coverPrev = null;
       syncScrollLock();
+      startSetup();      /* the sheet lifts; the position is set underneath */
     };
     if (reduced) { finish(); return; }
     /* let the sheet lift away before it leaves the DOM flow */
@@ -1270,6 +1320,16 @@
       };
     },
     unlockAll: unlockAll,
+    /* Replay the set on demand. On a warm cache it is over in 430ms and the
+       plaque never paints at all, which is exactly how it rots. To see the
+       PLAQUE, throttle to slow 4G with the cache off, or block app.js. */
+    setBoard: function () {
+      boardEl.classList.remove("setting");
+      void boardEl.offsetWidth;        /* commit, so the beat restarts */
+      setupRun = false;
+      startSetup();
+      return true;
+    },
     /* instant, not the animated reseal: callers assert straight after */
     reset: function () { hardReset(false); }
   };
@@ -1278,4 +1338,8 @@
   applyUnlocks(false);
   sizeFx();
   render();
+  clearWaiting();      /* the board is drawn; the plaque has nothing left to say */
+  /* No cover means no gate, so set the board now. With a cover, hideCover owns
+     the call — the set lives AFTER the only gate, never before it. */
+  if ($("cover").hidden) startSetup();
 })();
