@@ -40,7 +40,7 @@ export interface Job {
   org: string;
   location: string;
   /** Work arrangement — how the role was carried out, independent of company HQ. */
-  arrangement?: "In person" | "Hybrid" | "Remote";
+  arrangement?: "On site" | "Hybrid" | "Remote";
   period: string;
   current?: boolean;
   bullets: string[];
@@ -104,7 +104,7 @@ export const experience: Job[] = [
     role: "President / VP of Information Technology",
     org: "JA Company Program",
     location: "Brampton, ON",
-    arrangement: "In person",
+    arrangement: "On site",
     period: "Oct 2021 – Jun 2025",
     world: "night",
     bullets: [
@@ -144,7 +144,7 @@ export const experience: Job[] = [
     role: "STEAM Instructor",
     org: "City of Brampton",
     location: "Brampton, ON",
-    arrangement: "In person",
+    arrangement: "On site",
     period: "Oct 2022 – Sep 2025",
     world: "day",
     bullets: [
@@ -156,7 +156,7 @@ export const experience: Job[] = [
     role: "Founder & President",
     org: "Robotics Club & Team",
     location: "Brampton, ON",
-    arrangement: "In person",
+    arrangement: "On site",
     period: "Sep 2023 – Jun 2025",
     world: "day",
     bullets: [
