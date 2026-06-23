@@ -945,15 +945,14 @@
     background: rgba(244,236,217,.94);
     border: 1px solid var(--walnut);
     box-shadow: 3px 3px 0 rgba(91,58,36,.16);
-    /* THE WHOLE MECHANISM: a 600ms delay on an element app.js deletes. Ready in
-       200ms and this never paints, so there is no "skip the loader" branch to
-       get wrong — the fast path IS the animation never starting. The appearance
-       is a snap, not a fade, so opacity is only ever 0 or 1, which is what lets
-       suOut hard-code from{opacity:1} without ever popping. */
-    opacity: 0;
-    animation: suIn 1ms linear 600ms forwards;
+    /* Visible from the first paint, deliberately. This used to hide behind a
+       600ms delay so a fast page never showed it — but the page is ready in
+       ~40ms warm, so in practice nobody ever saw it. app.js now holds it for a
+       minimum instead (WAIT_MIN), and because this card is pointer-events:none
+       over a board that is already live, holding it costs no interactivity — it
+       is a beat, not a gate. */
+    opacity: 1;
   }
-  @keyframes suIn{ to{ opacity: 1; } }
 
   .su-note{ display: flex; flex-direction: column; align-items: center; gap: 7px; }
   .su-kicker{
@@ -981,8 +980,10 @@
   .su-rule{
     display: block; width: 118px; height: 2px; background: var(--red);
     transform: scaleX(0); transform-origin: left center;
-    animation: suRule 1.5s cubic-bezier(.2,.7,.2,1) 600ms 4,
-               suRest 1ms   linear                  6600ms forwards;
+    /* starts with the card now that the card starts with the page; four runs
+       still take it to 6s, where suRest pins the pen */
+    animation: suRule 1.5s cubic-bezier(.2,.7,.2,1) 0s 4,
+               suRest 1ms   linear                  6s  forwards;
   }
   @keyframes suRule{
     0%, 4%    { transform: scaleX(0); transform-origin: left center; }
@@ -1993,16 +1994,14 @@
     /* ---- the waiting plaque and the set ----
        app.js also refuses to add .setting when this query matches, and takes the
        instant plaque removal, so these are the belt to that braces.
-       suIn and suFall are deliberately NOT listed. They are opacity and
-       visibility only — no travel — and they are not decoration: the 600ms delay
-       is HOW the plaque knows whether it is needed at all, and the 6s fade is the
-       only escape hatch when the scripts never arrive. Killing them would either
-       pin the plaque invisible and hide that message from slow reduced-motion
-       visitors forever, or pin it visible and flash it at every fast one. Both
-       invert the rule. Keep the state, drop the motion — and the motion here is
-       the travel: the pen stops travelling and rests at full width, and the
-       pieces just sit there instead of sitting down. Both .pc forms are named
-       because a media query adds no specificity and (1,3,0) never beats (1,4,0). */
+       suFall is deliberately NOT listed. It is visibility and opacity only — no
+       travel — and it is not decoration: it is the only escape hatch when the
+       scripts never arrive, so killing it would hide that message from slow
+       reduced-motion visitors forever. That inverts the rule.
+       Keep the state, drop the motion — and the motion here is the travel: the
+       pen stops travelling and rests at full width, and the pieces just sit there
+       instead of sitting down. Both .pc forms are named because a media query
+       adds no specificity and (1,3,0) never beats (1,4,0). */
     .su-rule{ animation: none; transform: scaleX(1); transform-origin: left center; }
     .setting-up.going .su-plaque{ animation: none; }
     #board.setting .sq .pc,
