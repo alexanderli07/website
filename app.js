@@ -538,68 +538,16 @@
     }
   }
 
-  /* =============== the board sets itself =============== */
-  /* index.html ships #setting-up inside .board-wrap, because the window it covers
-     is the one BEFORE this file exists. Two functions: one takes the plaque away,
-     one settles the board. Neither waits on a timer, a font, an image or the
-     network — the only signal is the last line of init, which is the board
-     genuinely being set. */
+  /* The intro curtain's markup, kept so it can be replayed. The whole thing is
+     over in 1.6s and then deleted, which is exactly how a feature like this
+     rots — __gambit.replayIntro() is how you look at it again. */
+  var introHTML = "";
+
+  /* =============== the board settles =============== */
+  /* The pieces sit down rank by rank once the board is live. Waits on nothing —
+     no timer, no font, no image, no network. The intro curtain is pure CSS and
+     needs no help from here. */
   var setupRun = false;
-
-  /* How long the plaque stays up even when the page needed no time at all. The
-     board is ready in ~40ms on a warm cache, so without a floor the waiting state
-     was real but invisible. This is a deliberate beat, and it is only affordable
-     because the plaque gates nothing: pointer-events:none over a board that is
-     already built, already correct and already clickable. On a slow load the
-     value does nothing — the page has taken longer than this by itself. */
-  var WAIT_MIN = 1100;
-  var waitTimer = 0, liftWaiting = null;
-  /* The plaque's own markup, stashed before it is removed. The whole intro is
-     over in ~1.5s and then unreachable, which is exactly how it rots — this is
-     what __gambit.replayIntro() puts back. */
-  var waitHTML = "";
-
-  /* Removing the plaque is the LAST thing init does, on purpose: its
-     disappearance is then a liveness proof — this file ran to the end — rather
-     than a "a script downloaded" proof. That is what covers app.js loading but
-     throwing.
-     @param done runs once the plaque is gone, so the piece settle can follow it
-       rather than playing underneath it. */
-  function clearWaiting(done) {
-    var n = $("setting-up");
-    if (!n || !n.parentNode) { if (done) done(); return; }
-    if (!waitHTML) waitHTML = n.outerHTML;      /* for replayIntro() */
-    /* Behind the cover the plaque is invisible — a 660px card over a .55 scrim
-       sits on top of it — so holding it there buys nothing and would only delay
-       the settle that hideCover() triggers. */
-    var occluded = !$("cover").hidden;
-    if (reduced || occluded) {
-      n.parentNode.removeChild(n);
-      if (done) done();
-      return;
-    }
-    liftWaiting = function () {
-      liftWaiting = null;
-      n.classList.add("going");
-      setTimeout(function () {
-        if (n.parentNode) n.parentNode.removeChild(n);
-        if (done) done();
-      }, 200);                       /* matches suOut */
-    };
-    /* performance.now() is time since navigation, which on this path IS how long
-       the load took — the cover path never gets here, so it cannot be polluted by
-       however long someone spent reading the rules. */
-    var hold = Math.max(0, WAIT_MIN - performance.now());
-    waitTimer = setTimeout(liftWaiting, hold);
-  }
-
-  /* Touching the board is a decision to stop watching: cut the hold short rather
-     than making someone wait out a beat they have already moved past. */
-  function cutWaiting() {
-    if (!liftWaiting) return;
-    clearTimeout(waitTimer);
-    liftWaiting();
-  }
 
   /* The set is a reward for arriving, never a tax: it runs AFTER the one gate
      this page has, over a board that is already live and already correct.
@@ -879,7 +827,6 @@
   }
 
   function onSquareClick(e) {
-    cutWaiting();        /* touching the board means done watching */
     endSetup();          /* first touch cancels all four beats in one frame */
     var s = +e.currentTarget.dataset.s;
     if (gameOver || game.turn !== WHITE) return;
@@ -1358,30 +1305,15 @@
     /* Replay the set on demand. On a warm cache it is over in 430ms and the
        plaque never paints at all, which is exactly how it rots. To see the
        PLAQUE, throttle to slow 4G with the cache off, or block app.js. */
-    /* Replay the whole intro: the plaque, its hold, the lift, then the settle.
-       The real thing is over in ~1.5s and then gone from the DOM, so this is
-       the only way to look at it without throttling the network. */
+    /* Replay the curtain. It is pure CSS, so re-inserting the node is the whole
+       trick: the animations start over from their declared delays. */
     replayIntro: function () {
-      if (!waitHTML || !wrap) return false;
-      var old = $("setting-up");
+      if (!introHTML) return false;
+      var old = $("intro");
       if (old && old.parentNode) old.parentNode.removeChild(old);
-      clearTimeout(waitTimer);
-      liftWaiting = null;
-      wrap.insertAdjacentHTML("beforeend", waitHTML);
-      setupRun = false;
-      boardEl.classList.remove("setting");
-      /* the hold is measured from navigation, which is long past on a replay,
-         so drive it from now instead */
-      var n = $("setting-up");
-      liftWaiting = function () {
-        liftWaiting = null;
-        n.classList.add("going");
-        setTimeout(function () {
-          if (n.parentNode) n.parentNode.removeChild(n);
-          startSetup();
-        }, 200);
-      };
-      waitTimer = setTimeout(liftWaiting, WAIT_MIN);
+      document.body.insertAdjacentHTML("afterbegin", introHTML);
+      var el = $("intro");
+      setTimeout(function () { if (el && el.parentNode) el.parentNode.removeChild(el); }, 1700);
       return true;
     },
     setBoard: function () {
@@ -1399,10 +1331,17 @@
   applyUnlocks(false);
   sizeFx();
   render();
-  /* The board is drawn, so the plaque has nothing left to say — but it is held
-     for WAIT_MIN so the waiting state is actually seen, and the piece settle is
-     handed in as the callback so it plays AFTER the card lifts instead of
-     underneath it. With a cover, hideCover owns the settle: the plaque is
-     occluded there and comes off immediately. */
-  clearWaiting($("cover").hidden ? startSetup : null);
+  /* No cover means no gate, so settle the board now. With a cover, hideCover owns
+     the call — the settle lives AFTER the only gate, never before it. */
+  if ($("cover").hidden) startSetup();
+  /* The intro curtain is pure CSS and has already made itself inert by 1.6s; this
+     only takes the node out of the DOM afterwards so nothing is left lying over
+     the page. Guarded because it is scenery: if it is already gone, fine. */
+  (function dropIntro() {
+    var el = $("intro");
+    if (!el) return;
+    introHTML = el.outerHTML;                     /* so replayIntro() can put it back */
+    if (reduced) { if (el.parentNode) el.parentNode.removeChild(el); return; }
+    setTimeout(function () { if (el.parentNode) el.parentNode.removeChild(el); }, 1700);
+  })();
 })();
