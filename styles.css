@@ -959,11 +959,29 @@
     /* dark, and the page shows through just enough to be sensed behind it. The
        blur is the one place this design allows itself any, and it is gone in
        1.6s — @supports so a browser without it still gets a solid cover. */
-    background: rgba(36,26,15,.9);
+    background-color: rgba(36,26,15,.9);
     animation: introPart 1.6s cubic-bezier(.5,0,.2,1) .78s both;
   }
+  /* background-COLOR only, so it does not wipe the shading layers below */
   @supports (backdrop-filter: blur(2px)){
-    .intro-half{ background: rgba(36,26,15,.82); backdrop-filter: blur(9px); }
+    .intro-half{ background-color: rgba(36,26,15,.82); backdrop-filter: blur(9px); }
+  }
+  /* THE SHADING. Two layers per half: a soft centre light that lifts the king off
+     the ground, and a directional wash that darkens each half TOWARD the cut. The
+     seam is therefore the darkest line on the screen, which is what makes the
+     white blade read as light rather than as a painted stripe — and once the
+     halves part, each takes its own shading with it. Layers live on the halves
+     rather than on .intro for exactly that reason: anything on the parent would
+     stay behind after the reveal. */
+  .intro-top{
+    background-image:
+      radial-gradient(120% 95% at 50% 62%, rgba(255,255,255,.07), transparent 58%),
+      linear-gradient(to bottom, rgba(255,255,255,.05), rgba(0,0,0,.14));
+  }
+  .intro-bot{
+    background-image:
+      radial-gradient(120% 95% at 50% 38%, rgba(255,255,255,.07), transparent 58%),
+      linear-gradient(to bottom, rgba(0,0,0,.14), rgba(255,255,255,.035));
   }
   /* one diagonal, two complementary clips — the shared edge IS the cut */
   .intro-top{ clip-path: polygon(0 0, 100% 0, 100% 42%, 0 58%); }
@@ -979,6 +997,8 @@
     font-family: var(--pieces);
     font-size: clamp(120px, 30vmin, 260px);
     line-height: 1; color: var(--paper);
+    /* sits it on the ground rather than floating on it */
+    text-shadow: 0 8px 26px rgba(0,0,0,.55);
     /* the halves are already clipped, so the king is cut by its own parent */
     animation: introKing .5s cubic-bezier(.2,.7,.2,1) both;
   }
@@ -987,7 +1007,7 @@
     to  { opacity: 1; transform: scale(1); }
   }
 
-  .intro-knight, .intro-slash, .intro-burst{
+  .intro-knight, .intro-burst{
     position: absolute; left: 50%; top: 50%;
     pointer-events: none;
   }
@@ -1005,16 +1025,26 @@
     72% { opacity: 1; }
     100%{ opacity: 0; transform: translate(240%, -50%) rotate(14deg) scale(.95); }
   }
+  /* Spans the whole screen so its percentage geometry lines up with the clips;
+     the polygons inside sit on the seam. Black and white only now — the halo and
+     core are white, the under-edge is near-black, and the glow is a drop-shadow
+     rather than a box-shadow because the shape is a polygon, not a box. */
   .intro-slash{
-    width: 150vmax; height: 6px; border-radius: 3px;
-    background: linear-gradient(90deg, transparent, var(--red) 34%, #fff 50%, var(--red) 66%, transparent);
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
     opacity: 0;
+    filter: drop-shadow(0 0 7px rgba(255,255,255,.5))
+            drop-shadow(0 0 20px rgba(255,255,255,.2));
     animation: introSlash .8s ease-out .3s both;
   }
+  /* It opens from the middle outwards via clip-path, NOT scaleX: scaling this
+     element horizontally would change the diagonal's angle mid-animation, since
+     preserveAspectRatio="none" ties the geometry to the element's own box. */
   @keyframes introSlash{
-    0%, 30% { opacity: 0; transform: translate(-50%, -50%) rotate(-9deg) scaleX(0); }
-    52%     { opacity: 1; transform: translate(-50%, -50%) rotate(-9deg) scaleX(1); }
-    100%    { opacity: 0; transform: translate(-50%, -50%) rotate(-9deg) scaleX(1); }
+    0%, 30% { opacity: 0; clip-path: inset(0 50% 0 50%); }
+    52%     { opacity: 1; clip-path: inset(0 0 0 0); }
+    100%    { opacity: 0; clip-path: inset(0 0 0 0); }
   }
   .intro-burst{
     width: 160vmax; height: 160vmax;

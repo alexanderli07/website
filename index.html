@@ -93,7 +93,38 @@
   <div class="intro-half intro-top"><span class="intro-king">&#9818;&#xFE0E;</span></div>
   <div class="intro-half intro-bot"><span class="intro-king">&#9818;&#xFE0E;</span></div>
   <span class="intro-knight">&#9822;&#xFE0E;</span>
-  <span class="intro-slash"></span>
+  <!-- The blade is an SVG in the SAME percentage space as the cut, not a rotated
+       bar. The cut drops 16% of the HEIGHT across the full WIDTH, so its real
+       angle depends on the aspect ratio — about 6deg on a desktop but 19deg on a
+       phone. No single `rotate()` can match that. viewBox 0..100 with
+       preserveAspectRatio="none" maps these units onto the same percentages the
+       clip-paths use, so the blade sits exactly on the seam at every size. -->
+  <svg class="intro-slash" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+    <defs>
+      <linearGradient id="is-core" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="100" y2="0">
+        <stop offset="0" stop-color="#fff" stop-opacity="0"/>
+        <stop offset=".28" stop-color="#fff" stop-opacity=".45"/>
+        <stop offset=".5" stop-color="#fff" stop-opacity="1"/>
+        <stop offset=".72" stop-color="#fff" stop-opacity=".45"/>
+        <stop offset="1" stop-color="#fff" stop-opacity="0"/>
+      </linearGradient>
+      <linearGradient id="is-glow" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="100" y2="0">
+        <stop offset="0" stop-color="#fff" stop-opacity="0"/>
+        <stop offset=".5" stop-color="#fff" stop-opacity=".22"/>
+        <stop offset="1" stop-color="#fff" stop-opacity="0"/>
+      </linearGradient>
+      <linearGradient id="is-under" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="100" y2="0">
+        <stop offset="0" stop-color="#120c06" stop-opacity="0"/>
+        <stop offset=".5" stop-color="#120c06" stop-opacity=".75"/>
+        <stop offset="1" stop-color="#120c06" stop-opacity="0"/>
+      </linearGradient>
+    </defs>
+    <!-- widest first: the halo, then a dark under-edge that gives the cut depth,
+         then the bright core on top. Black and white only. -->
+    <polygon fill="url(#is-glow)"  points="0,56.0 100,40.0 100,44.0 0,60.0"/>
+    <polygon fill="url(#is-under)" points="0,58.4 100,42.4 100,44.0 0,60.0"/>
+    <polygon fill="url(#is-core)"  points="0,57.6 100,41.6 100,42.4 0,58.4"/>
+  </svg>
   <span class="intro-burst"></span>
 </div>
 
