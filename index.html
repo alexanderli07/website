@@ -87,11 +87,19 @@
      aria-hidden and inert to assistive tech throughout: it is scenery, and the
      real content underneath is already reachable. -->
 <div class="intro" id="intro" aria-hidden="true">
-  <!-- Each half carries its OWN copy of the king and its own dark ground, cut by
-       the same diagonal — so when they part they take their share of both the
-       king and the screen with them. That is the whole trick. -->
-  <div class="intro-half intro-top"><span class="intro-king">&#9818;&#xFE0E;</span></div>
-  <div class="intro-half intro-bot"><span class="intro-king">&#9818;&#xFE0E;</span></div>
+  <!-- Four layers, not two. The grounds and the king are separate elements cut by
+       the SAME diagonal, rather than the king living inside each ground — that is
+       what lets them travel at different rates. With the king as a child it
+       inherited the ground's transform exactly, so it was welded to it; and
+       moving it within its parent is not an option either, because the clip is
+       fixed in the parent's space, so the king would slide under its own cut.
+       One ground is ink and one is paper, and each king half is the opposite of
+       the ground it sits on — black king on the light side, white king on the
+       dark. It is the same shape in both colours, which is the whole point. -->
+  <div class="intro-half intro-top"></div>
+  <div class="intro-half intro-bot"></div>
+  <div class="intro-kh intro-kh-top"><span class="intro-king">&#9818;&#xFE0E;</span></div>
+  <div class="intro-kh intro-kh-bot"><span class="intro-king">&#9818;&#xFE0E;</span></div>
   <span class="intro-knight">&#9822;&#xFE0E;</span>
   <!-- The blade is an SVG in the SAME percentage space as the cut, not a rotated
        bar. The cut drops 16% of the HEIGHT across the full WIDTH, so its real

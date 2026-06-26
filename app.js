@@ -1313,7 +1313,7 @@
       if (old && old.parentNode) old.parentNode.removeChild(old);
       document.body.insertAdjacentHTML("afterbegin", introHTML);
       var el = $("intro");
-      setTimeout(function () { if (el && el.parentNode) el.parentNode.removeChild(el); }, 1700);
+      setTimeout(function () { if (el && el.parentNode) el.parentNode.removeChild(el); }, 1850);
       return true;
     },
     setBoard: function () {
@@ -1342,6 +1342,6 @@
     if (!el) return;
     introHTML = el.outerHTML;                     /* so replayIntro() can put it back */
     if (reduced) { if (el.parentNode) el.parentNode.removeChild(el); return; }
-    setTimeout(function () { if (el.parentNode) el.parentNode.removeChild(el); }, 1700);
+    setTimeout(function () { if (el.parentNode) el.parentNode.removeChild(el); }, 1850);
   })();
 })();
