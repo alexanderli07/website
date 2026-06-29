@@ -964,9 +964,14 @@
   .intro-bot{ clip-path: polygon(0 58%, 100% 42%, 100% 100%, 0 100%); }
 
   /* THE GROUND IS A BOARD. Same trick #board uses for its pre-script diagram: one
-     repeating conic tile, each tile a 2x2 block of squares, so 25% gives an 8x8
-     board across the viewport. The cells come out rectangular on any screen that
-     is not square — which is fine, it only has to cover.
+     repeating conic tile, each tile a 2x2 block of squares.
+     SQUARE cells, so the tile is sized in vmin rather than in percentages — a
+     percentage tile stretches to the element and gave 179x113 rectangles on a
+     desktop. 25vmin per tile means a 12.5vmin cell, i.e. exactly 8 cells along
+     the SHORT side of any screen, and however many that takes along the long one:
+     about 13 across on a wide desktop, about 17 down on a phone. The pattern
+     repeats, so the odd partial cell at the far edge is simply clipped — it still
+     covers completely, which is the only thing it has to do.
      PHASE: a conic tile puts its FIRST colour in the top-RIGHT quadrant, so the
      first colour named is the DARK one and the board's top-left square is light,
      exactly as renderBoard lays the real one out.
@@ -977,7 +982,7 @@
   .intro-half{
     background-color: #f3e8cf;
     background-repeat: no-repeat, repeat;
-    background-size: 100% 100%, 25% 25%;
+    background-size: 100% 100%, 25vmin 25vmin;
   }
   /* Shading rides ON TOP of the squares — first layer listed paints last. Each
      half darkens TOWARD the cut, so the seam is the darkest line on screen and the
