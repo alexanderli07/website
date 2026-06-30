@@ -1008,15 +1008,15 @@
   /* White king, both halves — it is one piece, and the ground is now a board
      rather than two opposed fields. */
 
-  /* An outlined white piece, drawn the way .sq .pc.w is drawn on the real board —
-     which is what lets it read over BOTH square colours. A flat paper fill would
-     disappear on the light squares. */
+  /* Black king, and OUTLINED — the board has two square colours, so a flat fill
+     disappears over one of them. The paper stroke is what carries it across the
+     dark squares, the same reason .sq .pc.b has a light edge on the real board. */
   .intro-king{
     font-family: var(--pieces);
     font-size: clamp(120px, 30vmin, 260px);
     line-height: 1;
-    color: #fbf4e0;
-    -webkit-text-stroke: 3px rgba(36,26,15,.92);
+    color: var(--ink);
+    -webkit-text-stroke: 3px rgba(244,236,217,.92);
     filter: drop-shadow(0 6px 14px rgba(36,26,15,.45));
     animation: introKing .5s cubic-bezier(.2,.7,.2,1) both;
   }
@@ -1069,11 +1069,10 @@
     font-family: var(--pieces);
     font-size: clamp(90px, 22vmin, 200px);
     line-height: 1;
-    /* Black knight against a white king. The paper stroke is the mirror of the
-       king's ink one: it is what keeps it legible over the dark squares, the same
-       reason .sq .pc.b carries a light edge on the real board. */
-    color: var(--ink);
-    -webkit-text-stroke: 2px rgba(244,236,217,.92);
+    /* White knight against a black king — the mirror of the king's treatment, so
+       the ink stroke is what keeps it legible over the light squares. */
+    color: #fbf4e0;
+    -webkit-text-stroke: 2px rgba(36,26,15,.92);
     filter: drop-shadow(0 6px 14px rgba(36,26,15,.5));
     animation: introKnight .95s cubic-bezier(.32,.05,.2,1) .25s both;
   }
@@ -1084,10 +1083,9 @@
     72% { opacity: 1; }
     100%{ opacity: 0; transform: translate(240%, -50%) rotate(14deg) scale(.95); }
   }
-  /* Spans the whole screen so its percentage geometry lines up with the clips;
-     the polygons inside sit on the seam. Black and white only now — the halo and
-     core are white, the under-edge is near-black, and the glow is a drop-shadow
-     rather than a box-shadow because the shape is a polygon, not a box. */
+  /* Spans the whole screen so its percentage geometry lines up with the clips; the
+     shapes inside sit on the seam. The drop-shadow is the outer glow — a
+     box-shadow would trace the element's box, not the tapered slash inside it. */
   .intro-slash{
     position: absolute; inset: 0;
     width: 100%; height: 100%;

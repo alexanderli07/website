@@ -109,29 +109,32 @@
        clip-paths use, so the blade sits exactly on the seam at every size. -->
   <svg class="intro-slash" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true" focusable="false">
     <defs>
-      <linearGradient id="is-core" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="100" y2="0">
-        <stop offset="0" stop-color="#fff" stop-opacity="0"/>
-        <stop offset=".28" stop-color="#fff" stop-opacity=".45"/>
+      <linearGradient id="is-lip" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="100" y2="0">
+        <stop offset="0" stop-color="#fff" stop-opacity=".25"/>
         <stop offset=".5" stop-color="#fff" stop-opacity="1"/>
-        <stop offset=".72" stop-color="#fff" stop-opacity=".45"/>
-        <stop offset="1" stop-color="#fff" stop-opacity="0"/>
+        <stop offset="1" stop-color="#fff" stop-opacity=".25"/>
+      </linearGradient>
+      <linearGradient id="is-gash" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="100" y2="0">
+        <stop offset="0" stop-color="#0d0805" stop-opacity=".55"/>
+        <stop offset=".5" stop-color="#0d0805" stop-opacity=".95"/>
+        <stop offset="1" stop-color="#0d0805" stop-opacity=".55"/>
       </linearGradient>
       <linearGradient id="is-glow" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="100" y2="0">
         <stop offset="0" stop-color="#fff" stop-opacity="0"/>
-        <stop offset=".5" stop-color="#fff" stop-opacity=".22"/>
+        <stop offset=".5" stop-color="#fff" stop-opacity=".26"/>
         <stop offset="1" stop-color="#fff" stop-opacity="0"/>
       </linearGradient>
-      <linearGradient id="is-under" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="100" y2="0">
-        <stop offset="0" stop-color="#120c06" stop-opacity="0"/>
-        <stop offset=".5" stop-color="#120c06" stop-opacity=".75"/>
-        <stop offset="1" stop-color="#120c06" stop-opacity="0"/>
-      </linearGradient>
     </defs>
-    <!-- widest first: the halo, then a dark under-edge that gives the cut depth,
-         then the bright core on top. Black and white only. -->
-    <polygon fill="url(#is-glow)"  points="0,56.0 100,40.0 100,44.0 0,60.0"/>
-    <polygon fill="url(#is-under)" points="0,58.4 100,42.4 100,44.0 0,60.0"/>
-    <polygon fill="url(#is-core)"  points="0,57.6 100,41.6 100,42.4 0,58.4"/>
+    <!-- ONE slash, not two stacked bars. Each shape is a lens: it comes to a POINT
+         at both ends of the cut and is thickest in the middle, which is what makes
+         it read as a slash rather than as a ruled line. The quadratic controls sit
+         at twice the intended bulge, because a quadratic passes through only half
+         of it (curve midpoint = (P0 + 2C + P2) / 4).
+         Black AND white in one form, the way a cut actually looks: the gash is the
+         dark opening, and the white lip is the light catching its upper edge. -->
+    <path fill="url(#is-glow)" d="M0,58 Q50,43 100,42 Q50,57 0,58 Z"/>
+    <path fill="url(#is-gash)" d="M0,58 Q50,46.8 100,42 Q50,53.2 0,58 Z"/>
+    <path fill="url(#is-lip)"  d="M0,58 Q50,46.8 100,42 Q50,48.6 0,58 Z"/>
   </svg>
   <span class="intro-burst"></span>
 </div>
