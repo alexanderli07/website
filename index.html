@@ -96,8 +96,32 @@
        One ground is ink and one is paper, and each king half is the opposite of
        the ground it sits on — black king on the light side, white king on the
        dark. It is the same shape in both colours, which is the whole point. -->
-  <div class="intro-half intro-top"></div>
-  <div class="intro-half intro-bot"></div>
+  <!-- THE POSITION: smothered mate, Nf7#. Verified with engine.js — black is in
+       check with zero legal moves, and removing the knight clears the check, so
+       the knight really is the piece delivering it. The king is walled in by its
+       own rook and pawns, which is why a knight can finish it.
+       The pieces live INSIDE the grounds, so they are clipped by the same diagonal
+       and travel with the board, exactly as pieces on a board should. Only the
+       occupied squares exist; everything else is the background checker, which is
+       what fills the rest of the screen.
+       Both halves carry the whole position — each then shows only its own side of
+       the cut, so together they read as one board. -->
+  <div class="intro-half intro-top">
+    <span class="ip ip-g8 b">&#9820;&#xFE0E;</span>
+    <span class="ip ip-h8 b">&#9818;&#xFE0E;</span>
+    <span class="ip ip-f7 w">&#9822;&#xFE0E;</span>
+    <span class="ip ip-g7 b">&#9823;&#xFE0E;</span>
+    <span class="ip ip-h7 b">&#9823;&#xFE0E;</span>
+    <span class="ip ip-a1 w">&#9818;&#xFE0E;</span>
+  </div>
+  <div class="intro-half intro-bot">
+    <span class="ip ip-g8 b">&#9820;&#xFE0E;</span>
+    <span class="ip ip-h8 b">&#9818;&#xFE0E;</span>
+    <span class="ip ip-f7 w">&#9822;&#xFE0E;</span>
+    <span class="ip ip-g7 b">&#9823;&#xFE0E;</span>
+    <span class="ip ip-h7 b">&#9823;&#xFE0E;</span>
+    <span class="ip ip-a1 w">&#9818;&#xFE0E;</span>
+  </div>
   <div class="intro-kh intro-kh-top"><span class="intro-king">&#9818;&#xFE0E;</span></div>
   <div class="intro-kh intro-kh-bot"><span class="intro-king">&#9818;&#xFE0E;</span></div>
   <span class="intro-knight">&#9822;&#xFE0E;</span>

@@ -983,6 +983,12 @@
     background-color: #f3e8cf;
     background-repeat: no-repeat, repeat;
     background-size: 100% 100%, 25vmin 25vmin;
+    /* CENTRED, and that is what lets the position sit on real squares. A tile is
+       25vmin = two cells, so centring puts cell boundaries at the viewport centre
+       and every 12.5vmin out from it — the same lattice .ip below measures from.
+       At 0 0 the lattice started from the top-left corner instead, and a centred
+       8x8 would have landed half a square off on most screens. */
+    background-position: center, center;
   }
   /* Shading rides ON TOP of the squares — first layer listed paints last. Each
      half darkens TOWARD the cut, so the seam is the darkest line on screen and the
@@ -997,6 +1003,34 @@
       linear-gradient(to bottom, rgba(36,26,15,.30), rgba(244,236,217,.10)),
       repeating-conic-gradient(#c8a878 0 25%, #f3e8cf 0 50%);
   }
+
+  /* ---- the position on the board ----
+     A centred 8x8 of 12.5vmin cells: 100vmin square, so its cell lines fall on the
+     same 12.5vmin lattice the centred background uses. Only occupied squares are
+     drawn; the rest of the screen is background checker.
+     These sit inside the grounds, so they need no animation of their own — they
+     are clipped and carried by the half they belong to, which is what keeps them
+     looking like pieces standing ON the board rather than floating over it. */
+  .ip{
+    position: absolute;
+    width: 12.5vmin; height: 12.5vmin;
+    left: calc(50% - 50vmin + var(--f) * 12.5vmin);
+    top:  calc(50% - 50vmin + var(--r) * 12.5vmin);
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--pieces);
+    font-size: 9.4vmin; line-height: 1;
+  }
+  /* outlined in the opposite colour, the same reason the real board does it: a flat
+     fill vanishes over one of the two square colours */
+  .ip.w{ color: #fbf4e0; -webkit-text-stroke: .32vmin rgba(36,26,15,.9); }
+  .ip.b{ color: var(--ink);  -webkit-text-stroke: .28vmin rgba(244,236,217,.85); }
+  /* file 0-7 left to right, row 0-7 top to bottom — read off the verified board */
+  .ip-g8{ --f: 6; --r: 0; }
+  .ip-h8{ --f: 7; --r: 0; }
+  .ip-f7{ --f: 5; --r: 1; }
+  .ip-g7{ --f: 6; --r: 1; }
+  .ip-h7{ --f: 7; --r: 1; }
+  .ip-a1{ --f: 0; --r: 7; }
 
   /* ---- the king, cut on the same line but travelling on its own ---- */
   .intro-kh{
