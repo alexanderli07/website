@@ -543,6 +543,18 @@
      rots — __gambit.replayIntro() is how you look at it again. */
   var introHTML = "";
 
+  /* Pure CSS, so re-inserting the node is the whole trick: every animation starts
+     over from its declared delay. */
+  function replayIntro() {
+    if (!introHTML) return false;
+    var old = $("intro");
+    if (old && old.parentNode) old.parentNode.removeChild(old);
+    document.body.insertAdjacentHTML("afterbegin", introHTML);
+    var el = $("intro");
+    setTimeout(function () { if (el && el.parentNode) el.parentNode.removeChild(el); }, 1850);
+    return true;
+  }
+
   /* =============== the board settles =============== */
   /* The pieces sit down rank by rank once the board is live. Waits on nothing —
      no timer, no font, no image, no network. The intro curtain is pure CSS and
@@ -1305,17 +1317,7 @@
     /* Replay the set on demand. On a warm cache it is over in 430ms and the
        plaque never paints at all, which is exactly how it rots. To see the
        PLAQUE, throttle to slow 4G with the cache off, or block app.js. */
-    /* Replay the curtain. It is pure CSS, so re-inserting the node is the whole
-       trick: the animations start over from their declared delays. */
-    replayIntro: function () {
-      if (!introHTML) return false;
-      var old = $("intro");
-      if (old && old.parentNode) old.parentNode.removeChild(old);
-      document.body.insertAdjacentHTML("afterbegin", introHTML);
-      var el = $("intro");
-      setTimeout(function () { if (el && el.parentNode) el.parentNode.removeChild(el); }, 1850);
-      return true;
-    },
+    replayIntro: replayIntro,
     setBoard: function () {
       boardEl.classList.remove("setting");
       void boardEl.offsetWidth;        /* commit, so the beat restarts */

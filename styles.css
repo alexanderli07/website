@@ -959,78 +959,109 @@
   /* ---- the two grounds ---- */
   .intro-half{ position: absolute; inset: 0; }
   /* One diagonal, two complementary clips — the shared edge IS the cut. The king
-     halves below use the SAME two clips, so both are severed on one line. */
-  .intro-top{ clip-path: polygon(0 0, 100% 0, 100% 42%, 0 58%); }
+     halves below use the SAME two clips, so both are severed on one line.
+     THE TOP OVERSHOOTS BY .2%, and it is not sloppiness. Two clips meeting on the
+     exact same line still antialias their own edges, so both sides of the seam are
+     partially transparent and the page shows through as a hairline — a second, much
+     fainter pre-cut underneath the one the wash was drawing. Overlapping them puts
+     something opaque behind that soft edge.
+     The TOP is the one extended because .intro-bot comes after it in the document
+     and therefore paints over the overlap: the visible cut is still bot's clean edge
+     at 58%/42%, exactly where the blade is drawn, so nothing has to move to match.
+     The king halves are deliberately NOT extended — their hairline falls inside a
+     glyph over an opaque ground rather than over the page, and overlapping them
+     would double-draw a sliver of stroked glyph and darken it. */
+  .intro-top{ clip-path: polygon(0 0, 100% 0, 100% 42.2%, 0 58.2%); }
   .intro-bot{ clip-path: polygon(0 58%, 100% 42%, 100% 100%, 0 100%); }
 
-  /* THE GROUND IS A BOARD. Same trick #board uses for its pre-script diagram: one
-     repeating conic tile, each tile a 2x2 block of squares.
-     SQUARE cells, so the tile is sized in vmin rather than in percentages — a
-     percentage tile stretches to the element and gave 179x113 rectangles on a
-     desktop. 25vmin per tile means a 12.5vmin cell, i.e. exactly 8 cells along
-     the SHORT side of any screen, and however many that takes along the long one:
-     about 13 across on a wide desktop, about 17 down on a phone. The pattern
-     repeats, so the odd partial cell at the far edge is simply clipped — it still
-     covers completely, which is the only thing it has to do.
-     PHASE: a conic tile puts its FIRST colour in the top-RIGHT quadrant, so the
-     first colour named is the DARK one and the board's top-left square is light,
-     exactly as renderBoard lays the real one out.
-     Both halves carry the SAME board at the same position, so the pattern runs
-     unbroken across the cut until they part — and then each takes its own half of
-     the board with it. Opaque, so no blur and nothing shows through: the squares
-     are the cover now. */
-  .intro-half{
-    background-color: #f3e8cf;
-    background-repeat: no-repeat, repeat;
-    background-size: 100% 100%, 25vmin 25vmin;
-    /* CENTRED, and that is what lets the position sit on real squares. A tile is
-       25vmin = two cells, so centring puts cell boundaries at the viewport centre
-       and every 12.5vmin out from it — the same lattice .ip below measures from.
-       At 0 0 the lattice started from the top-left corner instead, and a centred
-       8x8 would have landed half a square off on most screens. */
-    background-position: center, center;
-  }
-  /* Shading rides ON TOP of the squares — first layer listed paints last. Each
-     half darkens TOWARD the cut, so the seam is the darkest line on screen and the
-     blade's white core still reads as light against it. */
-  .intro-top{
-    background-image:
-      linear-gradient(to bottom, rgba(244,236,217,.14), rgba(36,26,15,.30)),
-      repeating-conic-gradient(#c8a878 0 25%, #f3e8cf 0 50%);
-  }
-  .intro-bot{
-    background-image:
-      linear-gradient(to bottom, rgba(36,26,15,.30), rgba(244,236,217,.10)),
-      repeating-conic-gradient(#c8a878 0 25%, #f3e8cf 0 50%);
-  }
+  /* ---- THE GROUND ----
+     PAPER: the site's own surface. The cut then reads as a page being slit rather
+     than a stage going dark, which is what the rest of this page is about — and it
+     is why this won over five darker drafts (kept in
+     ../website-themes/gambit-intro-grounds.css, four of them dark, for when there
+     is a dark mode to hang them on).
 
-  /* ---- the position on the board ----
-     A centred 8x8 of 12.5vmin cells: 100vmin square, so its cell lines fall on the
-     same 12.5vmin lattice the centred background uses. Only occupied squares are
-     drawn; the rest of the screen is background checker.
-     These sit inside the grounds, so they need no animation of their own — they
-     are clipped and carried by the half they belong to, which is what keeps them
-     looking like pieces standing ON the board rather than floating over it. */
-  .ip{
-    position: absolute;
-    width: 12.5vmin; height: 12.5vmin;
-    left: calc(50% - 50vmin + var(--f) * 12.5vmin);
-    top:  calc(50% - 50vmin + var(--r) * 12.5vmin);
-    display: flex; align-items: center; justify-content: center;
-    font-family: var(--pieces);
-    font-size: 9.4vmin; line-height: 1;
+     A ground is defined ENTIRELY by the properties below, and that is the point of
+     writing it this way: swapping the whole backdrop never touches the parting, the
+     clips or the timing. It is the seam a theme plugs into.
+
+       --gnd-base   what sits underneath — the guarantee of opacity
+       --gnd        the fill itself, a whole background-image list
+       --wash-far   shading at the screen's top and bottom edges
+       --wash-cut   shading through the band the cut travels — nothing, on paper
+       --blade-1 / --blade-2 / --burst   the light effects
+       --shard      the chips thrown off the king — ink on paper, paper on ink
+
+     THE WASH RUNS OUTWARD, NOT INWARD, and that follows from the blade's colour.
+     The original converged on ink at the cut, deliberately, so that the seam was the
+     darkest line on screen and a WHITE blade had something to read against. Invert
+     the blade to ink for paper and that same wash becomes a dark diagonal painted
+     along the seam from the very first frame — it pre-announces the cut, visible
+     before the knight has even crossed. So it now darkens toward the screen's OUTER
+     edges instead: a vignette that frames the middle and leaves the seam perfectly
+     clean, with the ink blade landing on the brightest part of the ground.
+     A dark ground wants the original direction back, which is a matter of swapping
+     these two values. The two go together — flipping the blade without flipping the
+     wash is what produced the visible pre-cut.
+
+     The light effects INVERT with the ground and that is not a nicety: a white halo
+     on paper is invisible, and an ink one is exactly what makes a slit in paper look
+     deep. So the blade's halo here is ink, and any dark ground has to put it back to
+     white. The burst goes the other way — it is light, so it stays light, just
+     pushed nearly to full white to register against paper at all.
+
+     Both halves take the same --gnd at the same position, so any pattern in it runs
+     unbroken across the cut until they part — then each carries its own half away.
+     Opaque by contract: no blur, nothing showing through. The ground IS the cover. */
+  .intro{
+    --gnd-base: var(--paper);
+    --gnd: radial-gradient(125% 95% at 50% 48%, #fdf7e6 0%, #ecdfc0 58%, #d5c39c 100%);
+    --wash-far: rgba(36,26,15,.16);
+    /* Zero-alpha INK rather than `transparent`, which is zero-alpha black: the two
+       are not the same when a gradient interpolates through them. */
+    --wash-cut: rgba(36,26,15,0);
+    --blade-1: rgba(36,26,15,.45);
+    --blade-2: rgba(36,26,15,.22);
+    --burst: rgba(255,255,255,.95);
+    /* The king is ink here, so its chips are ink. On a dark ground the king inverts
+       to paper and so must these, or the debris vanishes into the backdrop. */
+    --shard: rgba(36,26,15,.92);
   }
-  /* outlined in the opposite colour, the same reason the real board does it: a flat
-     fill vanishes over one of the two square colours */
-  .ip.w{ color: #fbf4e0; -webkit-text-stroke: .32vmin rgba(36,26,15,.9); }
-  .ip.b{ color: var(--ink);  -webkit-text-stroke: .28vmin rgba(244,236,217,.85); }
-  /* file 0-7 left to right, row 0-7 top to bottom — read off the verified board */
-  .ip-g8{ --f: 6; --r: 0; }
-  .ip-h8{ --f: 7; --r: 0; }
-  .ip-f7{ --f: 5; --r: 1; }
-  .ip-g7{ --f: 6; --r: 1; }
-  .ip-h7{ --f: 7; --r: 1; }
-  .ip-a1{ --f: 0; --r: 7; }
+  .intro-half{
+    background-color: var(--gnd-base);
+    background-image: var(--gnd);
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center;
+  }
+  /* The wash is a LAYER, not another entry in --gnd: keeping it separate means a
+     ground can be a one-liner and never has to restate the shading, and no ground
+     can get its layer count out of step with background-size. It is clipped by the
+     parent's clip-path like any other child, so it is cut on the same diagonal.
+
+     BOTH HALVES GET THE IDENTICAL GRADIENT, and that is what makes the seam exact
+     rather than merely close. The halves are the same full-viewport box, so one
+     gradient resolves to the same value at the same point in both — the seam cannot
+     show, by construction, at any aspect ratio.
+     It has to be built this way because the cut is DIAGONAL. Mirroring a `to bottom`
+     gradient between the halves, which is the obvious way to shade toward a seam,
+     reaches its end colour at the element's edge and not at the seam: the seam
+     travels from 58% down-left to 42% up-right, so the two halves land on different
+     values along it and leave a step that is zero at mid-screen and widens toward
+     both ends. Measured at .026 ink alpha here — faint, but a line.
+     So instead: symmetric, and deliberately FLAT across 42%-58%, the exact band the
+     seam travels through. The shading lives only where the seam never goes.
+     Those two stops are the same numbers as the clip-paths above; they have to move
+     together. --wash-far is the screen's top and bottom edges, --wash-cut the clear
+     band through the middle, and a ground decides which of the two is darker. */
+  .intro-half::before{
+    content: ""; position: absolute; inset: 0;
+    background: linear-gradient(to bottom,
+      var(--wash-far) 0%,
+      var(--wash-cut) 42%,
+      var(--wash-cut) 58%,
+      var(--wash-far) 100%);
+  }
 
   /* ---- the king, cut on the same line but travelling on its own ---- */
   .intro-kh{
@@ -1039,12 +1070,14 @@
   }
   .intro-kh-top{ clip-path: polygon(0 0, 100% 0, 100% 42%, 0 58%); }
   .intro-kh-bot{ clip-path: polygon(0 58%, 100% 42%, 100% 100%, 0 100%); }
-  /* White king, both halves — it is one piece, and the ground is now a board
-     rather than two opposed fields. */
 
-  /* Black king, and OUTLINED — the board has two square colours, so a flat fill
-     disappears over one of them. The paper stroke is what carries it across the
-     dark squares, the same reason .sq .pc.b has a light edge on the real board. */
+  /* Black king, and the treatment matches the real board exactly: .pc.b is ink with
+     a paper edge and .pc.w is paper with an ink edge, so the curtain's two pieces
+     are the same pieces, just enormous. On the paper ground that reads as a solid
+     black king against an outlined white knight.
+     Each carrying a stroke in the OPPOSITE colour is also what makes them
+     ground-independent — invert the backdrop and neither piece vanishes into it,
+     they simply trade which one is the solid and which is the line art. */
   .intro-king{
     font-family: var(--pieces);
     font-size: clamp(120px, 30vmin, 260px);
@@ -1104,7 +1137,7 @@
     font-size: clamp(90px, 22vmin, 200px);
     line-height: 1;
     /* White knight against a black king — the mirror of the king's treatment, so
-       the ink stroke is what keeps it legible over the light squares. */
+       the ink stroke is what keeps it legible on a light ground. */
     color: #fbf4e0;
     -webkit-text-stroke: 2px rgba(36,26,15,.92);
     filter: drop-shadow(0 6px 14px rgba(36,26,15,.5));
@@ -1125,8 +1158,10 @@
     width: 100%; height: 100%;
     pointer-events: none;
     opacity: 0;
-    filter: drop-shadow(0 0 7px rgba(255,255,255,.5))
-            drop-shadow(0 0 20px rgba(255,255,255,.2));
+    /* Halo colour comes from the ground, because it has to: a white glow on the
+       paper ground is invisible, and an ink one there is what sells depth. */
+    filter: drop-shadow(0 0 7px var(--blade-1))
+            drop-shadow(0 0 20px var(--blade-2));
     animation: introSlash .8s ease-out .3s both;
   }
   /* It opens from the middle outwards via clip-path, NOT scaleX: scaling this
@@ -1139,7 +1174,7 @@
   }
   .intro-burst{
     width: 160vmax; height: 160vmax;
-    background: radial-gradient(circle at 50% 50%, rgba(255,255,255,.8), rgba(255,255,255,0) 60%);
+    background: radial-gradient(circle at 50% 50%, var(--burst), rgba(255,255,255,0) 60%);
     opacity: 0;
     animation: introBurst .7s ease-out .34s both;
   }
@@ -1147,6 +1182,70 @@
     0%, 26%{ opacity: 0; transform: translate(-50%, -50%) scale(.35); }
     46%    { opacity: 1; transform: translate(-50%, -50%) scale(1); }
     100%   { opacity: 0; transform: translate(-50%, -50%) scale(1.2); }
+  }
+
+  /* ---- the king comes apart ----
+     Fourteen chips from the point of impact. The container is a ZERO-SIZED point at
+     the centre of the screen, so every shard's own translate(-50%,-50%) starts it
+     exactly on that point and --dx / --dy are then a plain flight vector out from it.
+     Timed to the FLASH, not the blade: the blade enters at .3s but the burst peaks
+     around .66s, and the debris has to be the consequence of the strike rather than
+     part of the stroke. Runs .58 -> 1.25s at the latest, so it is finished long
+     before .intro goes inert at 1.7s, and it overlaps the parting on purpose — chips
+     still in the air as the screen opens is what stitches the two moments together. */
+  .intro-debris{
+    position: absolute; left: 50%; top: 50%;
+    width: 0; height: 0;
+    pointer-events: none;
+  }
+  .sh{
+    position: absolute; left: 0; top: 0;
+    width: var(--w); height: var(--w);
+    background: var(--shard);
+    animation: introShard .62s cubic-bezier(.12,.62,.28,1) calc(.58s + var(--d)) both;
+  }
+  /* Four irregular chips rather than squares or dots — a rotating square reads as a
+     square, and at this size a polygon reads as broken material. Cycled across the
+     fourteen so no two neighbours in flight share a silhouette. */
+  .sh1, .sh5,  .sh9,  .sh13{ clip-path: polygon(0 0, 100% 26%, 58% 100%); }
+  .sh2, .sh6,  .sh10, .sh14{ clip-path: polygon(14% 0, 100% 44%, 72% 100%, 0 60%); }
+  .sh3, .sh7,  .sh11       { clip-path: polygon(0 32%, 64% 0, 100% 70%, 28% 100%); }
+  .sh4, .sh8,  .sh12       { clip-path: polygon(0 0, 100% 8%, 52% 100%); }
+  /* Flight vectors, spins and sizes. Weighted along the cut and slightly downward on
+     balance, so the spray follows the blade's line and then gives in to gravity
+     rather than reading as a symmetrical firework. The knight travels left to right,
+     so the longest throws are to the right — that is its momentum.
+     SIZES ARE SET AGAINST THE KING, not picked to look small. Its glyph inks at
+     179x214px when the clamp is at its 260px ceiling (measured off a canvas raster of
+     Segoe UI Symbol, not guessed), so these 1.8-3.8vmin chips are 16-34px — roughly a
+     tenth to a fifth of the piece they came off. An earlier pass at half this size
+     read as dust on the screen rather than as broken king.
+     Throws top out at 34vmin, about 1.5x the king's own height, which keeps the spray
+     in the neighbourhood of the impact; at 43vmin the outliers landed far enough away
+     to look like unrelated specks. */
+  .sh1 { --dx: -18vmin; --dy:  -6vmin; --r: -130deg; --w: 3.0vmin; --d: .00s; }
+  .sh2 { --dx: -10vmin; --dy:   7vmin; --r:   95deg; --w: 2.1vmin; --d: .03s; }
+  .sh3 { --dx:  22vmin; --dy: -10vmin; --r:  205deg; --w: 3.5vmin; --d: .01s; }
+  .sh4 { --dx:  14vmin; --dy:   9vmin; --r: -155deg; --w: 2.5vmin; --d: .04s; }
+  .sh5 { --dx:  28vmin; --dy:  -2vmin; --r:  265deg; --w: 1.9vmin; --d: .02s; }
+  .sh6 { --dx: -25vmin; --dy:   3vmin; --r: -210deg; --w: 2.6vmin; --d: .05s; }
+  .sh7 { --dx:   6vmin; --dy: -15vmin; --r:  145deg; --w: 3.8vmin; --d: .00s; }
+  .sh8 { --dx:  -5vmin; --dy:  13vmin; --r: -115deg; --w: 3.2vmin; --d: .03s; }
+  .sh9 { --dx:  34vmin; --dy:   6vmin; --r:  300deg; --w: 1.8vmin; --d: .04s; }
+  .sh10{ --dx: -30vmin; --dy:  -4vmin; --r: -265deg; --w: 2.3vmin; --d: .02s; }
+  .sh11{ --dx:  10vmin; --dy:  17vmin; --r:  175deg; --w: 2.8vmin; --d: .05s; }
+  .sh12{ --dx: -14vmin; --dy: -13vmin; --r: -165deg; --w: 3.3vmin; --d: .01s; }
+  .sh13{ --dx:  24vmin; --dy:  14vmin; --r:  225deg; --w: 2.1vmin; --d: .03s; }
+  .sh14{ --dx: -22vmin; --dy:  10vmin; --r: -235deg; --w: 2.6vmin; --d: .02s; }
+  /* Shrinking on the way out is what buys depth without a second element to animate:
+     a chip that recedes reads as thrown, one that holds its size reads as slid. */
+  @keyframes introShard{
+    0%  { opacity: 0; transform: translate(-50%, -50%) rotate(0deg) scale(.85); }
+    16% { opacity: 1; }
+    70% { opacity: 1; }
+    100%{ opacity: 0;
+          transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy)))
+                     rotate(var(--r)) scale(.45); }
   }
 
   /* ---------- THE SET ----------
