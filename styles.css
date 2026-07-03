@@ -930,13 +930,43 @@
      ============================================================ */
   /* ============================================================
      THE INTRO — a knight runs the king through, and the screen opens
-     Same choreography as the checkmate slice (gsPiece / gsSlash / gsBurst /
-     gsTop / gsBot) but at full-screen scale, and the thing being cut is the
-     cover itself rather than a glyph inside a card. Deliberately NOT the same
-     numbers: the win keeps its 1.55s cinematic, this is a faster 1.6s total so
-     the two do not read as the same beat.
-     Timeline: 0-.35 the king lands · .25-.9 the knight crosses · .62 the blade
-     and the flash · .78-1.5 the halves part · 1.6 inert.
+     Same cast as the checkmate slice (gsPiece / gsSlash / gsBurst / gsTop /
+     gsBot) but at full-screen scale, and the thing being cut is the cover itself
+     rather than a glyph inside a card. Deliberately NOT the same numbers, so the
+     two never read as the same beat.
+
+     THE PAUSES ARE THE POINT, and there are two of them doing different jobs.
+     An early cut had the halves starting to part at .78s, while the blade was still
+     on screen and the flash still going — everything landing together, which reads
+     as one busy event rather than as a cut that takes a moment to be fatal.
+
+     PAUSE ONE, 1.04 -> 1.52, is dead air. The blade has come and gone, the king is
+     still standing, the screen is still whole. NOTHING may be scheduled in this
+     window and no earlier travel may run into it — it is half a second of held
+     breath, and anything moving in it spends the effect.
+
+     Then the king POPS: the top half shoves up and LEFT while turning anticlockwise,
+     the bottom down and RIGHT while turning clockwise, and that is all. The curtain
+     does not move. For that moment the king is visibly cut in two while the world it
+     is standing on is still intact, and the ground shows through the gap.
+
+     PAUSE TWO, 1.66 -> 2.20, holds it there. Structurally nothing moves, though the
+     debris thrown by the pop is still settling through most of it — deliberately, so
+     the hold has something alive in it and does not read as a freeze. Only then does
+     everything slide away.
+
+     Timeline
+       0    -  .40   the king lands
+        .15 -  .95   the knight crosses, passing the king at .47
+        .46 -  .58   the blade draws, left to right, in the knight's direction
+        .46 -  .98   the flash
+        .58 - 1.04   the blade holds, then fades out
+       1.04 - 1.52   PAUSE ONE — dead air, nothing at all
+       1.52 - 1.66   the halves pop apart, up-left and down-right, turning · debris
+       1.66 - 2.20   PAUSE TWO — held open, chips settling
+       2.20 - 2.90   the grounds part, and quickly — 104% of the height
+       2.20 - 3.08   the king follows at a third the speed, 42% — the parallax
+       3.15          inert   ·   3.30  app.js removes the node
      ============================================================ */
   .intro{
     position: fixed; inset: 0; z-index: 200;    /* over .cover (140) */
@@ -948,13 +978,19 @@
        app.js would clear it) degrades to a dark pane you can still scroll and
        click through rather than a locked screen. */
     pointer-events: none;
-    /* Inert once every travel has finished — the king is the last to land, at
-       1.66s. Set this EARLIER than that and the parting is cut off mid-slide:
-       at 1.6s with a 1.6s travel the grounds were only 51% of the way out, so
-       the reveal snapped. The CSS fail-safe, needing no script. */
-    animation: introDone 1ms linear 1.7s forwards;
+    /* Inert once every travel has finished — the king halves are last, at 3.08s.
+       Set this EARLIER than that and the parting is cut off mid-slide: at 1.6s
+       against a 1.6s travel the grounds were only 51% of the way out, so the
+       reveal snapped instead of sliding. The CSS fail-safe, needing no script. */
+    animation: introDone 1ms linear 3.15s forwards;
   }
   @keyframes introDone{ to{ visibility: hidden; } }
+  /* SEEN IT ALREADY. The class goes on <html> by the inline script in the head, before
+     <body> is parsed, so the curtain never paints a single frame on a return visit.
+     display:none rather than visibility or opacity, because those would still let the
+     keyframes run — and the debris alone is fourteen animated elements nobody is
+     looking at. The footer's replay link drops the class for that page view. */
+  .seen-intro .intro{ display: none; }
 
   /* ---- the two grounds ---- */
   .intro-half{ position: absolute; inset: 0; }
@@ -991,6 +1027,7 @@
        --wash-cut   shading through the band the cut travels — nothing, on paper
        --blade-1 / --blade-2 / --burst   the light effects
        --shard      the chips thrown off the king — ink on paper, paper on ink
+       --frame-1 / --frame-2   the plate border's heavy rule and its hairline
 
      THE WASH RUNS OUTWARD, NOT INWARD, and that follows from the blade's colour.
      The original converged on ink at the cut, deliberately, so that the seam was the
@@ -1026,6 +1063,8 @@
     /* The king is ink here, so its chips are ink. On a dark ground the king inverts
        to paper and so must these, or the debris vanishes into the backdrop. */
     --shard: rgba(36,26,15,.92);
+    --frame-1: rgba(36,26,15,.52);
+    --frame-2: rgba(36,26,15,.26);
   }
   .intro-half{
     background-color: var(--gnd-base);
@@ -1063,13 +1102,62 @@
       var(--wash-far) 100%);
   }
 
-  /* ---- the king, cut on the same line but travelling on its own ---- */
+  /* ---- the plate border ----
+     A letterpress frame: a heavy rule inset from the edge, a hairline inside it, and a
+     small block at each corner. Same vocabulary as the dotted rules and case borders on
+     the page proper, at curtain scale.
+     ON BOTH HALVES, EXACTLY LIKE THE GROUND AND THE WASH. Each half draws the WHOLE
+     frame and shows only its own side of the cut, so at rest the union is one unbroken
+     border with nothing to give the cut away — and when they part, each carries its own
+     piece of the frame with it, which is the entire point. Drawing it once on .intro
+     instead would leave a frame hanging in mid-air while the halves slid out from under
+     it.
+     THREE RULES FROM ONE ELEMENT, because ::before is already the wash and there is no
+     third pseudo-element available: `border` is the heavy rule, `outline` with a
+     NEGATIVE offset is the hairline drawn inside it, and four one-colour gradients
+     pinned to the corners are the blocks. background-origin is padding-box by default,
+     so the blocks land just inside the heavy rule, in the channel between the two. */
+  .intro-half::after{
+    content: ""; position: absolute; inset: 2.4vmin;
+    border: 2px solid var(--frame-1);
+    outline: 1px solid var(--frame-2);
+    outline-offset: -1.5vmin;
+    background-image:
+      linear-gradient(var(--frame-1), var(--frame-1)),
+      linear-gradient(var(--frame-1), var(--frame-1)),
+      linear-gradient(var(--frame-1), var(--frame-1)),
+      linear-gradient(var(--frame-1), var(--frame-1));
+    background-size: 1vmin 1vmin;
+    background-position: left top, right top, left bottom, right bottom;
+    background-repeat: no-repeat;
+  }
+
+  /* ---- the king, cut on the same line but travelling on its own ----
+     THE SHADOW LIVES OUT HERE, OUTSIDE THE CLIP, AND THE CLIP LIVES ON THE GLYPH.
+     That inversion is the whole point of this pair of rules. A filter is applied to an
+     element's rendered content and the clip is applied AFTERWARDS, so with the shadow
+     on the glyph and the clip on this wrapper — which is how it was — the shadow got
+     generated and then sliced along the diagonal. At rest that is invisible, because
+     the two clips tile the plane and their union is the whole shadow. The instant the
+     halves separate, each carries a fragment of shadow ending on a hard diagonal edge,
+     and the pieces read as flat cut-outs.
+     Putting the clip on a DESCENDANT reverses the order: the glyph is cut first, then
+     this wrapper casts a shadow from the cut silhouette. So each half throws a shadow
+     off its own cut face, which is what a solid slab does, and nothing is ever cut.
+     Checked against the old behaviour at rest, since that is what this risks: each half
+     now also shadows its own cut EDGE, which could have darkened the seam and given the
+     cut away before the pop. It does not — worst case 1.6 of 255 across the seam band.
+     Where ink crosses the cut that shadow falls on the other half's ink and cannot be
+     seen; where there is no ink there is no edge to cast one.
+     The filter region is this element, so it is viewport-sized. That is fine because
+     the content inside never changes during the animation — only transform and opacity
+     do — so the blur is rasterised once and then merely composited. */
   .intro-kh{
     position: absolute; inset: 0;
-    display: flex; align-items: center; justify-content: center;
+    filter: drop-shadow(0 6px 14px rgba(36,26,15,.45));
   }
-  .intro-kh-top{ clip-path: polygon(0 0, 100% 0, 100% 42%, 0 58%); }
-  .intro-kh-bot{ clip-path: polygon(0 58%, 100% 42%, 100% 100%, 0 100%); }
+  .intro-kh-top .intro-king{ clip-path: polygon(0 0, 100% 0, 100% 42%, 0 58%); }
+  .intro-kh-bot .intro-king{ clip-path: polygon(0 58%, 100% 42%, 100% 100%, 0 100%); }
 
   /* Black king, and the treatment matches the real board exactly: .pc.b is ink with
      a paper edge and .pc.w is paper with an ink edge, so the curtain's two pieces
@@ -1078,49 +1166,123 @@
      Each carrying a stroke in the OPPOSITE colour is also what makes them
      ground-independent — invert the backdrop and neither piece vanishes into it,
      they simply trade which one is the solid and which is the line art. */
+  /* Full-viewport and centring its OWN text, rather than being a shrink-wrapped span
+     centred by the wrapper. It has to be viewport-sized because it now carries the
+     clip, and clip-path percentages resolve against the element's own box — on a
+     shrink-wrapped span the same polygon would describe a completely different line.
+     The glyph ends up in exactly the same place either way: before, the wrapper
+     flex-centred this span's line box in the viewport; now this span flex-centres the
+     same line box inside a box that IS the viewport. Verified, not assumed.
+     introKing scales this element, clip and all — which is safe precisely because the
+     cut passes through the centre. A uniform scale about the centre maps that line onto
+     itself: at 1.35 the polygon's corners move to (-17.5%, 60.8%) and (117.5%, 39.2%),
+     which is the same -0.16 slope through the same midpoint. */
   .intro-king{
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
     font-family: var(--pieces);
     font-size: clamp(120px, 30vmin, 260px);
     line-height: 1;
     color: var(--ink);
     -webkit-text-stroke: 3px rgba(244,236,217,.92);
-    filter: drop-shadow(0 6px 14px rgba(36,26,15,.45));
-    animation: introKing .5s cubic-bezier(.2,.7,.2,1) both;
+    animation: introKing .4s cubic-bezier(.2,.7,.2,1) both;
   }
 
-  /* ---- the parting, with the king lagging behind the ground ----
-     THE TIMING IS LOAD-BEARING: .intro goes visibility:hidden at 1.7s, so every
-     travel here has to FINISH before then or the slide is cut off mid-flight and
-     the reveal snaps instead of sliding. Grounds run .78->1.60, king .82->1.66.
+  /* ---- the pop, the hold, and the parting ----
+     THE GROUNDS DO NOT MOVE UNTIL 2.20, and that is the whole trick. The blade
+     finished and faded at 1.04; the king pops at 1.52 and then sits there open. Pull
+     this delay any earlier and the curtain starts leaving while the king is still
+     being cut, which is the version that had no pauses in it.
+     THE TIMING IS ALSO LOAD-BEARING AT THE OTHER END: .intro goes visibility:hidden
+     at 3.15s, so every travel here has to FINISH before then or the slide is cut off
+     mid-flight and the reveal snaps. Grounds run 2.20->3.02, king halves 2.20->3.08.
      Straight up and down: at full-screen size any rotation swings a corner into
-     view, and the reveal has to be clean to the edges.
-     The parallax is the difference in distance, not in speed — the grounds clear
-     the viewport entirely while the king only travels two thirds of the way and
-     fades, so it hangs back over the revealed page for a beat and reads as
-     further away. */
-  .intro-half{ animation: introPart .82s cubic-bezier(.5,0,.2,1) .78s both; }
+     view, and the reveal has to be clean to the edges. */
+  /* .70s, not .82s — the grounds leave FASTER than they used to, and that is half of
+     what makes the parallax read. Widening the gap by slowing the king instead would
+     have pushed the whole curtain past 3.4s; speeding the departure costs nothing and
+     also suits it, since the world flying apart while the king hangs is the picture. */
+  .intro-half{ animation: introPart .7s cubic-bezier(.5,0,.2,1) 2.2s both; }
   .intro-top{ animation-name: introPartUp; }
   .intro-bot{ animation-name: introPartDown; }
   @keyframes introPartUp  { to{ transform: translateY(-104%); } }
   @keyframes introPartDown{ to{ transform: translateY(104%); } }
 
-  .intro-kh{ animation: introKhPart .84s cubic-bezier(.45,0,.3,1) .82s both; }
-  .intro-kh-top{ animation-name: introKhUp; }
-  .intro-kh-bot{ animation-name: introKhDown; }
-  /* Moves WITH the ground from the first frame, just less far. An earlier cut held
-     the king still for the first 40% and only then let it go, which opened a gap
-     of ~700px on a 900px screen — at that separation it stops reading as depth and
-     starts reading as the king detaching and floating over the revealed page.
-     Proportional travel from the same instant is what makes it parallax. */
+  /* THREE MOVES IN ONE RUN, because they have to be one animation: two animations on
+     the same element would have the later one's fill mode stomp the earlier one's
+     transform, and splitting them across the two halves would risk the pair drifting
+     out of sync — which is the one thing that must never happen here, since the king
+     only looks whole because its halves are perfectly registered.
+       0    -> 9%      THE POP — a shove, on the diagonal   1.52 -> 1.66
+       9%   -> 43.6%   held open, dead still                1.66 -> 2.20
+       43.6 -> 100%    away, and fading                     2.20 -> 3.08
+
+     EACH HALF TRANSLATES ON A DIAGONAL *AND* ROTATES, and no two of those four numbers
+     match. The top half goes up and LEFT, about 30 degrees off vertical, turning 4.5
+     degrees anticlockwise; the bottom goes down and RIGHT, about 23 degrees off
+     vertical, turning 3.4 degrees clockwise. Opposite translations, opposite spins,
+     unequal everything: that is what makes them read as two independent pieces of one
+     broken object instead of a symmetrical split. Mirrored values looked mechanical,
+     and translation without rotation looked like two sliding plates.
+
+     THE PIVOTS ARE EACH PIECE'S OWN CENTRE OF MASS, and that is load-bearing rather
+     than fussy. The default origin is the centre of the ELEMENT, which is the whole
+     viewport — so the pivot would sit on the cut, below the top half's mass and above
+     the bottom's, and rotating about it would swing each piece sideways. At these
+     magnitudes that swing is about the same size as the pop itself, so it would have
+     cancelled the bottom half's rightward travel almost exactly. Pivoting each piece on
+     its own mass makes rotation pure spin, leaving the translate solely in charge of
+     direction. Measured off the glyph: its ink spans 344-558px on a 900px screen and
+     the cut crosses at 450, so the halves' centres are 397px (44%) and 504px (56%).
+
+     THE POP IS IN VMIN, THE DEPARTURE IN PERCENT, and that difference is deliberate.
+     The pop has to stay a constant fraction of THE KING, which is itself sized in
+     vmin, so vmin keeps the gap at a tenth of the piece on any screen: 1.55vmin is
+     14px against a 260px king on a laptop and 6px against a 120px one on a phone.
+     Percentages would not — and worse, since translateX resolves against width and
+     translateY against height, a percentage pair changes ANGLE with the aspect ratio:
+     16 degrees on a desktop collapses to about 5 on a phone. vmin fixes both axes to
+     one length, so the angle holds everywhere.
+     The departure is the opposite case. It is about clearing the SCREEN, not about the
+     king, so it stays in percent of the viewport. The two units interpolate through
+     calc() between keyframes, which is fine and is verified.
+     Per-segment easing, hence `linear` on the shorthand — the pop is a hard snap, the
+     hold is nothing, and the departure eases out. */
+  .intro-kh{ animation: introKhPart 1.56s linear 1.52s both; }
+  .intro-kh-top{ transform-origin: 50% 44%; animation-name: introKhUp; }
+  .intro-kh-bot{ transform-origin: 50% 56%; animation-name: introKhDown; }
+  /* PARALLAX, WIDENED. On the way out the king covers 42% of the height in .88s while
+     the ground covers 104% in .70s — about a third of its speed, where it used to be
+     four sevenths. It also keeps drifting along its pop angle and keeps TURNING, out to
+     -9 and +7 degrees, so the king is moving on three axes while the ground moves on
+     one. That is most of why the depth reads: a rigid vertical slide gives the eye
+     nothing to compare against.
+     Travelling only 42% means it is still on screen, fading, after the ground has gone
+     — which is the whole effect: the page arrives underneath a king that has not
+     finished falling. The fade is held to 82% for that reason.
+     The parallax is that difference in speed and distance, NOT a difference in start
+     time. An earlier cut held the king still for the first 40% of a shared travel and
+     then released it, opening a ~700px gap on a 900px screen, and that read as the king
+     detaching rather than as depth. */
   @keyframes introKhUp{
-    from{ transform: translateY(0); opacity: 1; }
-    62% { opacity: 1; }
-    to  { transform: translateY(-64%); opacity: 0; }
+    0%    { transform: translate(0, 0) rotate(0deg); opacity: 1;
+            animation-timing-function: cubic-bezier(.12,.9,.25,1); }
+    9%    { transform: translate(-.85vmin, -1.5vmin) rotate(-4.5deg); opacity: 1;
+            animation-timing-function: linear; }
+    43.6% { transform: translate(-.85vmin, -1.5vmin) rotate(-4.5deg); opacity: 1;
+            animation-timing-function: cubic-bezier(.45,0,.35,1); }
+    82%   { opacity: 1; }
+    100%  { transform: translate(-5vmin, -42%) rotate(-9deg); opacity: 0; }
   }
   @keyframes introKhDown{
-    from{ transform: translateY(0); opacity: 1; }
-    62% { opacity: 1; }
-    to  { transform: translateY(64%); opacity: 0; }
+    0%    { transform: translate(0, 0) rotate(0deg); opacity: 1;
+            animation-timing-function: cubic-bezier(.12,.9,.25,1); }
+    9%    { transform: translate(.6vmin, 1.42vmin) rotate(3.4deg); opacity: 1;
+            animation-timing-function: linear; }
+    43.6% { transform: translate(.6vmin, 1.42vmin) rotate(3.4deg); opacity: 1;
+            animation-timing-function: cubic-bezier(.45,0,.35,1); }
+    82%   { opacity: 1; }
+    100%  { transform: translate(3.5vmin, 42%) rotate(7deg); opacity: 0; }
   }
 
   @keyframes introKing{
@@ -1141,7 +1303,10 @@
     color: #fbf4e0;
     -webkit-text-stroke: 2px rgba(36,26,15,.92);
     filter: drop-shadow(0 6px 14px rgba(36,26,15,.5));
-    animation: introKnight .95s cubic-bezier(.32,.05,.2,1) .25s both;
+    /* Passes the king at 40% of its run, so .15 + .8 * .4 = .47s — and the blade
+       below starts drawing at .46. The two are tied: the mark has to appear as the
+       knight is level with the king, not before it arrives or after it has gone. */
+    animation: introKnight .8s cubic-bezier(.32,.05,.2,1) .15s both;
   }
   @keyframes introKnight{
     0%  { opacity: 0; transform: translate(-320%, -50%) rotate(-18deg) scale(.85); }
@@ -1162,37 +1327,57 @@
        paper ground is invisible, and an ink one there is what sells depth. */
     filter: drop-shadow(0 0 7px var(--blade-1))
             drop-shadow(0 0 20px var(--blade-2));
-    animation: introSlash .8s ease-out .3s both;
+    animation: introSlash .58s linear .46s both;
   }
-  /* It opens from the middle outwards via clip-path, NOT scaleX: scaling this
-     element horizontally would change the diagonal's angle mid-animation, since
-     preserveAspectRatio="none" ties the geometry to the element's own box. */
+  /* It is WIPED, via clip-path, and never scaled: scaling this element horizontally
+     would change the diagonal's angle mid-animation, since preserveAspectRatio="none"
+     ties the geometry to the element's own box.
+     LEFT TO RIGHT, the way the knight travels — the mark is the path the blade took,
+     so it has to be laid down in that direction. It used to open from the centre
+     outwards in both directions, which reads as a cut spreading rather than as a
+     stroke being made.
+     Three moves in one: strike, hold, fade. The strike is 116ms because a slash is
+     nearly instantaneous; the hold is what makes it register at all; and the fade is
+     what leaves the screen empty for the beat that follows. Each segment carries its
+     own timing function, so the stroke stays sharp while the fade eases — hence the
+     shorthand above declaring `linear` rather than a curve for the whole run. */
   @keyframes introSlash{
-    0%, 30% { opacity: 0; clip-path: inset(0 50% 0 50%); }
-    52%     { opacity: 1; clip-path: inset(0 0 0 0); }
-    100%    { opacity: 0; clip-path: inset(0 0 0 0); }
+    0%  { opacity: 1; clip-path: inset(0 100% 0 0);
+          animation-timing-function: cubic-bezier(.16,.84,.36,1); }
+    20% { opacity: 1; clip-path: inset(0 0 0 0);
+          animation-timing-function: linear; }
+    60% { opacity: 1; clip-path: inset(0 0 0 0);
+          animation-timing-function: ease-in; }
+    100%{ opacity: 0; clip-path: inset(0 0 0 0); }
   }
   .intro-burst{
     width: 160vmax; height: 160vmax;
     background: radial-gradient(circle at 50% 50%, var(--burst), rgba(255,255,255,0) 60%);
     opacity: 0;
-    animation: introBurst .7s ease-out .34s both;
+    /* Belongs to the STRIKE, not to the split: it fires with the blade at .46 and is
+       gone by .98, so the beat is genuinely empty. */
+    animation: introBurst .52s ease-out .46s both;
   }
   @keyframes introBurst{
-    0%, 26%{ opacity: 0; transform: translate(-50%, -50%) scale(.35); }
-    46%    { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-    100%   { opacity: 0; transform: translate(-50%, -50%) scale(1.2); }
+    0%  { opacity: 0; transform: translate(-50%, -50%) scale(.35); }
+    30% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+    100%{ opacity: 0; transform: translate(-50%, -50%) scale(1.2); }
   }
 
   /* ---- the king comes apart ----
      Fourteen chips from the point of impact. The container is a ZERO-SIZED point at
      the centre of the screen, so every shard's own translate(-50%,-50%) starts it
      exactly on that point and --dx / --dy are then a plain flight vector out from it.
-     Timed to the FLASH, not the blade: the blade enters at .3s but the burst peaks
-     around .66s, and the debris has to be the consequence of the strike rather than
-     part of the stroke. Runs .58 -> 1.25s at the latest, so it is finished long
-     before .intro goes inert at 1.7s, and it overlaps the parting on purpose — chips
-     still in the air as the screen opens is what stitches the two moments together. */
+     THROWN BY THE POP, at 1.52. Not at the strike — they used to fly with the flash,
+     which put the eruption inside the stroke and left nothing to happen afterwards —
+     and not at the parting either, because the moment the king separates is the moment
+     its cut faces would shed anything.
+     This delay has to track the pop's. Leave it behind and the chips fly during pause
+     one, which has to stay dead air.
+     Runs 1.52 -> 2.19 at the latest, so it spans most of pause two and is spent right
+     as the grounds start to move. That overlap is deliberate: the hold is structurally
+     frozen, and the chips settling through it are the only thing keeping it from
+     reading as a stalled frame. */
   .intro-debris{
     position: absolute; left: 50%; top: 50%;
     width: 0; height: 0;
@@ -1202,7 +1387,7 @@
     position: absolute; left: 0; top: 0;
     width: var(--w); height: var(--w);
     background: var(--shard);
-    animation: introShard .62s cubic-bezier(.12,.62,.28,1) calc(.58s + var(--d)) both;
+    animation: introShard .62s cubic-bezier(.12,.62,.28,1) calc(1.52s + var(--d)) both;
   }
   /* Four irregular chips rather than squares or dots — a rotating square reads as a
      square, and at this size a polygon reads as broken material. Cycled across the
@@ -2214,6 +2399,12 @@
        none` the halves would sit at their un-parted position and cover the page
        forever — the reveal IS the animation. */
     .intro{ display: none; }
+    /* EXCEPT when it was asked for. The footer's replay link marks the curtain it
+       inserts, and a visitor who clicks something labelled "replay intro" has chosen
+       this motion — suppressing it there would just be a dead control. The preference
+       is about motion nobody asked for. (0,2,0) beats the rule above, so this needs no
+       !important. Still safe: app.js removes the node on its own timer either way. */
+    .intro.forced{ display: block; }
 
     /* ---- the set ----
        app.js also refuses to add .setting when this query matches, so this is the

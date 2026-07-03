@@ -543,15 +543,35 @@
      rots — __gambit.replayIntro() is how you look at it again. */
   var introHTML = "";
 
+  /* How long to leave the curtain in the DOM. The CSS already made it inert at 3.15s
+     via introDone; this is only the tidy-up afterwards, so it has to be LATER than
+     that mark and is not otherwise load-bearing. Kept next to the markup it serves
+     rather than inline at both call sites, because the choreography's last travel
+     ends at 3.08s and a stale copy of this number is how the node would get pulled
+     out from under a parting that had not finished. */
+  var INTRO_MS = 3300;
+
+  /* Set on <html> by the inline head script when the visitor has seen the curtain
+     before; the stylesheet uses it to suppress the whole thing with nothing painted. */
+  var INTRO_KEY = "gambit-intro-seen";
+  var SEEN_CLASS = "seen-intro";
+
   /* Pure CSS, so re-inserting the node is the whole trick: every animation starts
-     over from its declared delay. */
+     over from its declared delay.
+     Dropping the class matters — on a return visit the stylesheet is hiding .intro, so
+     without this the replay would insert a node that is display:none and appear to do
+     nothing at all. It is not persisted, so it only affects this page view. */
   function replayIntro() {
     if (!introHTML) return false;
+    document.documentElement.classList.remove(SEEN_CLASS);
     var old = $("intro");
     if (old && old.parentNode) old.parentNode.removeChild(old);
     document.body.insertAdjacentHTML("afterbegin", introHTML);
     var el = $("intro");
-    setTimeout(function () { if (el && el.parentNode) el.parentNode.removeChild(el); }, 1850);
+    /* Marks this curtain as asked for, which is what lets it through the
+       prefers-reduced-motion rule that hides the automatic one. */
+    if (el) el.classList.add("forced");
+    setTimeout(function () { if (el && el.parentNode) el.parentNode.removeChild(el); }, INTRO_MS);
     return true;
   }
 
@@ -1256,6 +1276,10 @@
   });
 
   $("reset-link").addEventListener("click", function (e) { e.preventDefault(); hardReset(true); });
+  /* Deliberately does not clear gambit-intro-seen: this replays the curtain for the
+     one page view, it does not re-arm it for future loads. Same reasoning as reset
+     unlocks leaving gambit-cover-seen alone. */
+  $("intro-link").addEventListener("click", function (e) { e.preventDefault(); replayIntro(); });
   /* =============== focus trap =============== */
   /* All three panels are aria-modal="true", which tells a screen reader that
      nothing outside them exists — but Tab still walked the whole page behind
@@ -1336,14 +1360,26 @@
   /* No cover means no gate, so settle the board now. With a cover, hideCover owns
      the call — the settle lives AFTER the only gate, never before it. */
   if ($("cover").hidden) startSetup();
-  /* The intro curtain is pure CSS and has already made itself inert by 1.6s; this
+  /* The intro curtain is pure CSS and has already made itself inert at 2.85s; this
      only takes the node out of the DOM afterwards so nothing is left lying over
-     the page. Guarded because it is scenery: if it is already gone, fine. */
+     the page. Guarded because it is scenery: if it is already gone, fine.
+     It also decides whether the curtain was allowed to play at all. The markup is
+     always served, so the outerHTML is captured FIRST and unconditionally — that is
+     what lets the footer link replay it even on a visit where it never ran. */
   (function dropIntro() {
     var el = $("intro");
     if (!el) return;
     introHTML = el.outerHTML;                     /* so replayIntro() can put it back */
-    if (reduced) { if (el.parentNode) el.parentNode.removeChild(el); return; }
-    setTimeout(function () { if (el.parentNode) el.parentNode.removeChild(el); }, 1850);
+    /* Suppressed by the head script (seen before), or motion is off: straight out.
+       Reduced motion deliberately does NOT record a viewing — turn the preference off
+       later and the curtain is still owed once. */
+    if (document.documentElement.classList.contains(SEEN_CLASS) || reduced) {
+      if (el.parentNode) el.parentNode.removeChild(el);
+      return;
+    }
+    /* Written as it starts, not when it ends: a visitor who navigates away mid-curtain
+       has still seen it, and a half-played curtain is not worth replaying at them. */
+    try { localStorage.setItem(INTRO_KEY, "1"); } catch (e) {}
+    setTimeout(function () { if (el.parentNode) el.parentNode.removeChild(el); }, INTRO_MS);
   })();
 })();

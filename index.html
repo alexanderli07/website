@@ -72,6 +72,23 @@
   ]
 }
 </script>
+
+<!-- ONE-TIME CURTAIN. The intro plays on a visitor's first ever load and never again
+     unless they ask for it from the footer.
+     THIS HAS TO BE AN INLINE SCRIPT IN THE HEAD, and it is the only one on the page.
+     The curtain is pure CSS, so it starts animating the moment its element is parsed —
+     which is well before app.js runs at the end of the body. Deciding this from app.js
+     would mean a returning visitor sees several frames of curtain before it is torn
+     out. Setting a class on <html> before <body> exists is the only way to suppress it
+     with nothing rendered at all.
+     Wrapped in try/catch because localStorage throws outright in some privacy modes;
+     failing there simply means the curtain plays, which is the harmless direction. -->
+<script>
+  try {
+    if (localStorage.getItem("gambit-intro-seen") === "1")
+      document.documentElement.classList.add("seen-intro");
+  } catch (e) {}
+</script>
 </head>
 <body>
 
@@ -134,8 +151,16 @@
          50, the two controls are simply 50 - T and 50 + T.
          T is 1.5 here, down from 3.2: about 13px on a laptop and 13 on a phone. At
          3.2 it was a 29px wedge and read as a painted stripe rather than something a
-         blade did. Thin enough that the ink halo around it does real work now. -->
-    <path fill="url(#is-gash)" d="M0,58 Q50,48.5 100,42 Q50,51.5 0,58 Z"/>
+         blade did. Thin enough that the ink halo around it does real work now.
+         LENGTH. The mark spans x 16..84, so about two thirds of the width, while the
+         CUT it belongs to still runs edge to edge — the blade is the visible stroke,
+         not the seam, and a stroke that reaches both edges reads as a rule drawn
+         across the page rather than as something swung through the middle of it.
+         Its endpoints ride the cut's own line, y = 58 - 0.16x, which is what keeps it
+         collinear with the seam it is about to open: 55.44 at x=16, 44.56 at x=84.
+         The controls do not change with the span. Any range symmetric about x=50 has
+         endpoints averaging 50, so 50 -/+ T holds however short the mark gets. -->
+    <path fill="url(#is-gash)" d="M16,55.44 Q50,48.5 84,44.56 Q50,51.5 16,55.44 Z"/>
   </svg>
   <span class="intro-burst"></span>
   <!-- The king comes apart. Fourteen chips thrown from the point of impact, timed to
@@ -367,6 +392,7 @@
 <footer>
   GAMBIT <span class="r">&middot;</span> made with <span class="r" aria-hidden="true">&hearts;</span><span class="vh">love</span> by Alex
   <span class="r">&middot;</span> <a href="#" id="reset-link">reset unlocks</a>
+  <span class="r">&middot;</span> <a href="#" id="intro-link">replay intro</a>
 </footer>
 
 <!-- ======================= COVER / RULES (dialog) ======================= -->
