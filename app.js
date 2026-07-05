@@ -42,7 +42,7 @@
     { title: "dragonfl.ai", yr: "Sep 2023",
       blurb: "An ML system helping blind users perceive their surroundings — object, face and text recognition on one dashboard.",
       hl: "1st Overall — RythmHacks 2023", quiet: false,
-      tags: ["Machine Learning", "Computer Vision", "OCR"],
+      tags: ["Computer Vision", "OCR", "Facial Recognition"],
       img: "assets/images/dragonflai.webp", links: [{ l: "GitHub", h: "https://github.com/SpiritByte/dragonfl.ai" }, { l: "Devpost", h: "https://devpost.com/software/dragonfl-ai" }],
       problem: "How much of the world is closed off if you can't see it? We set out to give blind users a real-time sense of what's around them.",
       approach: "Built an image-recognition device with object, face and text recognition; all readings stream to a dashboard accessible through a frontend website.",
@@ -50,7 +50,7 @@
     { title: "reMindA", yr: "Aug 2024",
       blurb: "Smart glasses for Alzheimer's patients — facial recognition surfaces a loved one's name and relationship on a discreet display the moment they're seen.",
       hl: "2nd Overall — Ignition Hacks 2024", quiet: false,
-      tags: ["Facial Recognition", "ESP32", "Flask"],
+      tags: ["OpenCV", "ESP32-CAM", "Flask"],
       img: "assets/images/reminda.webp", links: [{ l: "GitHub", h: "https://github.com/DevTechJr/reminda" }, { l: "Video", h: "https://youtu.be/jonY-y7NVz0" }, { l: "Devpost", h: "https://devpost.com/software/reminda" }],
       problem: "Alzheimer's slowly erases the faces of the people you love most. Could a wearable quietly hand those names back, right when they're needed?",
       approach: "Paired an ESP32-CAM and LCD on an Arduino R4 with an OpenCV facial-recognition model trained on a family-uploaded database, plus a Flask dashboard for managing faces, relationships and settings.",
@@ -58,7 +58,7 @@
     { title: "invīsibilis", yr: "2022 – present",
       blurb: "A horror game where an invisible maze is only revealed through a lidar gun — built in Roblox Studio with Lua. 10,000+ players.",
       hl: "Best Game Mechanic — AngelHacks 2023", quiet: false,
-      tags: ["Roblox Studio", "Lua", "Game Mechanic"],
+      tags: ["Roblox Studio", "Lua", "Lidar"],
       img: "assets/images/invisibilis.webp", links: [{ l: "Play on Roblox", h: "https://www.roblox.com/games/13512108865/inv-sibilis" }],
       problem: "What if you couldn't see the level at all, and seeing it was the gameplay?",
       approach: "Engineered lidar-based visibility mechanics in Lua, optimizing game logic and rendering loops so the maze and monsters only exist for a moment after each scan.",
@@ -66,7 +66,7 @@
     { title: "Opposite Odyssey", yr: "Dec 2023",
       blurb: "A platformer where switching between night and day reveals different paths up the mountain.",
       hl: "1st Place + Most Creative — MayfieldHacks", quiet: false,
-      tags: ["Game Dev", "Level Design"],
+      tags: ["Roblox Studio", "Lua", "3D Vector Space"],
       img: "assets/images/OppositeOdyssey.webp", links: [],
       problem: "The theme was \"opposites attract\" — so the opposite of light became a different version of the world.",
       approach: "Players toggle night/day to reveal paths that exist in only one state, across parkour and boss fights.",
@@ -74,7 +74,7 @@
     { title: "ServiceSwap", yr: "Jul 2025",
       blurb: "A peer-to-peer marketplace where people trade skills instead of cash — semantic matching pairs what you need with whoever can offer it.",
       hl: "Built at Hack404 2025", quiet: true,
-      tags: ["Marketplace", "NLP / Embeddings", "Flask", "Socket.IO"],
+      tags: ["sentence-transformers", "Flask", "Socket.IO", "Geolocation"],
       img: "assets/images/serviceswap.svg", links: [{ l: "Video", h: "https://youtu.be/0sAJfKkeAMY" }, { l: "Devpost", h: "https://devpost.com/software/serviceswap" }],
       problem: "Plenty of people can't afford services but hold skills worth trading. A market only works if supply and demand can actually find each other.",
       approach: "Built a two-sided marketplace on Flask with real-time chat (Socket.IO), geolocation filtering (Haversine), and a sentence-transformers model that matches listings by semantic similarity (cosine distance) — the matching engine at the core of the market.",
@@ -88,8 +88,8 @@
       approach: "Pulls price and volume history with yfinance, screens candidates for liquidity (minimum average volume, full trading months) and 30-day volatility, then scores each on volatility, liquidity and market cap — with a Groq LLM tuning the metric weights. The optimizer forces one large-cap and one small-cap, caps any position at 15% and any sector at 40%, and clips weights for diversification across 10–25 names, all inside a $1,000,000 CAD budget." },
     { title: "Brampton Arts & Culture Coin", yr: "May 2024",
       blurb: "Upload original art, an AI detector verifies it, and every view earns $BAC — a culture currency redeemable for tax rebates or NFTs.",
-      hl: "3rd Place — WolfHacks · tokenomics", quiet: false,
-      tags: ["Tokenomics", "Crypto", "AI"],
+      hl: "3rd Place — WolfHacks", quiet: false,
+      tags: ["AI Art Detection", "Token Minting", "NFTs"],
       img: "assets/images/BAC.webp", links: [{ l: "GitHub", h: "https://github.com/alexanderli07/Brampton-Arts-and-Culture-Coin" }],
       problem: "The theme was \"AI takeover.\" We flipped it: what if AI rewarded human creativity with real economic value?",
       approach: "Designed the token economy ($BAC): an AI art detector verifies originality, views mint coins, and coins trade for tax rebates or buy pieces as NFTs — a full incentive + payments loop.",
@@ -97,7 +97,7 @@
     { title: "ecoin", yr: "Jul 2024",
       blurb: "A climate-action reward currency — verified green purchases and recycling mint ecoin, redeemable with eco-conscious partners.",
       hl: "Built at StarterHacks 2024", quiet: true,
-      tags: ["Incentive Design", "Flask", "SQLAlchemy"],
+      tags: ["Python", "Flask", "SQLAlchemy"],
       img: "assets/images/ecoin.webp", links: [{ l: "GitHub", h: "https://github.com/HetavP2/Ecoin" }, { l: "Devpost", h: "https://devpost.com/software/ecoin-p0t9l1" }],
       problem: "Climate anxiety stalls action. What if sustainable choices paid you back — a currency that turns good habits into spendable value and links people to greener businesses?",
       approach: "Designed a points-based reward economy on a Flask + SQLAlchemy backend: green transactions (sustainable purchases, recycling) mint ecoin, which connects consumers to partner companies — a closed incentive loop tying behaviour to value.",
@@ -1269,10 +1269,14 @@
   /* Unsealing everything is its own explicit button — and once everything is
      open, the same button is how you put it all back. Branches on the same flag
      applyUnlocks() uses to set the label, so the two can never disagree. */
+  /* No jumpTo here on purpose. It used to scroll the page to the spoils section,
+     which yanked you away from wherever you were reading — and the whole page has
+     just opened, so there is nothing special about that one section any more. The
+     cascade is announced for screen readers regardless, so nothing is lost by
+     leaving the viewport where the visitor put it. */
   $("btn-unlock-all").addEventListener("click", function () {
     if (allDone) { hardReset(true); return; }
     unlockAll();
-    jumpTo("spoils");
   });
 
   $("reset-link").addEventListener("click", function (e) { e.preventDefault(); hardReset(true); });

@@ -170,11 +170,17 @@
   }
   .topnav .brand .dot{ color: var(--red); }
   /* One typeface for the whole lockup — mixing mono into a 19px nav item reads
-     busy at this size. The hierarchy comes from weight and colour instead: the
-     name steps back to walnut at 700, the wordmark keeps ink at 900, and the red
-     stays on the full stop so there is still only one accent in the bar. */
-  .topnav .brand .bn{ font-weight: 700; color: var(--walnut); }
-  .topnav .brand .bx{ font-weight: 700; color: var(--walnut-3); margin: 0 .04em; }
+     busy at this size, so the shape of it comes from weight, colour and tracking.
+     THE NAME NO LONGER STEPS BACK. It sat at walnut/700 against the wordmark's
+     ink/900, which made GAMBIT the loud half of a lockup whose entire job is to say
+     whose site this is. ALEX now matches it on both counts and takes a little extra
+     tracking on top, so it carries at least as much weight as the wordmark. The colon
+     stays walnut-3, which is what keeps the two halves legible as separate words now
+     that they share a colour, and the red stays on the full stop so there is still
+     only one accent in the bar.
+     Moving to ink also fixes the contrast: walnut measures 5.9:1 on paper, ink 13:1. */
+  .topnav .brand .bn{ font-weight: 900; color: var(--ink); letter-spacing: .05em; }
+  .topnav .brand .bx{ font-weight: 700; color: var(--walnut-3); margin: 0 .06em; }
   .nav-links{ display: flex; gap: 6px; flex-wrap: wrap; min-width: 0; }
   /* These used to snap a 1px red rectangle around the label on hover, with no
      transition declared at all — an outlined box appearing instantly, which read
@@ -370,8 +376,16 @@
     list-style: none; margin: 16px 0 0; padding: 0;
     border-top: 1px solid var(--walnut-3);
   }
+  /* THE GLYPH COLUMN IS 52px, NOT 34px, AND IT IS SIZED OFF THE WIDEST ROW.
+     The knight/bishop row carries TWO glyphs. Measured, the pair inks 45.6px against a
+     single piece's 21.5px — so in a 34px track it overflowed by 12.4px and ran into its
+     own label, ending up 2.6px PAST where the label starts while every other row had
+     21.5px of daylight. That is the unevenness: one row crushed, four airy.
+     52px fits the pair with slack for a different pieces font (a Mac resolves these
+     from Apple Symbols, not Segoe UI Symbol, at a different width), and every label in
+     the list still starts on the same x. */
   .cover-bounty li{
-    display: grid; grid-template-columns: 34px 130px 1fr;
+    display: grid; grid-template-columns: 52px 130px 1fr;
     gap: 10px; align-items: center;
     padding: 7px 2px;
     border-bottom: 1px dotted var(--walnut-3);
@@ -381,14 +395,19 @@
   .cover-bounty .bg.r{ color: var(--red); }
   .cover-bounty b{ font-weight: 600; color: var(--ink); }
   .cover-bounty i{ font-style: normal; color: var(--walnut-2); }
-  /* two glyphs on the knight/bishop row, so the cell must never wrap */
-  .cover-bounty .bg{ white-space: nowrap; }
+  /* two glyphs on the knight/bishop row, so the cell must never wrap.
+     CENTRED, which is what evens out the leftover space. Left-aligned in a track sized
+     for the widest row, a single 21.5px glyph would leave 30px of slack all on one side
+     and sit 40px from its label while the pair sat 16px away. Centring splits the slack,
+     so the gap runs 13px on the pair and 25px on the singles instead of 16 and 40 — and
+     it degrades gracefully if a platform's pieces font measures wider than this one. */
+  .cover-bounty .bg{ white-space: nowrap; text-align: center; }
   @media (max-width: 520px){
-    /* The glyph column stays 34px. At 28px the knight/bishop row's PAIR of
-       glyphs wrapped onto two lines inside the cell — 27x43 against 27x21 for
-       every other row — which alone made that row 84px tall against 62px, and
-       was the one thing breaking the alignment down the list. */
-    .cover-bounty li{ grid-template-columns: 34px 1fr; }
+    /* The glyph column keeps its full 52px here too. At 28px the knight/bishop row's
+       PAIR of glyphs wrapped onto two lines inside the cell — 27x43 against 27x21 for
+       every other row — which alone made that row 84px tall against 62px, and was the
+       one thing breaking the alignment down the list. */
+    .cover-bounty li{ grid-template-columns: 52px 1fr; }
     .cover-bounty i{ grid-column: 2; }
   }
   .cover-play{
@@ -409,9 +428,16 @@
     padding-bottom: 9px;
   }
   .sc-kicker .red{ color: var(--red); }
-  /* keep this line clear of the close button sitting over the corner. The rule
-     underneath still runs the full width — only the text is inset. */
-  .cover-card .sc-kicker{ padding-right: 30px; }
+  /* Keep this line clear of the close button sitting over the corner. The rule
+     underneath still runs the full width — only the text is inset.
+     24px, down from 30, so the red half sits a touch further right. The close button is
+     32px wide at right:6px, i.e. it occupies the first 38px in from the card's padding
+     edge, and this text's right edge lands at (card padding-right + this). Card padding
+     is clamp(18px, 4vw, 36px), so the clearance runs 22px at desktop widths down to 4px
+     at about 395px — which is the narrowest width where the two halves still share a
+     line at all; below that the kicker wraps and the button is not on that row. Do not
+     go below 24px: at 20px the tightest case touches zero. */
+  .cover-card .sc-kicker{ padding-right: 24px; }
   .sc-fields{
     display: grid; grid-template-columns: repeat(4, 1fr);
     border-bottom: 1px solid var(--walnut-3);
