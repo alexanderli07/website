@@ -68,11 +68,59 @@ var FILES = "abcdefgh";
                    pruning sharpened the scores enough to pull the average loss
                    down to ~87cp, and 260 puts the weakness back where it was
                    calibrated.
+     BOT_RECAPTURE_BIAS  multiplies the weight of a move that captures on the square
+                   the opponent just captured on. This is the fix for "the bot does
+                   not take back", and it is a HUMAN-LIKENESS knob rather than a
+                   strength one.
+                   It is needed because the search is RIGHT and still looks wrong.
+                   After 1.e4 e5 2.Nf3 Nc6 3.Nxe5, the moves that decline Nxe5 score
+                   only 40-50cp worse — honestly so, because the knight is still
+                   hanging next move too. The engine does not believe recapturing is
+                   urgent, and it is correct. A 1200-rated human takes back
+                   reflexively anyway, so that has to be stated, not tuned for.
+                   Measured with test/recapture.js over five positions where taking
+                   back IS the honest best move:
+                       bias    1     6    25    60   120
+                       mean  38%   61%   81%   89%   95%
+                       worst  5%   22%   53%   73%   88%
+                   120 is deliberately large: it means "recapture unless the safety
+                   ceiling forbids it". Crucially it costs nothing elsewhere —
+                   average loss 52.4cp before, 50.9 after; best-move rate 12.1%
+                   before, 13.8% after. It only ever moves the decision in positions
+                   where a capture just happened.
+                   Accepted consequence: the bot will take back into a mildly bad
+                   recapture, and can be baited by a sacrifice deeper than its
+                   horizon. BOT_MAX_LOSS still filters anything catastrophic, and
+                   "always takes back" is itself a very human 1200 weakness — far
+                   more human than ignoring a capture altogether.
+     BOT_RANK_DECAY  multiplies a move's weight by DECAY^rank. SHIPPED AT 1.0, i.e.
+                   OFF — it is a dial for a separate problem, left in place because
+                   the problem is real and measured.
+                   That problem: a plain softmax has no term for HOW MANY candidates
+                   there are. In an ordinary 32-move opening position the moves
+                   clustered within 40-120cp of best carry a summed weight of 15.8 to
+                   25.1 against 1.00 for the best move, so AL-1200 plays its own best
+                   move 12-14% of the time and its error rate is set by how bushy the
+                   position is — meaning it is quietly much weaker in open positions
+                   than in closed ones. Temperature cannot correct it, because it
+                   scales every tail entry equally: BOT_TEMP 260 -> 60 moved the
+                   recapture rate only 20% -> 34%.
+                   Turning this down sharpens the bot a lot, and that is why it is
+                   off. Measured in self-play, 240 decisions each:
+                       decay        1.00  0.92  0.85  0.78  0.70  0.62
+                       avg loss cp  52.4  32.9  22.0  17.7  12.4   8.1
+                       plays best   12%   22%   30%   42%   51%   60%
+                   Anything below ~0.9 also stops it ever shedding 300cp+ (0 of 240
+                   at every value tested below 1.0), which matters here: the whole
+                   site is gated behind winning material off this bot.
      BOT_MAX_LOSS  hard ceiling on how much worse than best a played move may
                    be. This is the whole safety story. 350 sits above a knight
                    (320) and below a rook (500): AL-1200 can drop a piece, and
                    does, but it can never shed a rook or a queen for nothing
                    and it can never walk into a mate it can see.
+                   It is also the ONLY guarantee here that does not depend on the
+                   knobs above: test/recapture.js keeps a position whose recapture
+                   is forced by this ceiling alone and asserts it at 100%.
    Every candidate that allows a forced mate (score <= -MATE_MIN) is excluded
    outright, whatever the knobs say, and a mate the bot can see is always
    played. There is no "uniformly random legal move" path any more — that is
@@ -85,6 +133,8 @@ var MATE_MIN = MATE - 1000;
 
 var BOT_DEPTH = 4;
 var BOT_TEMP = 260;
+var BOT_RANK_DECAY = 1.0;      /* off — read the note above before changing this */
+var BOT_RECAPTURE_BIAS = 120;
 var BOT_MAX_LOSS = 350;
 
 /* Zobrist keys — two 32-bit halves per component, so a position key is a full
@@ -859,10 +909,23 @@ function bestMove(game) {
   return scored.length ? scored[0].m : null;
 }
 
-/* softmax weight of a root score. Clamped at `best` so a transposition-table
-   inconsistency can never manufacture a weight above 1. */
-function botWeight(v, best) {
-  return Math.exp(((v < best ? v : best) - best) / BOT_TEMP);
+/* Softmax weight of a root score, times a per-candidate multiplier that carries the
+   rank decay and any recapture bias. The exponential is still clamped at `best` so a
+   transposition-table inconsistency can never manufacture a weight above `mult`.
+   `mult` is fixed per index BEFORE any sampling (see botMove), which is what keeps
+   the rejection sampling below exact: it appears identically in the envelope and in
+   the acceptance test, so it cancels out of the accept ratio. */
+function botWeight(v, best, mult) {
+  return mult * Math.exp(((v < best ? v : best) - best) / BOT_TEMP);
+}
+
+/* The square the opponent just captured on, or -1. Read off the move stack rather
+   than tracked separately so it cannot desync from the board — takebacks included. */
+function lastCaptureSquare(game) {
+  var h = game.hist;
+  if (!h || h.length === 0) return -1;
+  var m = h[h.length - 1].m;
+  return m.captured ? m.to : -1;
 }
 
 /* draw an index from a weight array holding total mass `tot` */
@@ -926,11 +989,19 @@ function botMove(game) {
   /* everything at or below `lo` is excluded: a catastrophic material drop, or
      (far below any eval) a move that allows a forced mate */
   var lo = best - BOT_MAX_LOSS - 1;
-  var W = new Array(n), tot = 0, i, s, v, e;
+  /* Per-candidate multipliers, fixed here and never touched again — the two knobs
+     that shape the mistake, kept out of the sampling loop so the loop stays exact.
+       DECAY^i   flattens the influence of a long tail of near-equal moves, which is
+                 what previously outvoted the best move ~20:1
+       BIAS      pulls taking-back back up to something a human would recognise */
+  var recapSq = lastCaptureSquare(game);
+  var MULT = new Array(n), W = new Array(n), tot = 0, i, s, v, e;
   for (i = 0; i < n; i++) {
     s = scored[i];
+    MULT[i] = Math.pow(BOT_RANK_DECAY, i);
+    if (recapSq >= 0 && s.m.captured && s.m.to === recapSq) MULT[i] *= BOT_RECAPTURE_BIAS;
     /* a fail-low bound at or under the cut is proof enough to drop the move */
-    W[i] = (s.v <= lo) ? 0 : botWeight(s.v, best);
+    W[i] = (s.v <= lo) ? 0 : botWeight(s.v, best, MULT[i]);
     tot += W[i];
   }
 
@@ -942,7 +1013,7 @@ function botMove(game) {
     if (s.exact) return s.m;                    /* envelope was the true weight */
     if (tries-- <= 0) break;
     v = refineRootMove(game, s, BOT_DEPTH, lo);
-    e = s.exact ? botWeight(v, best) : 0;       /* not exact => outside the band */
+    e = s.exact ? botWeight(v, best, MULT[i]) : 0;   /* not exact => outside the band */
     if (Math.random() * W[i] < e) return s.m;
     tot += e - W[i];                            /* envelope tightens to the truth */
     W[i] = e;
@@ -954,7 +1025,7 @@ function botMove(game) {
   tot = 0;
   for (i = 0; i < n; i++) {
     if (!scored[i].exact || scored[i].v <= lo) W[i] = 0;
-    else { W[i] = botWeight(scored[i].v, best); tot += W[i]; }
+    else { W[i] = botWeight(scored[i].v, best, MULT[i]); tot += W[i]; }
   }
   i = tot > 0 ? sampleWeighted(W, n, tot) : 0;
   return scored[i < 0 ? 0 : i].m;
