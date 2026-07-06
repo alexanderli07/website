@@ -55,6 +55,10 @@ const STORAGE_KEY = "two-worlds:world";
 
 function initialWorld(): World {
   if (typeof window === "undefined") return "day";
+  // An explicit ?world=night (or ?world=day) deep link wins, so a finance posting
+  // can link straight into the quant world. Then a returning visitor's saved choice.
+  const param = new URLSearchParams(window.location.search).get("world");
+  if (param === "day" || param === "night") return param;
   const saved = window.localStorage.getItem(STORAGE_KEY);
   if (saved === "day" || saved === "night") return saved;
   return "day"; // builder-first by default
@@ -72,7 +76,9 @@ export function WorldProvider({ children }: { children: ReactNode }) {
   const reduced = useReducedMotion();
   const [world, setWorldState] = useState<World>(initialWorld);
   const [flip, setFlip] = useState<Flip | null>(null);
+  const [announce, setAnnounce] = useState("");
   const flipId = useRef(0);
+  const didMount = useRef(false);
   const anchorRef = useRef<Anchor | null>(null);
 
   // Apply the world to <html> FIRST — fonts (Space Grotesk vs Fraunces) and colours
@@ -91,8 +97,11 @@ export function WorldProvider({ children }: { children: ReactNode }) {
     if (!el) return;
     // reading layout here forces the new fonts to apply before we measure
     const newTop = docTop(el);
-    // keep the same depth into the section, clamped so a shorter section can't overshoot
-    const off = Math.max(0, Math.min(a.offset, Math.max(0, el.offsetHeight - 40)));
+    // Keep the exact same depth into the section. The offset can be slightly negative
+    // (the section's heading was sitting just under the fixed nav) — preserve that so we
+    // don't snap down by the nav's height. Only clamp the top end so a section that's
+    // shorter in the other world can't overshoot past its end.
+    const off = Math.min(a.offset, Math.max(0, el.offsetHeight - 40));
     const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
     const target = Math.max(0, Math.min(newTop + off, maxScroll));
     if (lenisRef.current) {
@@ -108,6 +117,20 @@ export function WorldProvider({ children }: { children: ReactNode }) {
   // Persist the choice (non-layout) separately.
   useEffect(() => {
     window.localStorage.setItem(STORAGE_KEY, world);
+  }, [world]);
+
+  // Announce the flip to assistive tech — the whole site's content swaps with it,
+  // and that change is otherwise silent to screen-reader users. Skip the first run.
+  useEffect(() => {
+    if (!didMount.current) {
+      didMount.current = true;
+      return;
+    }
+    setAnnounce(
+      world === "day"
+        ? "Switched to day view — Full-stack and AI."
+        : "Switched to night view — Quant and Finance.",
+    );
   }, [world]);
 
   const setWorld = useCallback(
@@ -148,6 +171,11 @@ export function WorldProvider({ children }: { children: ReactNode }) {
   return (
     <Ctx.Provider value={value}>
       {children}
+
+      {/* Screen-reader-only announcement of the world flip (the visible swap is silent to AT). */}
+      <div className="sr-only" role="status" aria-live="polite">
+        {announce}
+      </div>
 
       {/* Circular reveal of the next world, anchored at the toggle. */}
       <AnimatePresence>
