@@ -245,18 +245,91 @@
   function clearMateModalTimer() {
     if (mateModalTimer) { clearTimeout(mateModalTimer); mateModalTimer = 0; }
   }
-  function openAt(el, delay) {
+  /* THE REVEAL USED TO SNAP, and that is what made the animation look broken.
+     A sealed face is compact — .u-back is 118px — while an open card is however tall
+     its content needs. Measured: project cards 120px -> ~500px, experience 105 -> 435,
+     the file 182 -> 612. That is 3.4x to 4.6x. Adding .open changed it in ONE frame, so
+     the grid row jumped, the still-sealed cards sharing that row were dragged to the
+     new height with it (grid items stretch), and every section below shifted down. Ten
+     cards cascading 70ms apart turned that into the whole page hopping.
+     Measure-then-animate, with no height stored anywhere: read the box, flip the
+     classes, read it again, pin the old value for one frame, then let a transition
+     carry it to the new one and hand the card back to `auto`. Correct at any viewport
+     width and for any card content, which a hard-coded min-height per family is not —
+     that is exactly what had drifted.
+     THREE THINGS THAT ARE EASY TO GET WRONG HERE:
+       overflow:hidden for the duration, and it is not optional — the card is a column
+         flex box whose front takes flex:1, so while it is pinned to the smaller height
+         the content hangs straight out through the border. Measured spill at the start
+         of the grow: 245px on a project card, 201 on a job, 258 on the file.
+       offsetHeight rather than a rect — the integer layout box, which is exactly what
+         the grid row reserves. (A rect would do here: flipIn's rotateX sits on the
+         FRONT, not on an ancestor of the card, so the card's own box is not
+         foreshortened. Measured 509 vs 508.8. Use offsetHeight anyway, so this stays
+         true if the flip ever moves onto the card itself.)
+       a timeout alongside transitionend — if the transition never fires (interrupted,
+         tab hidden, a reseal landing mid-grow) the card must not stay pinned to a
+         fixed pixel height forever. */
+  var GROW_MS = 450;
+  function animateHeight(el, apply) {
+    var from = el.offsetHeight;
+    apply();
+    var to = el.offsetHeight;
+    /* 12px, not a token 1 or 2: the award tiles share a fixed height and shift only
+       about 7px between faces, and nudging those over 450ms is jitter with no reveal
+       in it. Real growth here is 320-430px, so nothing that matters is near the gate. */
+    if (Math.abs(to - from) < 12) return;
+    var t = 0;
+    var clear = function () {
+      el.removeEventListener("transitionend", clear);
+      if (t) { clearTimeout(t); t = 0; }
+      el.style.transition = ""; el.style.height = ""; el.style.overflow = "";
+    };
+    el.style.overflow = "hidden";
+    el.style.height = from + "px";
+    void el.offsetHeight;                       /* commit the start height */
+    el.style.transition = "height " + GROW_MS + "ms cubic-bezier(.2,.7,.2,1)";
+    el.style.height = to + "px";
+    el.addEventListener("transitionend", clear);
+    t = setTimeout(clear, GROW_MS + 200);
+  }
+
+  /* ONE CARD AT A TIME, DELIBERATELY — do not "fix" the projects grid by opening it as
+     a unit. It was tried: measure #proj-grid, give every card .open in the same frame,
+     and transition the container's height once, staggering only the flips via a
+     --flip-delay custom property. On paper that removes the grid-row contention
+     described below, and the delays did come out correctly at 0/45/90/.../405ms.
+     It looked worse, because the container has to carry overflow:hidden while it is
+     pinned — otherwise the opened cards hang 2384px out through the bottom of the
+     section. That clip hides each card until the growing edge passes it, so the whole
+     cascade plays behind it and what you actually see is every card arriving already
+     flipped. The stagger was still happening; it was just invisible.
+     So the per-card path stays. The residual roughness is real and has a cause: cards in
+     one grid row share that row's height, so the first card to open drags its still
+     sealed neighbours up with it, and those then measure a `from` of wherever the row
+     already got to (their delta lands under the 12px gate, so they skip their own
+     animation and simply flip). Four rows of three means four growth surges rather than
+     one. The lever for that is `align-items: start` on .dgrid, which stops the dragging
+     entirely at the cost of ragged card bottoms within a row (~25px). Not taken. */
+  function openAt(el, delay, animate) {
     if (!el || el.classList.contains("open")) return false;
-    if (delay > 0 && !reduced) revealTimers.push(setTimeout(function () { el.classList.add("open"); }, delay));
-    else el.classList.add("open");
+    var run = animate
+      ? function () { animateHeight(el, function () { el.classList.add("open"); }); }
+      : function () { el.classList.add("open"); };
+    if (delay > 0 && !reduced) revealTimers.push(setTimeout(run, delay));
+    else run();
     return true;
   }
   function applyUnlocks(cascade) {
     var c = counts(), delay = 0, step = cascade && !reduced ? 70 : 0, i;
-    for (i = 0; i < 10; i++) if (i < c.wins && openAt($("win-" + i), delay)) delay += step;
-    for (i = 0; i < 10; i++) if (i < c.projects && openAt($("proj-" + i), delay)) delay += step;
-    for (i = 0; i < 6; i++) if (i < c.jobs && openAt($("job-" + i), delay)) delay += step;
-    if (c.resume) openAt($("resume-card"), delay);
+    /* Only the animated cascade grows the boxes. A page load that already has unlocks
+       calls this with cascade off and must paint the open cards at full height
+       immediately — growing them there would replay the reveal on every visit. */
+    var anim = !!(cascade && !reduced);
+    for (i = 0; i < 10; i++) if (i < c.wins && openAt($("win-" + i), delay, anim)) delay += step;
+    for (i = 0; i < 10; i++) if (i < c.projects && openAt($("proj-" + i), delay, anim)) delay += step;
+    for (i = 0; i < 6; i++) if (i < c.jobs && openAt($("job-" + i), delay, anim)) delay += step;
+    if (c.resume) openAt($("resume-card"), delay, anim);
     $("prog-wins").textContent = c.wins + "/10";
     $("prog-proj").textContent = c.projects + "/10";
     $("prog-jobs").textContent = c.jobs + "/6";
@@ -328,7 +401,9 @@
       revealTimers.push(setTimeout(function () {
         el.classList.add("sealing");
         revealTimers.push(setTimeout(function () {
-          el.classList.remove("open", "sealing");
+          /* shrinks on the way down too — the same snap in reverse looked just as
+             wrong, and resealing is the one place you watch every card at once */
+          animateHeight(el, function () { el.classList.remove("open", "sealing"); });
         }, 300));                        /* matches flipOut's duration */
       }, i * 40));
     });
