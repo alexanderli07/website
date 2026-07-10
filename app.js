@@ -428,25 +428,47 @@
   var botCapsSinceToast = 3;     /* first bot capture shows the toast */
   var trayP = [], trayB = [];    /* {glyph, label} */
 
+  /* =============== the sides =============== */
+  /* WHICH SIDE YOU PLAY IS THE THEME. The head gate put data-theme on <html>
+     before anything painted; reading it here rather than localStorage keeps one
+     source of truth, and it means a broken storage API degrades to light/White
+     everywhere at once instead of the two halves disagreeing.
+     Everything downstream compares against these two — there is deliberately no
+     other WHITE/BLACK literal left in the game flow, so a future third mode
+     (handicap? bot-vs-bot?) only has this seam to widen. */
+  var playerSide = document.documentElement.getAttribute("data-theme") === "dark" ? BLACK : WHITE;
+  var botSide = -playerSide;
+
   /* =============== board DOM =============== */
   var boardEl = $("board"), sqEls = [], pcEls = [];
-  (function buildBoard() {
+  /* Re-callable, because the toggle rebuilds the board the other way up. The
+     ORIENTATION lives entirely in this mapping — every consumer downstream is
+     keyed by 0x88 square, so nothing else knows which way is up. Flipped puts
+     h1 top-left and a8 bottom-right: Black's seat. Coordinates and labels are
+     derived from the square itself, so they cannot disagree with the mapping.
+     The visual-row CSS (the setup settle's nth-child beats) stays correct for
+     free: children are appended in visual order either way, so "the far back
+     rank settles first and yours last" holds in both worlds. */
+  function buildBoard(flipped) {
+    boardEl.innerHTML = "";
+    sqEls = []; pcEls = [];
     for (var vr = 0; vr < 8; vr++) {
       for (var vf = 0; vf < 8; vf++) {
-        var s = (7 - vr) * 16 + vf;
+        var s = flipped ? vr * 16 + (7 - vf) : (7 - vr) * 16 + vf;
         var d = document.createElement("button");
         d.type = "button";
         d.dataset.s = s;
-        d.setAttribute("aria-label", "abcdefgh"[vf] + (8 - vr));
-        if (vf === 0) { var rr = document.createElement("span"); rr.className = "coord rank"; rr.textContent = 8 - vr; d.appendChild(rr); }
-        if (vr === 7) { var ff = document.createElement("span"); ff.className = "coord file"; ff.textContent = "abcdefgh"[vf]; d.appendChild(ff); }
+        d.setAttribute("aria-label", "abcdefgh"[s & 7] + ((s >> 4) + 1));
+        if (vf === 0) { var rr = document.createElement("span"); rr.className = "coord rank"; rr.textContent = (s >> 4) + 1; d.appendChild(rr); }
+        if (vr === 7) { var ff = document.createElement("span"); ff.className = "coord file"; ff.textContent = "abcdefgh"[s & 7]; d.appendChild(ff); }
         var g = document.createElement("span"); g.className = "pc"; d.appendChild(g);
         d.addEventListener("click", onSquareClick);
         boardEl.appendChild(d);
         sqEls[s] = d; pcEls[s] = g;
       }
     }
-  })();
+  }
+  buildBoard(playerSide === BLACK);
 
   function renderBoard() {
     var lastM = game.hist.length ? game.hist[game.hist.length - 1].m : null;
@@ -513,7 +535,7 @@
      "White to move" line is noise next to a board that already shows it. */
   function statusHTML() {
     if (gameOver) return gameOver.text;
-    if (game.turn === BLACK) return "<b>AL-1200</b> is thinking&hellip;";
+    if (game.turn === botSide) return "<b>AL-1200</b> is thinking&hellip;";
     if (game.inCheck()) return '<span class="chk">Check</span> &mdash; get out of it.';
     return "";
   }
@@ -528,10 +550,11 @@
     var el = $("announce");
     if (!el) return;
     var n = sans.length, msg = "";
-    /* index 0 is White's first move, so an odd count means White moved last */
-    if (n) msg += (n % 2 === 1 ? "You played " : "AL-1200 played ") + sans[n - 1] + ". ";
+    /* index 0 is White's first move, so an odd count means White moved last —
+       and whether White's voice is "You" depends on which seat you took */
+    if (n) msg += ((n % 2 === 1) === (playerSide === WHITE) ? "You played " : "AL-1200 played ") + sans[n - 1] + ". ";
     if (gameOver) msg += gameOver.text.replace(/<[^>]*>/g, "");
-    else if (game.turn === BLACK) msg += "AL-1200 is thinking.";
+    else if (game.turn === botSide) msg += "AL-1200 is thinking.";
     else if (game.inCheck()) msg += "You are in check.";
     else msg += "Your move.";
     if (msg === lastAnnounced) return;      /* don't re-announce an unchanged state */
@@ -540,7 +563,7 @@
   }
 
   function render() {
-    legalCache = (!gameOver && game.turn === WHITE) ? game.legal() : [];
+    legalCache = (!gameOver && game.turn === playerSide) ? game.legal() : [];
     renderBoard();
     renderMoves();
     renderTray($("tray-player"), trayP);
@@ -550,7 +573,7 @@
        property. Takeback with no history and Hint on the bot's turn both did
        nothing while still looking pressable. */
     $("btn-take").disabled = !game.hist.length;
-    $("btn-hint").disabled = !!gameOver || game.turn !== WHITE;
+    $("btn-hint").disabled = !!gameOver || game.turn !== playerSide;
     announce();
   }
 
@@ -650,6 +673,80 @@
     return true;
   }
 
+  /* =============== the theme — the Black side of GAMBIT =============== */
+  /* Dark mode is not a palette: it is the other seat at the table. One switch
+     flips the tokens (CSS), the seat, the board orientation, the bounty copy
+     and who moves first. They can never disagree because they all read the one
+     data-theme attribute this writes.
+     The storage convention matches the theme gate in the head: the key exists
+     only when dark, so a first-time visitor and a cleared store both mean the
+     paper world. */
+  var THEME_KEY = "gambit-theme";
+  function themeNow() {
+    return document.documentElement.getAttribute("data-theme") === "dark" ? "dark" : "light";
+  }
+  /* The full swap, synchronously — attribute, storage, seat, board, copy, fresh
+     game. Callers that want it hidden put a curtain up in the SAME task (see
+     toggleTheme): the browser paints only after the task finishes, so the page
+     never shows a half-swapped frame. */
+  function applyTheme(t) {
+    endSetup();                        /* the settle's timers touch the old board */
+    if (t === "dark") document.documentElement.setAttribute("data-theme", "dark");
+    else document.documentElement.removeAttribute("data-theme");
+    try {
+      if (t === "dark") localStorage.setItem(THEME_KEY, "dark");
+      else localStorage.removeItem(THEME_KEY);
+    } catch (e) {}
+    playerSide = t === "dark" ? BLACK : WHITE;
+    botSide = -playerSide;
+    buildBoard(playerSide === BLACK);
+    applySideCopy();
+    var mt = document.querySelector('meta[name="theme-color"]');
+    if (mt) mt.setAttribute("content", t === "dark" ? "#171009" : "#f4ecd9");
+    /* sides changed, so the game in progress is void — newGame also gives the
+       bot its opening move when it now owns the white pieces */
+    newGame();
+  }
+  /* Everything the page SAYS about who plays what. Idempotent and total: called
+     at init and after every swap, so no string is half-flipped. */
+  function applySideCopy() {
+    var dark = playerSide === BLACK;
+    var el;
+    if ((el = $("rail-bounty-sub"))) el.textContent = "what each " + (dark ? "white" : "black") + " piece is carrying";
+    if ((el = $("rail-sides"))) el.innerHTML = dark ? "W: AL-1200 &middot; B: you" : "W: you &middot; B: AL-1200";
+    if ((el = $("sc-white"))) el.textContent = dark ? "AL-1200" : "You";
+    if ((el = $("sc-black"))) el.textContent = dark ? "You" : "AL-1200";
+    if ((el = $("cover-side-word"))) el.textContent = dark ? "white" : "black";
+    if ((el = $("cover-play"))) el.innerHTML = "Take " + (dark ? "Black" : "White") + " &mdash; begin";
+    var btn = $("btn-side");
+    if (btn) {
+      /* the button offers the OTHER world, so its label is the destination */
+      btn.setAttribute("aria-pressed", dark ? "true" : "false");
+      btn.setAttribute("aria-label", dark
+        ? "Switch sides — play White in light mode"
+        : "Switch sides — play Black in dark mode");
+      var lb = btn.querySelector(".sb-label");
+      if (lb) lb.textContent = dark ? "White" : "Black";
+    }
+  }
+  /* The toggle: the knight slices the king, and behind the parting halves the
+     world has changed sides. Same curtain as the intro — replayIntro() — and
+     the swap happens in the same synchronous task as the insertion, so the
+     curtain that covers the old world is already DRESSED for the new one: its
+     tokens flip with everything else, which is what makes the fallen king the
+     old world's colour. Under reduced motion there is no curtain and the swap
+     is simply instant, which is what that preference is asking for. */
+  var themeBusy = false;
+  function toggleTheme() {
+    if (themeBusy) return;
+    var next = themeNow() === "dark" ? "light" : "dark";
+    if (reduced || !introHTML) { applyTheme(next); return; }
+    themeBusy = true;
+    applyTheme(next);
+    replayIntro();
+    setTimeout(function () { themeBusy = false; }, INTRO_MS);
+  }
+
   /* =============== the board settles =============== */
   /* The pieces sit down rank by rank once the board is live. Waits on nothing —
      no timer, no font, no image, no network. The intro curtain is pure CSS and
@@ -675,11 +772,12 @@
   }
 
   /* =============== capture -> unlock plumbing =============== */
-  /* black pawns still standing — drives the promotion top-up below */
-  function blackPawnsLeft() {
+  /* the BOT's pawns still standing — drives the promotion top-up below. Side-
+     relative, because in dark mode the bot's pawns are the white ones. */
+  function botPawnsLeft() {
     var n = 0;
     for (var r = 0; r < 8; r++) {
-      for (var f = 0; f < 8; f++) if (game.board[r * 16 + f] === -PAWN) n++;
+      for (var f = 0; f < 8; f++) if (game.board[r * 16 + f] === PAWN * botSide) n++;
     }
     return n;
   }
@@ -712,11 +810,11 @@
     var pt = m.captured > 0 ? m.captured : -m.captured;   /* real piece — drives the tray glyph */
     var track = trackOfPiece(pt);                         /* which unlock track it pays into */
     var before = counts(), items = [], label = "", muted = false, kicker = "";
-    /* AL-1200 can't hide wins by promoting: once no black pawn is left standing
-       (all captured or promoted away), any further capture tops up the wins queue.
-       Derived from the board, so takebacks can't desync it. */
+    /* AL-1200 can't hide wins by promoting: once none of its pawns is left
+       standing (all captured or promoted away), any further capture tops up the
+       wins queue. Derived from the board, so takebacks can't desync it. */
     var toppedUp = false;
-    if (track !== "pawns" && !trackFull("pawns") && blackPawnsLeft() === 0) {
+    if (track !== "pawns" && !trackFull("pawns") && botPawnsLeft() === 0) {
       track = "pawns";
       toppedUp = true;
     }
@@ -800,7 +898,7 @@
 
   function botReply() {
     botTimer = 0;
-    if (gameOver || game.turn !== BLACK) return;
+    if (gameOver || game.turn !== botSide) return;
     var m = botMove(game);
     if (!m) { checkEnd(); return; }
     sans.push(san(game, m));
@@ -851,7 +949,7 @@
       return true;
     }
     if (game.inCheck()) {
-      if (game.turn === BLACK) {          /* White delivered mate */
+      if (game.turn === botSide) {        /* the PLAYER delivered mate */
         gameOver = { text: '<span class="chk">Checkmate.</span> <b>You win — full disclosure.</b>', kind: "win" };
         onPlayerMate();
       } else {
@@ -936,13 +1034,13 @@
   function onSquareClick(e) {
     endSetup();          /* first touch cancels all four beats in one frame */
     var s = +e.currentTarget.dataset.s;
-    if (gameOver || game.turn !== WHITE) return;
+    if (gameOver || game.turn !== playerSide) return;
     if (sel >= 0) {
       var m = findMove(sel, s);
       if (m) { afterPlayerMove(m, false); return; }
     }
     var p = game.board[s];
-    sel = (p > 0 && s !== sel) ? s : -1;
+    sel = (p * playerSide > 0 && s !== sel) ? s : -1;
     renderBoard();
   }
 
@@ -963,7 +1061,7 @@
     if (!m) return;
     sans.pop();
     if (m.captured) {
-      var arr = m.piece > 0 ? trayP : trayB;
+      var arr = m.piece * playerSide > 0 ? trayP : trayB;
       arr.pop();
     }
     if (m._unl) {                     /* refund the unlock this capture banked */
@@ -982,9 +1080,12 @@
     if (!game.hist.length) return;
     clearHint(); clearSlides(); sel = -1;
     undoOne();
-    if (game.turn === BLACK && game.hist.length) undoOne();
+    if (game.turn === botSide && game.hist.length) undoOne();
     hideGameOver();
     render();
+    /* In dark mode the bot owns move one, so taking everything back leaves it
+       to move — without this the game would sit there waiting for nobody. */
+    scheduleBotOpening(420);
   }
   function newGame() {
     if (botTimer) { clearTimeout(botTimer); botTimer = 0; }
@@ -996,9 +1097,18 @@
     hideGameOver();
     hideReveal();
     render();
+    scheduleBotOpening(650);
+  }
+  /* One gate for every "it might be the bot's move now" moment: new game and
+     takeback in dark mode, and the theme toggle behind its curtain. No-op
+     whenever it is not actually the bot's turn, so callers don't check. */
+  function scheduleBotOpening(ms) {
+    if (gameOver || game.turn !== botSide) return;
+    if (botTimer) clearTimeout(botTimer);
+    botTimer = setTimeout(botReply, ms || 650);
   }
   function showHint() {
-    if (gameOver || game.turn !== WHITE) return;
+    if (gameOver || game.turn !== playerSide) return;
     var m = bestMove(game);        /* the real best move, not AL-1200's fallible pick */
     if (!m) return;
     hintSquares = [m.from, m.to];
@@ -1359,6 +1469,7 @@
      one page view, it does not re-arm it for future loads. Same reasoning as reset
      unlocks leaving gambit-cover-seen alone. */
   $("intro-link").addEventListener("click", function (e) { e.preventDefault(); replayIntro(); });
+  $("btn-side").addEventListener("click", toggleTheme);
   /* =============== focus trap =============== */
   /* All three panels are aria-modal="true", which tells a screen reader that
      nothing outside them exists — but Tab still walked the whole page behind
@@ -1401,7 +1512,7 @@
     turn: function () { return game.turn === WHITE ? "w" : "b"; },
     legal: function () { return game.legal().map(moveToUci); },
     move: function (uci) {
-      if (gameOver || game.turn !== WHITE) return false;
+      if (gameOver || game.turn !== playerSide) return false;
       var m = uciToMove(game, uci);
       if (!m) return false;
       afterPlayerMove(m, true);   /* plays the move AND the bot reply, with reveal side-effects */
@@ -1421,6 +1532,14 @@
        plaque never paints at all, which is exactly how it rots. To see the
        PLAQUE, throttle to slow 4G with the cache off, or block app.js. */
     replayIntro: replayIntro,
+    /* the seat, and an instant theme setter (no curtain) so tests stay sync */
+    side: function () { return playerSide === WHITE ? "w" : "b"; },
+    theme: function (t) {
+      if (t === undefined) return themeNow();
+      if (t !== "dark" && t !== "light") return false;
+      if (t !== themeNow()) applyTheme(t);
+      return themeNow();
+    },
     setBoard: function () {
       boardEl.classList.remove("setting");
       void boardEl.offsetWidth;        /* commit, so the beat restarts */
@@ -1434,8 +1553,12 @@
 
   /* =============== init =============== */
   applyUnlocks(false);
+  applySideCopy();
   sizeFx();
   render();
+  /* A dark-theme load seats the bot as White with the move. Give the settle its
+     moment first — the opening landing mid-cascade reads as a glitch. */
+  scheduleBotOpening(1200);
   /* No cover means no gate, so settle the board now. With a cover, hideCover owns
      the call — the settle lives AFTER the only gate, never before it. */
   if ($("cover").hidden) startSetup();

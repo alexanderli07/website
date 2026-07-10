@@ -21,6 +21,14 @@
        came out identical to Black's. Keep a text font that has these glyphs
        ahead of any emoji fallback. */
     --pieces: "Segoe UI Symbol", "Apple Symbols", "Noto Sans Symbols 2", "DejaVu Sans", "Arial Unicode MS", sans-serif;
+    /* form controls / UA scrollbars follow the theme; the dark block flips this */
+    color-scheme: light;
+    /* rgb TRIPLETS, for the translucent families that need a different base per
+       theme but keep their alphas: the linen card fills, the paper halo rings,
+       and the brown hatch/vignette dust. Used as rgba(var(--linen), .55) etc. */
+    --linen: 255,251,240;
+    --halo:  244,236,217;
+    --hatch: 91,58,36;
   }
   *{ margin:0; padding:0; box-sizing:border-box; }
   /* overflow-x guard belongs on the root, not on body: on body it computes to
@@ -37,7 +45,7 @@
   @media (prefers-reduced-motion: reduce){ html{ scroll-behavior:auto; } }
   body{
     background:
-      radial-gradient(1100px 500px at 50% -8%, rgba(91,58,36,.07), transparent 65%),
+      radial-gradient(1100px 500px at 50% -8%, rgba(var(--hatch),.07), transparent 65%),
       var(--paper);
     color: var(--ink);
     font-family: var(--serif);
@@ -555,7 +563,7 @@
     margin-top: var(--tray-h);
     height: var(--board);
     border: 1px solid var(--walnut);
-    background: rgba(255,251,240,.62);
+    background: rgba(var(--linen),.62);
     box-shadow: 3px 3px 0 rgba(91,58,36,.16);
     padding: 0 0 4px;
     display: flex; flex-direction: column;
@@ -894,8 +902,14 @@
     -webkit-text-stroke: 1px rgba(36,26,15,.9);
     text-shadow: 0 2px 2px rgba(36,26,15,.28);
   }
+  /* PINNED, not var(--ink) — this is the one place the distinction matters. A black
+     chessman is black in both themes; the token flips to near-paper in dark mode, and
+     riding it would have turned Black's whole army white the moment the theme changed.
+     Every OTHER piece glyph on the page (trays, bounty rails, the win slice) represents
+     "the bot's pieces" and deliberately KEEPS the token, because the bot really does
+     swap colours with the theme. Board pieces are literal; UI pieces are semantic. */
   .sq .pc.b{
-    color: var(--ink);
+    color: #241a0f;
     text-shadow: 0 1px 0 rgba(244,236,217,.35);
   }
   .sq .coord{
@@ -1091,7 +1105,23 @@
     --shard: rgba(36,26,15,.92);
     --frame-1: rgba(36,26,15,.52);
     --frame-2: rgba(36,26,15,.26);
+    /* The blade's SVG gradient stops read this (see the .intro-slash stop rule): all
+       three stops share one colour and differ only in opacity, so one token flips the
+       whole mark. Ink on paper; paper on ink. */
+    --gash: #0d0805;
+    /* The cast: the king rides var(--ink) and so flips with the theme by itself —
+       black king slain in the light world, WHITE king slain in the dark one, which is
+       the story of the toggle. These four carry the parts of the pair that cannot ride
+       a token: the knight's fill is the king's opposite, and each stroke is its own
+       fill's opposite. */
+    --ck-edge: rgba(244,236,217,.92);
+    --kn-fill: #fbf4e0;
+    --kn-edge: rgba(36,26,15,.92);
+    --pc-glow: rgba(36,26,15,.45);
   }
+  /* stop-color is a presentation attribute, so this CSS wins over the markup value —
+     the SVG keeps its light-theme colours as the no-CSS fallback */
+  .intro-slash stop{ stop-color: var(--gash); }
   .intro-half{
     background-color: var(--gnd-base);
     background-image: var(--gnd);
@@ -1180,7 +1210,7 @@
      do — so the blur is rasterised once and then merely composited. */
   .intro-kh{
     position: absolute; inset: 0;
-    filter: drop-shadow(0 6px 14px rgba(36,26,15,.45));
+    filter: drop-shadow(0 6px 14px var(--pc-glow));
   }
   .intro-kh-top .intro-king{ clip-path: polygon(0 0, 100% 0, 100% 42%, 0 58%); }
   .intro-kh-bot .intro-king{ clip-path: polygon(0 58%, 100% 42%, 100% 100%, 0 100%); }
@@ -1209,8 +1239,8 @@
     font-family: var(--pieces);
     font-size: clamp(120px, 30vmin, 260px);
     line-height: 1;
-    color: var(--ink);
-    -webkit-text-stroke: 3px rgba(244,236,217,.92);
+    color: var(--ink);    /* flips with the theme: the fallen king is always the OLD world's */
+    -webkit-text-stroke: 3px var(--ck-edge);
     animation: introKing .4s cubic-bezier(.2,.7,.2,1) both;
   }
 
@@ -1326,9 +1356,9 @@
     line-height: 1;
     /* White knight against a black king — the mirror of the king's treatment, so
        the ink stroke is what keeps it legible on a light ground. */
-    color: #fbf4e0;
-    -webkit-text-stroke: 2px rgba(36,26,15,.92);
-    filter: drop-shadow(0 6px 14px rgba(36,26,15,.5));
+    color: var(--kn-fill);
+    -webkit-text-stroke: 2px var(--kn-edge);
+    filter: drop-shadow(0 6px 14px var(--pc-glow));
     /* Passes the king at 40% of its run, so .15 + .8 * .4 = .47s — and the blade
        below starts drawing at .46. The two are tied: the mark has to appear as the
        knight is level with the king, not before it arrives or after it has gone. */
@@ -1563,7 +1593,7 @@
     display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
     text-align: center;
     background:
-      repeating-linear-gradient(-45deg, rgba(91,58,36,.05) 0 10px, transparent 10px 20px),
+      repeating-linear-gradient(-45deg, rgba(var(--hatch),.05) 0 10px, transparent 10px 20px),
       var(--paper-2);
     padding: 16px 12px;
   }
@@ -1601,7 +1631,7 @@
   }
   .cap{
     border: 1px dashed var(--walnut-3);
-    background: rgba(255,251,240,.5);
+    background: rgba(var(--linen),.5);
     position: relative;
     overflow: hidden;
     min-height: var(--cap-h, 196px);
@@ -1653,7 +1683,7 @@
   }
   .dcard{
     border: 1px dashed var(--walnut-3);
-    background: rgba(255,251,240,.55);
+    background: rgba(var(--linen),.55);
     display: flex; flex-direction: column;
   }
   /* A TALLER SEALED FACE, to cut how far the grid has to travel. The shared .u-back is
@@ -1908,11 +1938,11 @@
   ol.moves{ list-style: none; display: flex; flex-direction: column; gap: 14px; }
   .move{
     border: 1px dashed var(--walnut-3);
-    background: rgba(255,251,240,.5);
+    background: rgba(var(--linen),.5);
   }
   .move.open{
     border: 1px solid var(--walnut);
-    background: rgba(255,251,240,.62);
+    background: rgba(var(--linen),.62);
     box-shadow: 3px 3px 0 rgba(91,58,36,.16);
   }
   .move .u-front{ padding: 0; }
@@ -1988,7 +2018,7 @@
   .adjourn{
     max-width: 680px; margin: 0 auto;
     border: 1px dashed var(--walnut-3);
-    background: rgba(255,251,240,.6);
+    background: rgba(var(--linen),.6);
   }
   .adjourn.open{
     border: 1px solid var(--walnut);
@@ -2025,7 +2055,7 @@
     font-family: var(--mono); font-size: 13px; font-weight: 500;
     letter-spacing: .06em;
     color: var(--ink); text-decoration: none;
-    background: rgba(255,251,240,.7);
+    background: rgba(var(--linen),.7);
     border: 1px solid var(--walnut);
     padding: 12px 16px 11px;
     overflow-wrap: anywhere;
@@ -2073,7 +2103,7 @@
   }
   .reveal.show{ transform: none; pointer-events: auto; }
   .reveal-card{
-    background: rgba(244,236,217,.98);
+    background: rgba(var(--halo),.98);
     border: 1px solid var(--walnut);
     /* The frame is drawn with box-shadow further down, not with outline. It used
        to be an outline — the same property the focus ring uses — so focusing
@@ -2358,13 +2388,13 @@
      or Esc to dismiss" — and had no state rules at all */
   .reveal-card{
     --shadow: 4px 4px 0 rgba(36,26,15,.22);
-    box-shadow: 0 0 0 3px rgba(244,236,217,.98), 0 0 0 4px var(--walnut), var(--shadow);
+    box-shadow: 0 0 0 3px rgba(var(--halo),.98), 0 0 0 4px var(--walnut), var(--shadow);
     transition: transform .14s cubic-bezier(.2,.7,.2,1), box-shadow .18s ease;
   }
   .reveal-card:hover { transform: translate(-1px,-1px); --shadow: 5px 5px 0 rgba(36,26,15,.28); }
   .reveal-card:active{ transform: translate(2px,2px);   --shadow: 0 0 0 rgba(36,26,15,0); }
   .reveal.fd .reveal-card{
-    box-shadow: 0 0 0 3px rgba(244,236,217,.98), 0 0 0 4px var(--red), var(--shadow);
+    box-shadow: 0 0 0 3px rgba(var(--halo),.98), 0 0 0 4px var(--red), var(--shadow);
   }
 
   /* The win modal's buttons were invisible but still clickable and tabbable for
@@ -2531,6 +2561,109 @@
   }
 
   /* ============================================================
+     DARK MODE — the Black side of GAMBIT
+     Not a reskin: [data-theme="dark"] also decides WHICH SIDE YOU PLAY. app.js
+     reads the same attribute, seats you as Black, flips the board and gives
+     AL-1200 the white pieces and the first move. The head gate sets the
+     attribute before first paint; the navbar knight toggles it.
+     Built as OVERRIDES so the light theme stays byte-identical: the palette
+     tokens flip here, and the dozen places a literal could not ride a token get
+     their own rule. The board pieces are the one thing that must NOT follow the
+     theme — a black chessman is black in both worlds — which is why .sq .pc.b
+     is pinned where everything semantic rides var(--ink).
+     ============================================================ */
+  html[data-theme="dark"]{
+    color-scheme: dark;
+    --paper:   #171009;   /* the field — the curtain's own near-black family */
+    --paper-2: #211812;
+    --paper-3: #2c2115;
+    --walnut:  #b3906b;   /* strong labels/borders */
+    --walnut-2:#c9a87d;   /* body copy */
+    --walnut-3:#785d3f;   /* rules and dotted borders only — 3.08:1, the same
+                             floor the light theme holds them to */
+    --ink:     #efe4cb;   /* primary text */
+    --red:     #e4674f;   /* the accent, lifted: #a4211b measures ~2.6:1 here */
+    --linen:   46,35,23;  /* card fills lift the panel instead of whitening it */
+    --halo:    23,16,9;   /* the ring around lifted cards = the field colour */
+    --hatch:   226,196,150; /* sealed-face hatching: light dust on dark panels */
+  }
+
+  /* ---- the board ----
+     Dimmed, not inverted: the same warm wood two stops down, so the white army
+     glows and the black army reads by its paper edge. That stroke is the one
+     addition — .pc.b is pinned near-black (correctly), and on #48341e it needs
+     the same rescue the curtain gives its ink pieces on dark grounds. */
+  html[data-theme="dark"] #board{
+    background-image: repeating-conic-gradient(#48341e 0 25%, #7b6040 0 50%);
+  }
+  html[data-theme="dark"] .sq.light{ background: #7b6040; }
+  html[data-theme="dark"] .sq.dark{ background: #48341e; }
+  html[data-theme="dark"] .sq .pc.b{
+    -webkit-text-stroke: 1px rgba(244,236,217,.45);
+    text-shadow: 0 1px 0 rgba(0,0,0,.4);
+  }
+  html[data-theme="dark"] .sq .coord{ color: rgba(240,228,203,.42); }
+  /* the red washes sit on darker squares now; same gesture, a little more of it */
+  html[data-theme="dark"] .sq.last{ --sh-wash: 0 0 0 100vmax rgba(228,103,79,.20); }
+  html[data-theme="dark"] .sq.check{ --sh-wash: 0 0 0 100vmax rgba(228,103,79,.42); }
+  html[data-theme="dark"] .sq.hint{ --sh-ring: 0 0 0 3px rgba(226,196,150,.9); }
+
+  /* ---- the win slice ----
+     .gs-half (the mated king) rides var(--ink) and flips by itself — in dark the
+     bot IS White, so the light king falling is correct, not a bug. The mating
+     piece is YOURS, and you are Black here. */
+  html[data-theme="dark"] .gs-piece{
+    color: #241a0f;
+    -webkit-text-stroke: 2px rgba(244,236,217,.9);
+    filter: drop-shadow(0 4px 6px rgba(0,0,0,.5));
+  }
+  html[data-theme="dark"] .gs-half{ text-shadow: 0 3px 4px rgba(0,0,0,.45); }
+
+  /* ---- the curtain, dark skin ----
+     The drafts file (../website-themes/gambit-intro-grounds.css) said the light
+     effects invert with the ground, and this is that promise kept: the ground is
+     the INK draft, the blade goes back to light, and the cast swaps — var(--ink)
+     already turned the fallen king white, these finish the pair. The toggle
+     replays this curtain, so the story reads: the black knight slays the white
+     king, and the world comes back dark. */
+  html[data-theme="dark"] .intro{
+    --gnd-base: #0d0906;
+    --gnd: radial-gradient(125% 95% at 50% 48%, #3d2d1d 0%, #1d1509 46%, #0b0805 100%);
+    --wash-far: rgba(0,0,0,.38);
+    --wash-cut: rgba(0,0,0,0);
+    --blade-1: rgba(255,246,224,.5);
+    --blade-2: rgba(255,246,224,.22);
+    --burst: rgba(255,255,255,.85);
+    --shard: rgba(244,236,217,.9);
+    --frame-1: rgba(240,230,207,.42);
+    --frame-2: rgba(240,230,207,.2);
+    --gash: #f6ecd4;
+    --ck-edge: rgba(36,26,15,.9);
+    --kn-fill: #241a0f;
+    --kn-edge: rgba(244,236,217,.9);
+    --pc-glow: rgba(0,0,0,.55);
+  }
+
+  /* ---- the side toggle ----
+     The glyph dresses as the side ON OFFER — the label names where the button
+     takes you, so the knight wears that side's colours too. */
+  .side-btn .sb-glyph{
+    font-family: var(--pieces); font-size: 13px; line-height: 1;
+    margin-right: 5px; vertical-align: -1px;
+    color: #241a0f;
+  }
+  html[data-theme="dark"] .side-btn .sb-glyph{
+    color: #fbf4e0; -webkit-text-stroke: .5px rgba(36,26,15,.8);
+  }
+  @media (max-width: 520px){
+    /* the bar is already fighting for its single row down here (see the brand
+       notes above) — the knight alone says it */
+    .side-btn .sb-label{ display: none; }
+    .side-btn .sb-glyph{ margin-right: 0; }
+    .side-btn{ padding-left: 9px; padding-right: 9px; }
+  }
+
+  /* ============================================================
      PRINT
      Ctrl+P on a portfolio should produce the portfolio, not a
      screenshot of a game. The board, chrome and dialogs go; every
@@ -2542,6 +2675,16 @@
   .print-head{ display: none; }
 
   @media print{
+    /* print is paper, whichever world the screen was in — re-pin every token
+       the dark block flips, so a dark-mode Ctrl+P still prints the letterpress
+       page rather than 40 near-black rectangles */
+    html[data-theme="dark"]{
+      color-scheme: light;
+      --paper:#f4ecd9; --paper-2:#ede1c4; --paper-3:#e4d5b2;
+      --walnut:#5b3a24; --walnut-2:#7a5230; --walnut-3:#9a7a52;
+      --ink:#241a0f; --red:#a4211b;
+      --linen:255,251,240; --halo:244,236,217; --hatch:91,58,36;
+    }
     .topnav, .arena, .cover, .case, .modal, .reveal, .toast,
     .skip, .u-back, #fx, .gs, footer{ display: none !important; }
 

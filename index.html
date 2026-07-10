@@ -7,7 +7,8 @@
 <title>Alexander Li — GAMBIT, a playable chess portfolio</title>
 <meta name="description" content="Personal portfolio of Alexander Li — Computing &amp; Financial Management at Waterloo. Hackathon wins, projects, work experience and the résumé." />
 <meta name="author" content="Alexander Li" />
-<!-- one committed light world, like print: stop the UA applying a dark scheme -->
+<!-- Default scheme, pre-CSS. styles.css sets the color-scheme PROPERTY per theme,
+     which outranks this meta once it loads; this only covers the unstyled flash. -->
 <meta name="color-scheme" content="light" />
 <meta name="theme-color" content="#f4ecd9" />
 <!-- CHANGE THIS if the page is served anywhere other than the site root -->
@@ -73,20 +74,22 @@
 }
 </script>
 
-<!-- ONE-TIME CURTAIN. The intro plays on a visitor's first ever load and never again
-     unless they ask for it from the footer.
-     THIS HAS TO BE AN INLINE SCRIPT IN THE HEAD, and it is the only one on the page.
-     The curtain is pure CSS, so it starts animating the moment its element is parsed —
-     which is well before app.js runs at the end of the body. Deciding this from app.js
-     would mean a returning visitor sees several frames of curtain before it is torn
-     out. Setting a class on <html> before <body> exists is the only way to suppress it
-     with nothing rendered at all.
+<!-- TWO GATES, ONE INLINE SCRIPT IN THE HEAD — the only script tag on the page
+     outside the ld+json. Both decisions have to land before ANYTHING paints:
+     · the one-time curtain: pure CSS, so it starts animating the moment its element
+       is parsed — well before app.js runs at the end of the body. Deciding it there
+       would show a returning visitor several frames of curtain before tear-out.
+     · the theme: dark mode is the whole page (and which SIDE you play — app.js reads
+       this same attribute). Set after first paint it would flash paper before going
+       dark on every return visit.
      Wrapped in try/catch because localStorage throws outright in some privacy modes;
-     failing there simply means the curtain plays, which is the harmless direction. -->
+     failing there means light theme and the curtain plays — the harmless defaults. -->
 <script>
   try {
     if (localStorage.getItem("gambit-intro-seen") === "1")
       document.documentElement.classList.add("seen-intro");
+    if (localStorage.getItem("gambit-theme") === "dark")
+      document.documentElement.setAttribute("data-theme", "dark");
   } catch (e) {}
 </script>
 </head>
@@ -240,6 +243,15 @@
       <span class="nub-key">&#9919;</span><span class="nub-label">Unlock everything</span>
     </button>
     <button class="nav-btn" id="btn-rules" type="button" aria-haspopup="dialog">Rules</button>
+    <!-- The side toggle. Not a sun-and-moon: dark mode here means TAKING BLACK — the
+         theme and your side of the board are one setting, which is the point of it.
+         The label names the side you would switch TO, so it reads as an offer; the
+         knight is the site's motif and its colouring flips with the theme it offers.
+         aria-pressed tracks dark, and app.js keeps label + aria-label in step. -->
+    <button class="nav-btn side-btn" id="btn-side" type="button" aria-pressed="false"
+            aria-label="Switch sides — play Black in dark mode">
+      <span class="sb-glyph" aria-hidden="true">&#9822;&#xFE0E;</span><span class="sb-label">Black</span>
+    </button>
   </div>
 </nav>
 
@@ -248,7 +260,7 @@
 
   <aside class="rail rail-l" aria-label="Bounty — what each captured piece unlocks">
     <span class="rail-title">Bounty</span>
-    <span class="rail-sub">what each black piece is carrying</span>
+    <span class="rail-sub" id="rail-bounty-sub">what each black piece is carrying</span>
     <ul class="bounty">
       <li><span class="bg">&#9823;&#xFE0E;</span><span><b>pawn &times;8</b><i>10&times; hackathon wins</i></span></li>
       <li><span class="bg">&#9822;&#8202;&#9821;</span><span><b>knight / bishop &times;4</b><i>10&times; projects</i></span></li>
@@ -276,7 +288,7 @@
 
   <aside class="rail rail-r" aria-label="Move list and game controls">
     <span class="rail-title">Scoresheet</span>
-    <span class="rail-sub">W: you &middot; B: AL-1200</span>
+    <span class="rail-sub" id="rail-sides">W: you &middot; B: AL-1200</span>
     <div class="sheet-cols"><span>No.</span><span>White</span><span>Black</span></div>
     <div id="movelist"></div>
     <div class="rail-foot">
@@ -406,15 +418,15 @@
     </div>
     <div class="sc-fields">
       <div class="sc-field"><span class="lbl">Event</span><span class="val">ALEXANDERLI.DEV — GAMBIT</span></div>
-      <div class="sc-field"><span class="lbl">White</span><span class="val">You</span></div>
-      <div class="sc-field"><span class="lbl">Black</span><span class="val">AL-1200</span></div>
+      <div class="sc-field"><span class="lbl">White</span><span class="val" id="sc-white">You</span></div>
+      <div class="sc-field"><span class="lbl">Black</span><span class="val" id="sc-black">AL-1200</span></div>
       <div class="sc-field"><span class="lbl">Site</span><span class="val">Toronto 2026</span></div>
     </div>
 
     <h2 class="sc-name" id="cover-title">GAMBIT<span class="dot">.</span></h2>
     <p class="sc-role">
       This portfolio is <b>sealed</b>. Across the board sits <b>AL-1200</b> &mdash; a bot guarding
-      Alexander Li's record. Every black piece you capture unseals real content below.
+      Alexander Li's record. Every <span id="cover-side-word">black</span> piece you capture unseals real content below.
     </p>
 
     <ul class="cover-bounty">
