@@ -720,13 +720,15 @@
     if ((el = $("cover-play"))) el.innerHTML = "Take " + (dark ? "Black" : "White") + " &mdash; begin";
     var btn = $("btn-side");
     if (btn) {
-      /* the button offers the OTHER world, so its label is the destination */
+      /* the button offers the OTHER world: moon to go dark, sun to come back.
+         U+263D/U+2600 with the text-presentation selector, same treatment as
+         every other glyph on the page. */
       btn.setAttribute("aria-pressed", dark ? "true" : "false");
       btn.setAttribute("aria-label", dark
-        ? "Switch sides — play White in light mode"
-        : "Switch sides — play Black in dark mode");
-      var lb = btn.querySelector(".sb-label");
-      if (lb) lb.textContent = dark ? "White" : "Black";
+        ? "Light mode — play as White"
+        : "Dark mode — play as Black");
+      var gl = btn.querySelector(".sb-glyph");
+      if (gl) gl.textContent = dark ? "☀︎" : "☽︎";
     }
   }
   /* The toggle: the knight slices the king, and behind the parting halves the

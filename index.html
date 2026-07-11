@@ -243,14 +243,14 @@
       <span class="nub-key">&#9919;</span><span class="nub-label">Unlock everything</span>
     </button>
     <button class="nav-btn" id="btn-rules" type="button" aria-haspopup="dialog">Rules</button>
-    <!-- The side toggle. Not a sun-and-moon: dark mode here means TAKING BLACK — the
-         theme and your side of the board are one setting, which is the point of it.
-         The label names the side you would switch TO, so it reads as an offer; the
-         knight is the site's motif and its colouring flips with the theme it offers.
-         aria-pressed tracks dark, and app.js keeps label + aria-label in step. -->
+    <!-- The side toggle. It IS a sun-and-moon on the surface — but dark mode here
+         means TAKING BLACK: theme and seat are one setting, which is the point of
+         it. The glyph names the world you would switch TO (moon offers dark, sun
+         offers the way back); app.js swaps it and keeps aria-pressed and the
+         aria-label in step, and the label carries the seat change too. -->
     <button class="nav-btn side-btn" id="btn-side" type="button" aria-pressed="false"
-            aria-label="Switch sides — play Black in dark mode">
-      <span class="sb-glyph" aria-hidden="true">&#9822;&#xFE0E;</span><span class="sb-label">Black</span>
+            aria-label="Dark mode — play as Black">
+      <span class="sb-glyph" aria-hidden="true">&#9790;&#xFE0E;</span>
     </button>
   </div>
 </nav>
