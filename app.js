@@ -1128,6 +1128,14 @@
     saveState();
     applyUnlocks(true);
   }
+  /* Resetting the unlocks resets the game too, ON PURPOSE — the ledger is an
+     accounting of this game's captures and the two cannot be divorced. Every
+     capture stamps m._unl on the move history so takeback can refund it; wipe
+     the ledger while keeping the history and the next takeback refunds into
+     blank state, driving a count to -1 (which counts() turns into NaN wins).
+     The board-derived top-up (botPawnsLeft) would also start the new ledger
+     against material that already left the board. The coupling is one-way:
+     newGame() never touches the unlocks, so content survives rematches. */
   function hardReset(cascade) {
     try { localStorage.removeItem(LS_KEY); } catch (e) {}
     state = blankState();
