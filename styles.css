@@ -1117,7 +1117,17 @@
     --ck-edge: rgba(244,236,217,.92);
     --kn-fill: #fbf4e0;
     --kn-edge: rgba(36,26,15,.92);
-    --pc-glow: rgba(36,26,15,.45);
+    /* The WHOLE filter, not just a colour: dark mode swaps the offset ink shadow
+       for an unoffset pale glow, and the reason is measured, not taste. The
+       shadow sits on .intro-kh, OUTSIDE the clip (so the pop cannot slice it),
+       which means each half's shadow can reach the OTHER half: the bottom
+       half's 14px blur climbs ~8px above its own cut edge and paints onto the
+       top half's glyph. On an ink king that smudge is invisible (-1 luminance);
+       on dark mode's WHITE king it was a -11.7 band exactly along the future
+       cut, announcing the slice before the blade. A glow with no offset lands
+       light-on-light there (+0.0), and on a near-black ground it is also the
+       only shadow that reads at all. */
+    --pc-shadow: drop-shadow(0 6px 14px rgba(36,26,15,.45));
   }
   /* stop-color is a presentation attribute, so this CSS wins over the markup value —
      the SVG keeps its light-theme colours as the no-CSS fallback */
@@ -1210,7 +1220,7 @@
      do — so the blur is rasterised once and then merely composited. */
   .intro-kh{
     position: absolute; inset: 0;
-    filter: drop-shadow(0 6px 14px var(--pc-glow));
+    filter: var(--pc-shadow);
   }
   .intro-kh-top .intro-king{ clip-path: polygon(0 0, 100% 0, 100% 42%, 0 58%); }
   .intro-kh-bot .intro-king{ clip-path: polygon(0 58%, 100% 42%, 100% 100%, 0 100%); }
@@ -1358,7 +1368,7 @@
        the ink stroke is what keeps it legible on a light ground. */
     color: var(--kn-fill);
     -webkit-text-stroke: 2px var(--kn-edge);
-    filter: drop-shadow(0 6px 14px var(--pc-glow));
+    filter: var(--pc-shadow);
     /* Passes the king at 40% of its run, so .15 + .8 * .4 = .47s — and the blade
        below starts drawing at .46. The two are tied: the mark has to appear as the
        knight is level with the king, not before it arrives or after it has gone. */
@@ -2641,7 +2651,7 @@
     --ck-edge: rgba(36,26,15,.9);
     --kn-fill: #241a0f;
     --kn-edge: rgba(244,236,217,.9);
-    --pc-glow: rgba(0,0,0,.55);
+    --pc-shadow: drop-shadow(0 0 12px rgba(240,228,203,.38));
   }
 
   /* ---- the side toggle ----
