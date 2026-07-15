@@ -2604,27 +2604,27 @@
   }
 
   /* ---- the board ----
-     Dimmed, not inverted: the same warm wood two stops down, so the white army
-     glows and the black army reads by its paper edge. That stroke is the one
-     addition — .pc.b is pinned near-black (correctly), and on #48341e it needs
-     the same rescue the curtain gives its ink pieces on dark grounds. */
+     Dimmed, not inverted: the same warm wood a step and a half down, so the
+     white army glows and the black army reads by its paper edge. These square
+     values were chosen WITH the .pc.b stroke below as one setting — lighter
+     squares give the pinned near-black fill something to be dark against, the
+     stroke draws the silhouette. Darken one without the other and the army
+     sinks back into the board. */
   html[data-theme="dark"] #board{
-    background-image: repeating-conic-gradient(#48341e 0 25%, #7b6040 0 50%);
+    background-image: repeating-conic-gradient(#524026 0 25%, #876b47 0 50%);
   }
-  html[data-theme="dark"] .sq.light{ background: #7b6040; }
-  html[data-theme="dark"] .sq.dark{ background: #48341e; }
-  /* The black army reads by RIM LIGHT here, not by contrast — a dark fill on a
-     dark square tops out at ~1.8:1 whatever the shade, so the fill cannot carry
-     it. A slightly heavier paper edge draws the silhouette and a soft paper
-     glow lifts it off both square colours; the fill stays pinned near-black so
-     the army is still unmistakably Black. Compared against a heavier edge
-     alone (hollows the pieces into outlines, converging the armies) and
-     lighter squares (costs the board its mood for marginal gain) on a rendered
-     board before choosing. Same catching-light idiom as the curtain pieces and
-     the print shadows. */
+  html[data-theme="dark"] .sq.light{ background: #876b47; }
+  html[data-theme="dark"] .sq.dark{ background: #524026; }
+  /* The black army reads by its EDGE here, not by fill contrast — a dark fill
+     on a dark square tops out at ~1.8:1 whatever the shade, so the silhouette
+     has to carry it. A heavier paper stroke draws that silhouette, and the
+     squares sit one notch lighter than the first cut so the fill has something
+     to be dark AGAINST. (A soft paper glow was tried first and taken out by
+     hand — Alex preferred the crisper stroke-only look; the glow variant is in
+     the session renders if it's ever wanted back.) */
   html[data-theme="dark"] .sq .pc.b{
-    -webkit-text-stroke: 1.25px rgba(244,236,217,.6);
-    text-shadow: 0 0 5px rgba(244,236,217,.34), 0 0 2px rgba(244,236,217,.28);
+    -webkit-text-stroke: 1.5px rgba(244,236,217,.65);
+    text-shadow: 0 1px 0 rgba(0,0,0,.4);
   }
   html[data-theme="dark"] .sq .coord{ color: rgba(240,228,203,.42); }
   /* the red washes sit on darker squares now; same gesture, a little more of it */
