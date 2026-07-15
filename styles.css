@@ -29,6 +29,10 @@
     --linen: 255,251,240;
     --halo:  244,236,217;
     --hatch: 91,58,36;
+    /* the hard-offset "stacked paper" shadows — the 3D print idiom. Ink on
+       paper; on the dark ground an ink shadow is invisible, so dark mode flips
+       this to a pale edge and the stack reads as catching light instead. */
+    --shade: 36,26,15;
   }
   *{ margin:0; padding:0; box-sizing:border-box; }
   /* overflow-x guard belongs on the root, not on body: on body it computes to
@@ -230,7 +234,7 @@
      No blur anywhere: this whole design is print, and print does not glow. */
   .nav-unlock-btn,
   .nav-btn{
-    --shadow: 2px 2px 0 rgba(36,26,15,.20);
+    --shadow: 2px 2px 0 rgba(var(--shade),.20);
     flex: none;
     font-family: var(--mono); font-size: 10px; font-weight: 600;
     text-transform: uppercase;
@@ -246,7 +250,7 @@
   .nav-unlock-btn:hover,
   .nav-btn:hover{
     transform: translate(-1px, -1px);
-    --shadow: 3px 3px 0 rgba(36,26,15,.26);
+    --shadow: 3px 3px 0 rgba(var(--shade),.26);
   }
   .nav-unlock-btn:active,
   .nav-btn:active{
@@ -564,7 +568,7 @@
     height: var(--board);
     border: 1px solid var(--walnut);
     background: rgba(var(--linen),.62);
-    box-shadow: 3px 3px 0 rgba(91,58,36,.16);
+    box-shadow: 3px 3px 0 rgba(var(--shade),.16);
     padding: 0 0 4px;
     display: flex; flex-direction: column;
     overflow: hidden;
@@ -1705,19 +1709,19 @@
   .dcard .u-back{ min-height: 250px; }
   .dcard.open{
     border: 1px solid var(--walnut);
-    box-shadow: 3px 3px 0 rgba(36,26,15,.20);
+    box-shadow: 3px 3px 0 rgba(var(--shade),.20);
   }
   /* the frame used to snap: nothing on .ucard transitioned, so only the child
      cue animated. Keyboard focus gets the colour and shadow but NOT the lift —
      a card that jumps when you Tab to it is worse than one that doesn't. */
   .dcard.open:hover{
     border-color: var(--red);
-    box-shadow: 4px 4px 0 rgba(36,26,15,.26);
+    box-shadow: 4px 4px 0 rgba(var(--shade),.26);
     transform: translate(-1px,-1px);
   }
   .dcard.open:focus-visible{
     border-color: var(--red);
-    box-shadow: 4px 4px 0 rgba(36,26,15,.26);
+    box-shadow: 4px 4px 0 rgba(var(--shade),.26);
   }
   .dcard.open:active{
     transform: translate(2px,2px);
@@ -1953,7 +1957,7 @@
   .move.open{
     border: 1px solid var(--walnut);
     background: rgba(var(--linen),.62);
-    box-shadow: 3px 3px 0 rgba(91,58,36,.16);
+    box-shadow: 3px 3px 0 rgba(var(--shade),.16);
   }
   .move .u-front{ padding: 0; }
   /* sealed: the hatched face is the whole card, edge to edge — shorter than the
@@ -2248,7 +2252,7 @@
      .nav-btn / .nav-unlock-btn are deliberately absent: they already have it. */
   .cover-play, .gbtn, .case-links a, .file-mail, .file-social a,
   .nojs-links a, .resume-cta, .skip{
-    --shadow: 2px 2px 0 rgba(36,26,15,.20);
+    --shadow: 2px 2px 0 rgba(var(--shade),.20);
     box-shadow: var(--shadow);
     transition: color .18s ease, background .18s ease, border-color .18s ease,
                 transform .14s cubic-bezier(.2,.7,.2,1), box-shadow .18s ease;
@@ -2259,7 +2263,7 @@
   .cover-play:hover, .gbtn:hover, .case-links a:hover, .file-mail:hover,
   .file-social a:hover, .nojs-links a:hover, .resume-cta:hover{
     transform: translate(-1px,-1px);
-    --shadow: 3px 3px 0 rgba(36,26,15,.26);
+    --shadow: 3px 3px 0 rgba(var(--shade),.26);
   }
   /* never `box-shadow: none` here: none cannot interpolate, so the shadow would
      vanish in one frame instead of collapsing with the press */
@@ -2269,8 +2273,8 @@
     --shadow: 0 0 0 rgba(36,26,15,0);
   }
   /* the résumé CTA is a 520px slab; a 2px offset reads as a hairline under it */
-  .resume-cta{ --shadow: 4px 4px 0 rgba(36,26,15,.22); }
-  .resume-cta:hover{ --shadow: 5px 5px 0 rgba(36,26,15,.28); }
+  .resume-cta{ --shadow: 4px 4px 0 rgba(var(--shade),.22); }
+  .resume-cta:hover{ --shadow: 5px 5px 0 rgba(var(--shade),.28); }
   .resume-cta .rc-go{ transition: transform .3s cubic-bezier(.2,.7,.2,1); }
   .resume-cta:hover .rc-go{ transform: translate(2px,-2px); }
   .nojs-links a:hover{ border-color: var(--walnut); }
@@ -2397,11 +2401,11 @@
   /* the reveal card is role=button, tabindex=0, cursor:pointer and says "click
      or Esc to dismiss" — and had no state rules at all */
   .reveal-card{
-    --shadow: 4px 4px 0 rgba(36,26,15,.22);
+    --shadow: 4px 4px 0 rgba(var(--shade),.22);
     box-shadow: 0 0 0 3px rgba(var(--halo),.98), 0 0 0 4px var(--walnut), var(--shadow);
     transition: transform .14s cubic-bezier(.2,.7,.2,1), box-shadow .18s ease;
   }
-  .reveal-card:hover { transform: translate(-1px,-1px); --shadow: 5px 5px 0 rgba(36,26,15,.28); }
+  .reveal-card:hover { transform: translate(-1px,-1px); --shadow: 5px 5px 0 rgba(var(--shade),.28); }
   .reveal-card:active{ transform: translate(2px,2px);   --shadow: 0 0 0 rgba(36,26,15,0); }
   .reveal.fd .reveal-card{
     box-shadow: 0 0 0 3px rgba(var(--halo),.98), 0 0 0 4px var(--red), var(--shadow);
@@ -2596,6 +2600,7 @@
     --linen:   46,35,23;  /* card fills lift the panel instead of whitening it */
     --halo:    23,16,9;   /* the ring around lifted cards = the field colour */
     --hatch:   226,196,150; /* sealed-face hatching: light dust on dark panels */
+    --shade:   240,228,203; /* the print shadows catch light instead of casting it */
   }
 
   /* ---- the board ----
@@ -2665,16 +2670,24 @@
      .nav-btn wears — near-invisible. A hairline reads when it CONTRASTS with
      its own chip, and maximally so light-on-dark; colour emoji were tried and
      rejected as off-voice for the letterpress page. */
+  /* A SQUARE, sized to the height its neighbours actually reach (30.5px measured
+     — 10px mono line + 7/6 padding + borders; 30 is within the half-pixel the
+     row's centring absorbs), and flex-centred. Baseline maths put the glyph
+     visibly low before; flex centres its LINE box exactly. The +1px nudge is for
+     the ink: both symbols carry their ink ~1.5px high inside the em box
+     (measured off a canvas raster), and centring the box alone leaves the mark
+     riding high on the chip. */
   .side-btn{
-    padding-left: 10px; padding-right: 10px;
+    width: 30px; height: 30px; padding: 0;
+    display: inline-flex; align-items: center; justify-content: center;
     background: var(--ink); border-color: var(--ink);
   }
   .side-btn:hover{ border-color: var(--red); }
   .side-btn .sb-glyph{
     font-family: var(--pieces);
     font-size: 15px; line-height: 1;
-    vertical-align: -2px;
     color: var(--paper);
+    position: relative; top: 1px;
   }
 
   /* ============================================================
@@ -2697,7 +2710,7 @@
       --paper:#f4ecd9; --paper-2:#ede1c4; --paper-3:#e4d5b2;
       --walnut:#5b3a24; --walnut-2:#7a5230; --walnut-3:#9a7a52;
       --ink:#241a0f; --red:#a4211b;
-      --linen:255,251,240; --halo:244,236,217; --hatch:91,58,36;
+      --linen:255,251,240; --halo:244,236,217; --hatch:91,58,36; --shade:36,26,15;
     }
     .topnav, .arena, .cover, .case, .modal, .reveal, .toast,
     .skip, .u-back, #fx, .gs, footer{ display: none !important; }
