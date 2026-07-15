@@ -250,7 +250,19 @@
          aria-label in step, and the label carries the seat change too. -->
     <button class="nav-btn side-btn" id="btn-side" type="button" aria-pressed="false"
             aria-label="Dark mode — play as Black">
-      <span class="sb-glyph" aria-hidden="true">&#9789;&#xFE0E;</span>
+      <!-- Drawn, not typed: the text-presentation moon and sun carry their ink at
+           different heights inside their em boxes, so no one nudge centres both —
+           the sun sat near-centre while the moon rode high. Geometry has no
+           metrics: these are centred in their viewBox by construction, and
+           currentColor themes them like any glyph would be. -->
+      <svg class="sb-moon" aria-hidden="true" viewBox="0 0 24 24" focusable="false">
+        <path fill="currentColor" d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/>
+      </svg>
+      <svg class="sb-sun" aria-hidden="true" viewBox="0 0 24 24" focusable="false">
+        <circle cx="12" cy="12" r="4.4" fill="currentColor"/>
+        <path d="M12 2.2v3M12 18.8v3M2.2 12h3M18.8 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M19.1 4.9L17 7M7 17l-2.1 2.1"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/>
+      </svg>
     </button>
   </div>
 </nav>

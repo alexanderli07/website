@@ -121,7 +121,7 @@
      Deliberately NOT listed: .lock and the win-screen handshake. Those two are
      pictures and should stay in colour. */
   .sq .pc, .t-pc, .bg, .bgx, .cover-bounty .bg, .nub-key,
-  .rc-doc, .rc-go, .fm-ico, .gs-half, .gs-piece, .sb-glyph{
+  .rc-doc, .rc-go, .fm-ico, .gs-half, .gs-piece{
     font-variant-emoji: text;
   }
 
@@ -2670,25 +2670,24 @@
      .nav-btn wears — near-invisible. A hairline reads when it CONTRASTS with
      its own chip, and maximally so light-on-dark; colour emoji were tried and
      rejected as off-voice for the letterpress page. */
-  /* A SQUARE, sized to the height its neighbours actually reach (30.5px measured
-     — 10px mono line + 7/6 padding + borders; 30 is within the half-pixel the
-     row's centring absorbs), and flex-centred. Baseline maths put the glyph
-     visibly low before; flex centres its LINE box exactly. The +1px nudge is for
-     the ink: both symbols carry their ink ~1.5px high inside the em box
-     (measured off a canvas raster), and centring the box alone leaves the mark
-     riding high on the chip. */
+  /* A SQUARE, sized to the height its neighbours actually reach (30.5px measured;
+     30 is within the half-pixel the row's centring absorbs), and flex-centred.
+     The icons are SVG because the text-presentation moon and sun defeated
+     centring TWICE: each carries its ink at a different height in its em box,
+     so the nudge that centred one left the other high. A path in a viewBox has
+     no metrics — flex centres the box, the box IS the mark. currentColor
+     inherits the button's paper, so the chip stays a swatch of the destination
+     world with zero theme-specific rules on the icon itself. */
   .side-btn{
     width: 30px; height: 30px; padding: 0;
     display: inline-flex; align-items: center; justify-content: center;
     background: var(--ink); border-color: var(--ink);
   }
   .side-btn:hover{ border-color: var(--red); }
-  .side-btn .sb-glyph{
-    font-family: var(--pieces);
-    font-size: 15px; line-height: 1;
-    color: var(--paper);
-    position: relative; top: 1px;
-  }
+  .side-btn svg{ width: 15px; height: 15px; display: block; }
+  .side-btn .sb-sun{ display: none; }
+  html[data-theme="dark"] .side-btn .sb-sun{ display: block; }
+  html[data-theme="dark"] .side-btn .sb-moon{ display: none; }
 
   /* ============================================================
      PRINT
