@@ -721,14 +721,14 @@
     var btn = $("btn-side");
     if (btn) {
       /* the button offers the OTHER world: moon to go dark, sun to come back.
-         COLOUR emoji, not the text-presentation forms — those are hairline
-         outlines that disappear at toolbar size; see the .sb-glyph note. */
+         Text presentation (U+FE0E), kept in the letterpress voice — the chip
+         behind them carries the contrast; see the .sb-glyph note. */
       btn.setAttribute("aria-pressed", dark ? "true" : "false");
       btn.setAttribute("aria-label", dark
         ? "Light mode — play as White"
         : "Dark mode — play as Black");
       var gl = btn.querySelector(".sb-glyph");
-      if (gl) gl.textContent = dark ? "☀️" : "🌙";
+      if (gl) gl.textContent = dark ? "☀︎" : "☽︎";
     }
   }
   /* The toggle: the knight slices the king, and behind the parting halves the
