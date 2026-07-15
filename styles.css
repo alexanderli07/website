@@ -2613,9 +2613,18 @@
   }
   html[data-theme="dark"] .sq.light{ background: #7b6040; }
   html[data-theme="dark"] .sq.dark{ background: #48341e; }
+  /* The black army reads by RIM LIGHT here, not by contrast — a dark fill on a
+     dark square tops out at ~1.8:1 whatever the shade, so the fill cannot carry
+     it. A slightly heavier paper edge draws the silhouette and a soft paper
+     glow lifts it off both square colours; the fill stays pinned near-black so
+     the army is still unmistakably Black. Compared against a heavier edge
+     alone (hollows the pieces into outlines, converging the armies) and
+     lighter squares (costs the board its mood for marginal gain) on a rendered
+     board before choosing. Same catching-light idiom as the curtain pieces and
+     the print shadows. */
   html[data-theme="dark"] .sq .pc.b{
-    -webkit-text-stroke: 1px rgba(244,236,217,.45);
-    text-shadow: 0 1px 0 rgba(0,0,0,.4);
+    -webkit-text-stroke: 1.25px rgba(244,236,217,.6);
+    text-shadow: 0 0 5px rgba(244,236,217,.34), 0 0 2px rgba(244,236,217,.28);
   }
   html[data-theme="dark"] .sq .coord{ color: rgba(240,228,203,.42); }
   /* the red washes sit on darker squares now; same gesture, a little more of it */
