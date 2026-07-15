@@ -117,7 +117,7 @@
      Deliberately NOT listed: .lock and the win-screen handshake. Those two are
      pictures and should stay in colour. */
   .sq .pc, .t-pc, .bg, .bgx, .cover-bounty .bg, .nub-key,
-  .rc-doc, .rc-go, .fm-ico, .gs-half, .gs-piece, .sb-glyph{
+  .rc-doc, .rc-go, .fm-ico, .gs-half, .gs-piece{
     font-variant-emoji: text;
   }
 
@@ -2657,15 +2657,16 @@
   /* ---- the side toggle ----
      A moon that offers the dark world, a sun that offers the way back — the
      glyph names the DESTINATION, same convention the old text label used.
-     app.js swaps the character; the colour just rides var(--ink), which is
-     already the right foreground on this button in both worlds. Text
-     presentation (U+FE0E, and the font-variant list up top) rather than colour
-     emoji, so it sits in the letterpress language like every other glyph. */
+     COLOUR EMOJI, deliberately, breaking the letterpress rule the rest of the
+     page keeps: the text-presentation moon and sun are hairline outlines that
+     vanish at 14px on both grounds. An icon whose entire job is to be spotted
+     in a toolbar earns its colour — same dispensation the sealed cards' lock
+     already gets. Colour emoji ignore `color`, so there is nothing to theme. */
   .side-btn{ padding-left: 10px; padding-right: 10px; }
   .side-btn .sb-glyph{
-    font-family: var(--pieces); font-size: 14px; line-height: 1;
+    font-family: "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", sans-serif;
+    font-size: 13px; line-height: 1;
     vertical-align: -1px;
-    color: var(--ink);
   }
 
   /* ============================================================
