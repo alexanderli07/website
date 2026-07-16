@@ -2615,15 +2615,16 @@
   }
   html[data-theme="dark"] .sq.light{ background: #876b47; }
   html[data-theme="dark"] .sq.dark{ background: #524026; }
-  /* The black army reads by its EDGE here, not by fill contrast — a dark fill
-     on a dark square tops out at ~1.8:1 whatever the shade, so the silhouette
-     has to carry it. A heavier paper stroke draws that silhouette, and the
-     squares sit one notch lighter than the first cut so the fill has something
-     to be dark AGAINST. (A soft paper glow was tried first and taken out by
-     hand — Alex preferred the crisper stroke-only look; the glow variant is in
-     the session renders if it's ever wanted back.) */
+  /* A LIGHT stroke, deliberately — the lifted squares carry most of the work.
+     This landed after trying three treatments on Alex's own screen: a paper
+     glow (too soft), then a 1.5px/.65 stroke on these same squares (too much —
+     with the fill finally contrasting against the lighter board, the heavy
+     edge read as outline rather than silhouette). The subtle edge on lifted
+     squares keeps the army solid black with just enough rim to separate it
+     from the dark squares. The squares and this stroke are ONE setting: darken
+     the board again and the army sinks back in. */
   html[data-theme="dark"] .sq .pc.b{
-    -webkit-text-stroke: 1.5px rgba(244,236,217,.65);
+    -webkit-text-stroke: 1px rgba(244,236,217,.45);
     text-shadow: 0 1px 0 rgba(0,0,0,.4);
   }
   html[data-theme="dark"] .sq .coord{ color: rgba(240,228,203,.42); }
