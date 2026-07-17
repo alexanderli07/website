@@ -2624,7 +2624,11 @@
      from the dark squares. The squares and this stroke are ONE setting: darken
      the board again and the army sinks back in. */
   html[data-theme="dark"] .sq .pc.b{
-    -webkit-text-stroke: 1px rgba(244,236,217,.45);
+    /* darker than the pinned #241a0f the light board uses — with the lifted
+       squares the fill is what says "black", so it leans in; the hairline edge
+       just parts it from the dark squares */
+    color: #1a1309;
+    -webkit-text-stroke: .75px rgba(244,236,217,.45);
     text-shadow: 0 1px 0 rgba(0,0,0,.4);
   }
   html[data-theme="dark"] .sq .coord{ color: rgba(240,228,203,.42); }
