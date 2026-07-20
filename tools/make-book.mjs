@@ -1,0 +1,125 @@
+/**
+ * Build AL-1200's opening book from TheFaix's own chess.com games.
+ *
+ *   node tools/make-book.mjs <dir-of-monthly-pgns>
+ *
+ * Writes book.js at the repo root. The book is AL-1200's impersonation of Alex:
+ * every entry is a position Alex reached in a real 2025+ game, mapped to the
+ * moves HE played there, weighted by how often. The bot samples from it while
+ * the game stays in book, then the search takes over.
+ *
+ * Design decisions, so the next regeneration doesn't have to re-derive them:
+ *  - 2025+ ONLY. The 2022-24 archive is a different player (1.b3 Larsen, Owen's
+ *    Defence); the current repertoire is the Queen's Gambit as White and the
+ *    ...d5/...c5 anti-London counterattack as Black, and Alex named those.
+ *  - WHITE book only from games he opened 1.d4 — he still dabbles in 1.g3, but
+ *    he asked for the Queen's Gambit, so the bot commits.
+ *  - BLACK book from all his Black games; the prefix tree splits naturally by
+ *    White's first move, so the mix (e5 vs e4, d5/c5 vs d4, a little Modern) is
+ *    his real distribution.
+ *  - PREFIX-KEYED (space-joined UCI), not hash-keyed: loses a few transpositions
+ *    but every entry is independently replayable, which is what test/book.js
+ *    leans on. Depth <= 16 plies; a prefix needs >= 4 visits and a move >= 2
+ *    plays to survive, which prunes bullet mouse-slips.
+ *  - Moves are validated by replaying them through engine.js itself, so a book
+ *    entry that could desync from the movegen cannot be emitted.
+ */
+import { readFileSync, readdirSync, writeFileSync } from "fs";
+import { createRequire } from "module";
+import { join, dirname } from "path";
+import { fileURLToPath } from "url";
+
+const require = createRequire(import.meta.url);
+const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
+const E = require(join(ROOT, "engine.js"));
+
+const USER = "thefaix";
+const MAX_PLIES = 16, MIN_VISITS = 4, MIN_PLAYS = 2;
+
+const dir = process.argv[2];
+if (!dir) { console.error("usage: node tools/make-book.mjs <pgn-dir>"); process.exit(1); }
+
+/* ---- parse ---- */
+const games = [];
+for (const fn of readdirSync(dir).sort()) {
+  if (!fn.endsWith(".pgn") || fn < "2025") continue;          /* 2025+ only */
+  const raw = readFileSync(join(dir, fn), "utf8");
+  for (const chunk of raw.split(/\n\n(?=\[Event )/)) {
+    if (!chunk.includes("[Event")) continue;
+    const hdr = {};
+    for (const m of chunk.matchAll(/\[(\w+) "([^"]*)"\]/g)) hdr[m[1]] = m[2];
+    const body = chunk.includes("\n\n") ? chunk.split("\n\n").slice(1).join("\n\n") : "";
+    const clean = body.replace(/\{[^}]*\}/g, " ").replace(/\$\d+/g, " ");
+    const san = [...clean.matchAll(/(?:\d+\.+\s*)?([KQRNBa-h][\w=+#-]*[\w=+#]|O-O(?:-O)?[+#]?)/g)]
+      .map((m) => m[1]);
+    if (san.length) games.push({ white: (hdr.White || "").toLowerCase() === USER, san });
+  }
+}
+
+/* ---- replay through the engine, collect his choices per prefix ---- */
+const nodes = new Map();   /* prefix -> { visits, moves: Map(uci -> count) } */
+let replayed = 0, sanMisses = 0;
+
+for (const g of games) {
+  if (g.white && g.san[0] !== "d4") continue;                 /* White book = the Queen's Gambit repertoire */
+  const game = new E.Game();
+  const prefix = [];
+  for (let i = 0; i < Math.min(g.san.length, MAX_PLIES); i++) {
+    const legal = game.legal();
+    const mv = legal.find((m) => E.san(game, m) === g.san[i]);
+    if (!mv) { sanMisses++; break; }                          /* odd PGN token: stop this game here */
+    const hisMove = g.white === (i % 2 === 0);
+    if (hisMove) {
+      const key = prefix.join(" ");
+      let node = nodes.get(key);
+      if (!node) nodes.set(key, (node = { visits: 0, moves: new Map() }));
+      node.visits++;
+      const uci = E.moveToUci(mv);
+      node.moves.set(uci, (node.moves.get(uci) || 0) + 1);
+    }
+    prefix.push(E.moveToUci(mv));
+    game.make(mv);
+  }
+  replayed++;
+}
+
+/* ---- prune + emit ---- */
+const book = {};
+let entries = 0, moveCount = 0;
+for (const [key, node] of [...nodes.entries()].sort((a, b) => a[0].length - b[0].length)) {
+  if (node.visits < MIN_VISITS) continue;
+  const moves = [...node.moves.entries()].filter(([, n]) => n >= MIN_PLAYS)
+    .sort((a, b) => b[1] - a[1]);
+  if (!moves.length) continue;
+  book[key] = moves;
+  entries++; moveCount += moves.length;
+}
+
+/* final legality sweep: replay every key and assert every stored move is legal —
+   the emit refuses to write a book the engine would disagree with */
+for (const key of Object.keys(book)) {
+  const game = new E.Game();
+  if (key) for (const uci of key.split(" ")) {
+    const mv = game.legal().find((m) => E.moveToUci(m) === uci);
+    if (!mv) throw new Error("unreplayable key: " + key);
+    game.make(mv);
+  }
+  const legal = new Set(game.legal().map((m) => E.moveToUci(m)));
+  for (const [uci] of book[key]) if (!legal.has(uci)) throw new Error("illegal book move " + uci + " at " + key);
+}
+
+const header = `/* AUTO-GENERATED by tools/make-book.mjs — do not edit by hand; regenerate.
+   AL-1200's opening book: TheFaix's own 2025+ chess.com games (the Queen's
+   Gambit as White, the ...d5/...c5 anti-London counterattack and 1...e5 as
+   Black), prefix-keyed by space-joined UCI, values [uci, timesPlayed]. Consumed
+   by botMove() in engine.js; the Hint's bestMove() never reads it. */
+`;
+const payload = "var GAMBIT_BOOK = " + JSON.stringify(book) + ";\n" +
+  'if (typeof module !== "undefined" && module.exports) module.exports = GAMBIT_BOOK;\n';
+writeFileSync(join(ROOT, "book.js"), header + payload);
+console.log(`replayed ${replayed} games (${sanMisses} SAN misses) -> ${entries} positions, ${moveCount} moves`);
+console.log(`book.js: ${(header + payload).length} bytes`);
+console.log("root entry:", JSON.stringify(book[""]));
+console.log("after 1.d4 d5:", JSON.stringify(book["d2d4 d7d5"] || null));
+console.log("as Black vs 1.e4:", JSON.stringify(book["e2e4"] || null));
+console.log("as Black vs London (1.d4 d5 2.Bf4):", JSON.stringify(book["d2d4 d7d5 c1f4"] || null));

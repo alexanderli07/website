@@ -501,6 +501,11 @@
 <div class="toast" id="toast"></div>
 
 <script src="engine.js"></script>
+<!-- AL-1200's opening repertoire — Alex's own games, see tools/make-book.mjs.
+     After engine.js (which only probes it at move time, so order is soft) and
+     before app.js. If it ever fails to load, botMove falls back to the search:
+     a bot with amnesia about its openings, not a broken page. -->
+<script src="book.js"></script>
 <script src="app.js"></script>
 </body>
 </html>
