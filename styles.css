@@ -2604,17 +2604,15 @@
   }
 
   /* ---- the board ----
-     Dimmed, not inverted: the same warm wood a step and a half down, so the
-     white army glows and the black army reads by its paper edge. These square
-     values were chosen WITH the .pc.b stroke below as one setting — lighter
-     squares give the pinned near-black fill something to be dark against, the
-     stroke draws the silhouette. Darken one without the other and the army
-     sinks back into the board. */
+     Dimmed, not inverted: the same warm wood two stops down, so the white army
+     glows and the black army reads by its deep fill and a hairline paper edge.
+     These numbers were walked to on Alex's own screen — lighter squares were
+     tried and rolled back; the deeper fill below is what carries the army. */
   html[data-theme="dark"] #board{
-    background-image: repeating-conic-gradient(#524026 0 25%, #876b47 0 50%);
+    background-image: repeating-conic-gradient(#48341e 0 25%, #7b6040 0 50%);
   }
-  html[data-theme="dark"] .sq.light{ background: #876b47; }
-  html[data-theme="dark"] .sq.dark{ background: #524026; }
+  html[data-theme="dark"] .sq.light{ background: #7b6040; }
+  html[data-theme="dark"] .sq.dark{ background: #48341e; }
   /* A LIGHT stroke, deliberately — the lifted squares carry most of the work.
      This landed after trying three treatments on Alex's own screen: a paper
      glow (too soft), then a 1.5px/.65 stroke on these same squares (too much —
@@ -2624,11 +2622,10 @@
      from the dark squares. The squares and this stroke are ONE setting: darken
      the board again and the army sinks back in. */
   html[data-theme="dark"] .sq .pc.b{
-    /* darker than the pinned #241a0f the light board uses — with the lifted
-       squares the fill is what says "black", so it leans in; the hairline edge
-       just parts it from the dark squares */
+    /* darker than the pinned #241a0f the light board uses — the fill is what
+       says "black"; the half-pixel edge just parts it from the dark squares */
     color: #1a1309;
-    -webkit-text-stroke: .75px rgba(244,236,217,.45);
+    -webkit-text-stroke: .5px rgba(244,236,217,.45);
     text-shadow: 0 1px 0 rgba(0,0,0,.4);
   }
   html[data-theme="dark"] .sq .coord{ color: rgba(240,228,203,.42); }
