@@ -23,7 +23,7 @@ var PIECE_CHARS = " PNBRQK";
 var FILES = "abcdefgh";
 
 /* ============================================================
-   TUNING KNOBS — everything that decides how strong AL-1200 is
+   TUNING KNOBS — everything that decides how strong AL-1600 is
    lives here, one line each.
    ------------------------------------------------------------
    SEARCH
@@ -93,29 +93,31 @@ var FILES = "abcdefgh";
                    horizon. BOT_MAX_LOSS still filters anything catastrophic, and
                    "always takes back" is itself a very human 1200 weakness — far
                    more human than ignoring a capture altogether.
-     BOT_RANK_DECAY  multiplies a move's weight by DECAY^rank. SHIPPED AT 1.0, i.e.
-                   OFF — it is a dial for a separate problem, left in place because
-                   the problem is real and measured.
-                   That problem: a plain softmax has no term for HOW MANY candidates
-                   there are. In an ordinary 32-move opening position the moves
-                   clustered within 40-120cp of best carry a summed weight of 15.8 to
-                   25.1 against 1.00 for the best move, so AL-1200 plays its own best
-                   move 12-14% of the time and its error rate is set by how bushy the
-                   position is — meaning it is quietly much weaker in open positions
-                   than in closed ones. Temperature cannot correct it, because it
-                   scales every tail entry equally: BOT_TEMP 260 -> 60 moved the
-                   recapture rate only 20% -> 34%.
-                   Turning this down sharpens the bot a lot, and that is why it is
-                   off. Measured in self-play, 240 decisions each:
-                       decay        1.00  0.92  0.85  0.78  0.70  0.62
-                       avg loss cp  52.4  32.9  22.0  17.7  12.4   8.1
-                       plays best   12%   22%   30%   42%   51%   60%
-                   Anything below ~0.9 also stops it ever shedding 300cp+ (0 of 240
-                   at every value tested below 1.0), which matters here: the whole
-                   site is gated behind winning material off this bot.
+     BOT_RANK_DECAY  multiplies a move's weight by DECAY^rank — THE strength dial,
+                   set to 0.74 when Alex asked the bot to play at his own rating
+                   (~1600: his blitz 1542 / bullet 1665 / rapid 1716). At 0.74,
+                   measured in self-play: ~14cp average loss, best move 44% of the
+                   time, and it no longer sheds 300cp+ for nothing (0 of 237). That
+                   sits just under its own honest search, and depth-4 + quiescence
+                   on fast time controls is commonly reckoned high-1500s to 1700s —
+                   "1600-ish" by construction, not a certified Elo.
+                   Why the knob exists: a plain softmax has no term for HOW MANY
+                   candidates there are, so in a bushy 32-move position the near-best
+                   tail outvoted the best move ~20:1 and the bot played its own best
+                   move only 12-14% of the time (the original AL-1200 feel).
+                   Temperature cannot correct that — it scales every tail entry
+                   equally. The measured dial, 240 self-play decisions per point:
+                       decay        1.00  0.92  0.85  0.78  0.74  0.70  0.62
+                       avg loss cp  52.4  32.9  22.0  17.4  13.6  11.6   8.1
+                       plays best   12%   22%   30%   43%   44%   52%   60%
+                   THE UNLOCK ECONOMY SURVIVES the buff: unlocks pay on ANY capture
+                   of a bot piece, equal trades included, and a 1600 plays plenty of
+                   trades — what visitors lose is free material, not captures. The
+                   roll-up, the checkmate jackpot and the Unlock-everything button
+                   still cover weaker visitors. Restore 1.0 for the old soft bot.
      BOT_MAX_LOSS  hard ceiling on how much worse than best a played move may
                    be. This is the whole safety story. 350 sits above a knight
-                   (320) and below a rook (500): AL-1200 can drop a piece, and
+                   (320) and below a rook (500): AL-1600 can drop a piece, and
                    does, but it can never shed a rook or a queen for nothing
                    and it can never walk into a mate it can see.
                    It is also the ONLY guarantee here that does not depend on the
@@ -133,7 +135,7 @@ var MATE_MIN = MATE - 1000;
 
 var BOT_DEPTH = 4;
 var BOT_TEMP = 260;
-var BOT_RANK_DECAY = 1.0;      /* off — read the note above before changing this */
+var BOT_RANK_DECAY = 0.74;     /* the ~1600 setting — the note above is the dial */
 var BOT_RECAPTURE_BIAS = 120;
 var BOT_MAX_LOSS = 350;
 
@@ -941,7 +943,7 @@ function sampleWeighted(w, n, tot) {
 var BOT_TRIES = 8;
 
 /**
- * AL-1200's move: a full-strength search, then a deliberately fallible choice.
+ * AL-1600's move: a full-strength search, then a deliberately fallible choice.
  *
  * The old model rolled a 20% chance of a uniformly random legal move, which is
  * how a four-move mate worked on it and why it sometimes parked a rook on a

@@ -2578,7 +2578,7 @@
      DARK MODE — the Black side of GAMBIT
      Not a reskin: [data-theme="dark"] also decides WHICH SIDE YOU PLAY. app.js
      reads the same attribute, seats you as Black, flips the board and gives
-     AL-1200 the white pieces and the first move. The head gate sets the
+     AL-1600 the white pieces and the first move. The head gate sets the
      attribute before first paint; the navbar knight toggles it.
      Built as OVERRIDES so the light theme stays byte-identical: the palette
      tokens flip here, and the dozen places a literal could not ride a token get

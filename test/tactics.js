@@ -5,7 +5,7 @@
  * is supposed to understand:
  *
  *   1. the engine can see a mate delivered AGAINST it (the original bug: a
- *      2-ply search can only see mates it delivers, so AL-1200 walked into
+ *      2-ply search can only see mates it delivers, so AL-1600 walked into
  *      Qd8# to win a pawn),
  *   2. mate scores carry their distance, so it mates fast and resists slow,
  *   3. quiescence resolves exchanges instead of scoring mid-trade,
@@ -181,7 +181,7 @@ console.log("\nweakness model\n--------------");
 }
 
 /* The general form of the safety guarantee, audited over real games instead of
-   one hand-picked position: for every move AL-1200 actually plays, the search's
+   one hand-picked position: for every move AL-1600 actually plays, the search's
    own score for it must be within BOT_MAX_LOSS of the best move, and must not
    be a forced loss — unless the position was already lost whatever it played.
    This is the invariant that replaces the old uniform-random blunder branch. */

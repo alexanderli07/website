@@ -1,5 +1,5 @@
 /**
- * GAMBIT — does AL-1200 take back?   run with:  node test/recapture.js [trials]
+ * GAMBIT — does AL-1600 take back?   run with:  node test/recapture.js [trials]
  *
  * The complaint was that the bot often just ignores a capture, pawns especially.
  * This measures it rather than guessing at it.
@@ -7,7 +7,7 @@
  * Each case is a real opening line played out in UCI, ending with a CAPTURE BY
  * WHITE (the player). The square that capture landed on is the recapture square —
  * derived from the move, never hand-written, which is what went wrong in the first
- * draft of this file. Black (AL-1200) is then asked to move `trials` times and we
+ * draft of this file. Black (AL-1600) is then asked to move `trials` times and we
  * count how often it takes back.
  *
  * `honest` is what bestMove() — the full-strength, deterministic search behind
@@ -15,7 +15,7 @@
  * that gap IS the bug. Where honest declines too, taking back is genuinely not
  * best and the bot should not be judged on it.
  *
- * AL-1200 is meant to be fallible, so the target is not 100%. It is "declining a
+ * AL-1600 is meant to be fallible, so the target is not 100%. It is "declining a
  * sound recapture is the exception, not a coin flip".
  */
 const E = require("../engine.js");

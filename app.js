@@ -535,7 +535,7 @@
      "White to move" line is noise next to a board that already shows it. */
   function statusHTML() {
     if (gameOver) return gameOver.text;
-    if (game.turn === botSide) return "<b>AL-1200</b> is thinking&hellip;";
+    if (game.turn === botSide) return "<b>AL-1600</b> is thinking&hellip;";
     if (game.inCheck()) return '<span class="chk">Check</span> &mdash; get out of it.';
     return "";
   }
@@ -552,9 +552,9 @@
     var n = sans.length, msg = "";
     /* index 0 is White's first move, so an odd count means White moved last —
        and whether White's voice is "You" depends on which seat you took */
-    if (n) msg += ((n % 2 === 1) === (playerSide === WHITE) ? "You played " : "AL-1200 played ") + sans[n - 1] + ". ";
+    if (n) msg += ((n % 2 === 1) === (playerSide === WHITE) ? "You played " : "AL-1600 played ") + sans[n - 1] + ". ";
     if (gameOver) msg += gameOver.text.replace(/<[^>]*>/g, "");
-    else if (game.turn === botSide) msg += "AL-1200 is thinking.";
+    else if (game.turn === botSide) msg += "AL-1600 is thinking.";
     else if (game.inCheck()) msg += "You are in check.";
     else msg += "Your move.";
     if (msg === lastAnnounced) return;      /* don't re-announce an unchanged state */
@@ -713,9 +713,9 @@
     var dark = playerSide === BLACK;
     var el;
     if ((el = $("rail-bounty-sub"))) el.textContent = "what each " + (dark ? "white" : "black") + " piece is carrying";
-    if ((el = $("rail-sides"))) el.innerHTML = dark ? "W: AL-1200 &middot; B: you" : "W: you &middot; B: AL-1200";
-    if ((el = $("sc-white"))) el.textContent = dark ? "AL-1200" : "You";
-    if ((el = $("sc-black"))) el.textContent = dark ? "You" : "AL-1200";
+    if ((el = $("rail-sides"))) el.innerHTML = dark ? "W: AL-1600 &middot; B: you" : "W: you &middot; B: AL-1600";
+    if ((el = $("sc-white"))) el.textContent = dark ? "AL-1600" : "You";
+    if ((el = $("sc-black"))) el.textContent = dark ? "You" : "AL-1600";
     if ((el = $("cover-side-word"))) el.textContent = dark ? "white" : "black";
     if ((el = $("cover-play"))) el.innerHTML = "Take " + (dark ? "Black" : "White") + " &mdash; begin";
     var btn = $("btn-side");
@@ -811,7 +811,7 @@
     var pt = m.captured > 0 ? m.captured : -m.captured;   /* real piece — drives the tray glyph */
     var track = trackOfPiece(pt);                         /* which unlock track it pays into */
     var before = counts(), items = [], label = "", muted = false, kicker = "";
-    /* AL-1200 can't hide wins by promoting: once none of its pawns is left
+    /* AL-1600 can't hide wins by promoting: once none of its pawns is left
        standing (all captured or promoted away), any further capture tops up the
        wins queue. Derived from the board, so takebacks can't desync it. */
     var toppedUp = false;
@@ -822,7 +822,7 @@
     /* ROLL-UP. A capture whose own track is already full pays into the next one
        up instead of being wasted. Without this the top two tiers are effectively
        unreachable for a player who only takes what is offered, because the
-       engine's safety ceiling (BOT_MAX_LOSS) forbids AL-1200 from ever shedding
+       engine's safety ceiling (BOT_MAX_LOSS) forbids AL-1600 from ever shedding
        a rook or a queen for less than its value: measured over 100 games, a
        purely greedy White wins 5.4 pawns and 2.4 minors per game but only 0.33
        rooks and 0.06 queens, so the résumé took ~17 games to unseal and the
@@ -875,7 +875,7 @@
     botCapsSinceToast++;
     if (botCapsSinceToast >= 3) {
       botCapsSinceToast = 0;
-      showToast("AL-1200 defends his secrets.");
+      showToast("AL-1600 defends his secrets.");
     }
   }
 
@@ -954,8 +954,8 @@
         gameOver = { text: '<span class="chk">Checkmate.</span> <b>You win — full disclosure.</b>', kind: "win" };
         onPlayerMate();
       } else {
-        gameOver = { text: '<span class="chk">Checkmate.</span> AL-1200 wins — the file stays shut&hellip; for now.', kind: "loss" };
-        showGameOver("0–1", "Checkmated.", "AL-1200 keeps his secrets — this round. You can run it back, or just read everything.");
+        gameOver = { text: '<span class="chk">Checkmate.</span> AL-1600 wins — the file stays shut&hellip; for now.', kind: "loss" };
+        showGameOver("0–1", "Checkmated.", "AL-1600 keeps his secrets — this round. You can run it back, or just read everything.");
       }
     } else {
       gameOver = { text: "<b>Stalemate.</b> Drawn — the seals hold.", kind: "draw" };
@@ -1028,7 +1028,7 @@
     mateModalTimer = setTimeout(function () {
       mateModalTimer = 0;
       showGameOver("1–0", "Checkmate — you win.",
-        "AL-1200 resigns the file. Everything below is unsealed: run it back, or go read it.");
+        "AL-1600 resigns the file. Everything below is unsealed: run it back, or go read it.");
     }, reduced ? 0 : 2200);
   }
 
@@ -1110,7 +1110,7 @@
   }
   function showHint() {
     if (gameOver || game.turn !== playerSide) return;
-    var m = bestMove(game);        /* the real best move, not AL-1200's fallible pick */
+    var m = bestMove(game);        /* the real best move, not AL-1600's fallible pick */
     if (!m) return;
     hintSquares = [m.from, m.to];
     renderBoard();

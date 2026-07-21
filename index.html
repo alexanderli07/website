@@ -290,7 +290,7 @@
   </aside>
 
   <div class="board-col">
-    <div class="tray tray-bot" id="tray-bot" aria-label="Pieces AL-1200 has captured"></div>
+    <div class="tray tray-bot" id="tray-bot" aria-label="Pieces AL-1600 has captured"></div>
     <div class="board-wrap">
       <div id="board" aria-label="Chessboard — click a white piece, then a highlighted square, to move"></div>
       <canvas id="fx" aria-hidden="true"></canvas>
@@ -300,7 +300,7 @@
 
   <aside class="rail rail-r" aria-label="Move list and game controls">
     <span class="rail-title">Scoresheet</span>
-    <span class="rail-sub" id="rail-sides">W: you &middot; B: AL-1200</span>
+    <span class="rail-sub" id="rail-sides">W: you &middot; B: AL-1600</span>
     <div class="sheet-cols"><span>No.</span><span>White</span><span>Black</span></div>
     <div id="movelist"></div>
     <div class="rail-foot">
@@ -314,8 +314,8 @@
       </div>
       <!-- The engine credit, at the foot of the scoresheet. It sits here rather
            than in the page footer because this rail is the one place already
-           naming AL-1200, so it reads as a note about your opponent. -->
-      <span class="rail-note">AL-1200 is built from scratch: tailored to Alex&rsquo;s playstyle</span>
+           naming AL-1600, so it reads as a note about your opponent. -->
+      <span class="rail-note">AL-1600 is built from scratch: tailored to Alex&rsquo;s playstyle</span>
     </div>
   </aside>
 </section>
@@ -431,13 +431,13 @@
     <div class="sc-fields">
       <div class="sc-field"><span class="lbl">Event</span><span class="val">ALEXANDERLI.DEV — GAMBIT</span></div>
       <div class="sc-field"><span class="lbl">White</span><span class="val" id="sc-white">You</span></div>
-      <div class="sc-field"><span class="lbl">Black</span><span class="val" id="sc-black">AL-1200</span></div>
+      <div class="sc-field"><span class="lbl">Black</span><span class="val" id="sc-black">AL-1600</span></div>
       <div class="sc-field"><span class="lbl">Site</span><span class="val">Toronto 2026</span></div>
     </div>
 
     <h2 class="sc-name" id="cover-title">GAMBIT<span class="dot">.</span></h2>
     <p class="sc-role">
-      This portfolio is <b>sealed</b>. Across the board sits <b>AL-1200</b> &mdash; a bot guarding
+      This portfolio is <b>sealed</b>. Across the board sits <b>AL-1600</b> &mdash; a bot guarding
       Alexander Li's record. Every <span id="cover-side-word">black</span> piece you capture unseals real content below.
     </p>
 
@@ -501,7 +501,7 @@
 <div class="toast" id="toast"></div>
 
 <script src="engine.js"></script>
-<!-- AL-1200's opening repertoire — Alex's own games, see tools/make-book.mjs.
+<!-- AL-1600's opening repertoire — Alex's own games, see tools/make-book.mjs.
      After engine.js (which only probes it at move time, so order is soft) and
      before app.js. If it ever fails to load, botMove falls back to the search:
      a bot with amnesia about its openings, not a broken page. -->
