@@ -94,9 +94,10 @@ function draw(cv: HTMLCanvasElement, state: FieldState) {
         Math.sin(t * 47 + p[2]) * 2.2;
       let yy = y0 + wave * amp * (0.25 + band * (isBlue ? 1.3 : 1) * turb);
 
-      // pointer: a smooth local lens. Displacement is proportional to dy so
-      // it fades continuously to zero at the cursor's own height — a hard
-      // sign flip here produces vertical cliffs on lines crossing the cursor.
+      // pointer: a repulsion bubble. tanh saturates to near-full push a few
+      // px off the cursor's centerline (lines genuinely evacuate the bubble)
+      // yet stays continuous through dy = 0 — lines crossing the cursor's
+      // height swoop through in an S-curve instead of snapping (no cliffs).
       if (strength > 0.004) {
         const dx = x - px;
         const dy = yy - py;
@@ -104,7 +105,7 @@ function draw(cv: HTMLCanvasElement, state: FieldState) {
         const R = 110;
         if (d2 < R * R * 9) {
           const fall = Math.exp(-d2 / (R * R));
-          yy += dy * fall * 0.6 * strength;
+          yy += Math.tanh(dy / 10) * fall * 44 * strength;
         }
       }
       if (x === 0) ctx.moveTo(x, yy);
