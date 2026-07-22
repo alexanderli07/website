@@ -1,45 +1,23 @@
-import { WorldProvider } from "./world/WorldContext";
-import { useLenis } from "./world/useLenis";
-import { Atmosphere } from "./components/Atmosphere";
-import { Nav } from "./components/Nav";
-import { Hero } from "./components/Hero";
-import { Bridge } from "./components/Bridge";
-import { Experience } from "./components/Experience";
-import { Work } from "./components/Work";
-import { Signal } from "./components/Signal";
-import { Skills } from "./components/Skills";
-import { Voices } from "./components/Voices";
-import { Contact } from "./components/Contact";
-import { Footer } from "./components/Footer";
+import { Field } from "./components/Field";
+import { Ledger, FootRule } from "./components/Ledger";
 
-function Site() {
-  useLenis();
-  return (
-    <>
-      <a href="#main-content" className="skip-link">
-        Skip to content
-      </a>
-      <Atmosphere />
-      <Nav />
-      <main id="main-content" tabIndex={-1}>
-        <Hero />
-        <Bridge />
-        <Experience />
-        <Work />
-        <Signal />
-        <Skills />
-        <Voices />
-        <Contact />
-      </main>
-      <Footer />
-    </>
-  );
-}
-
+/**
+ * SIGNAL / LEDGER — the field is the face, the ledger is the body.
+ * A generative drawing fed by live market data, over an engineering-style
+ * index of the actual work. One world, no toggle: the duality is in the
+ * material (markets drive the art, code renders it), not in a theme switch.
+ */
 export function App() {
   return (
-    <WorldProvider>
-      <Site />
-    </WorldProvider>
+    <>
+      <a href="#index" className="skip-link">
+        Skip to the index
+      </a>
+      <Field />
+      <main id="main-content" tabIndex={-1}>
+        <Ledger />
+      </main>
+      <FootRule />
+    </>
   );
 }
