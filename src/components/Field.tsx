@@ -94,7 +94,9 @@ function draw(cv: HTMLCanvasElement, state: FieldState) {
         Math.sin(t * 47 + p[2]) * 2.2;
       let yy = y0 + wave * amp * (0.25 + band * (isBlue ? 1.3 : 1) * turb);
 
-      // pointer: a local repulsion bump, honest physics rather than sparkle
+      // pointer: a smooth local lens. Displacement is proportional to dy so
+      // it fades continuously to zero at the cursor's own height — a hard
+      // sign flip here produces vertical cliffs on lines crossing the cursor.
       if (strength > 0.004) {
         const dx = x - px;
         const dy = yy - py;
@@ -102,7 +104,7 @@ function draw(cv: HTMLCanvasElement, state: FieldState) {
         const R = 110;
         if (d2 < R * R * 9) {
           const fall = Math.exp(-d2 / (R * R));
-          yy += (dy >= 0 ? 1 : -1) * fall * 34 * strength;
+          yy += dy * fall * 0.6 * strength;
         }
       }
       if (x === 0) ctx.moveTo(x, yy);
@@ -149,11 +151,20 @@ export function Field() {
       // ease the field toward the new volatility (no pop when data lands)
       kickRef.current();
     }
-    // belt-and-braces: one more draw after layout settles (first paint can
-    // race the canvas getting its real size). setTimeout, not rAF — rAF is
-    // suspended in hidden/background tabs, so a background-tab load would
-    // otherwise sit unsized until focus.
-    const t = window.setTimeout(() => draw(cv, state), 80);
+    // belt-and-braces: retry until the canvas has real dimensions. The first
+    // draw can race layout (the canvas measures 0×0), and the usual recovery
+    // paths are unreliable in background tabs — rAF is suspended there and
+    // ResizeObserver only delivers with the render pipeline. setTimeout still
+    // fires (throttled), so poll briefly until a sized draw lands.
+    let tries = 0;
+    let t = 0;
+    const ensureDrawn = () => {
+      draw(cv, state);
+      if (cv.clientWidth === 0 && tries++ < 40) {
+        t = window.setTimeout(ensureDrawn, 250);
+      }
+    };
+    t = window.setTimeout(ensureDrawn, 80);
 
     const ro = new ResizeObserver(() => draw(cv, state));
     ro.observe(cv);
