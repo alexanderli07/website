@@ -315,7 +315,7 @@
       <!-- The engine credit, at the foot of the scoresheet. It sits here rather
            than in the page footer because this rail is the one place already
            naming AL-1600, so it reads as a note about your opponent. -->
-      <span class="rail-note">AL-1600 is built from scratch: tailored to Alex&rsquo;s playstyle</span>
+      <span class="rail-note">AL-1600 is built from scratch and trained on Alex&rsquo;s own games &mdash; in effect, you&rsquo;re playing him</span>
     </div>
   </aside>
 </section>
@@ -436,9 +436,15 @@
     </div>
 
     <h2 class="sc-name" id="cover-title">GAMBIT<span class="dot">.</span></h2>
+    <!-- Not marketing copy — every clause is checkable in the repo: the engine is
+         hand-built (engine.js), the openings come from his real chess.com games
+         (book.js, tools/make-book.mjs), and the strength is dialled to his rating
+         (BOT_RANK_DECAY note in engine.js). -->
     <p class="sc-role">
-      This portfolio is <b>sealed</b>. Across the board sits <b>AL-1600</b> &mdash; a bot guarding
-      Alexander Li's record. Every <span id="cover-side-word">black</span> piece you capture unseals real content below.
+      This portfolio is <b>sealed</b>. Across the board sits <b>AL-1600</b> &mdash; an engine
+      built from scratch and trained on Alexander Li's own games. It plays his openings, at
+      his rating; for all practical purposes, <b>you are playing him</b>. Every
+      <span id="cover-side-word">black</span> piece you capture unseals real content below.
     </p>
 
     <ul class="cover-bounty">

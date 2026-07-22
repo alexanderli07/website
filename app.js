@@ -955,7 +955,7 @@
         onPlayerMate();
       } else {
         gameOver = { text: '<span class="chk">Checkmate.</span> AL-1600 wins — the file stays shut&hellip; for now.', kind: "loss" };
-        showGameOver("0–1", "Checkmated.", "AL-1600 keeps his secrets — this round. You can run it back, or just read everything.");
+        showGameOver("0–1", "Checkmated.", "AL-1600 keeps his secrets — this round. It plays his openings at his rating, so that was, for all practical purposes, a loss to Alex. Run it back, or just read everything.");
       }
     } else {
       gameOver = { text: "<b>Stalemate.</b> Drawn — the seals hold.", kind: "draw" };
@@ -1028,7 +1028,7 @@
     mateModalTimer = setTimeout(function () {
       mateModalTimer = 0;
       showGameOver("1–0", "Checkmate — you win.",
-        "AL-1600 resigns the file. Everything below is unsealed: run it back, or go read it.");
+        "AL-1600 resigns the file — and since it was trained on Alex's own games, that is as close as a webpage gets to beating him. Everything below is unsealed: run it back, or go read it.");
     }, reduced ? 0 : 2200);
   }
 
