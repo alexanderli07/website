@@ -58,16 +58,15 @@ var FILES = "abcdefgh";
                    comes from *choosing* imperfectly, never from being blind.
      BOT_TEMP      softmax temperature in centipawns. Weight of a candidate is
                    exp((score - best) / BOT_TEMP). Lower = stronger and more
-                   deterministic; higher = looser. At 260 the bot's average loss
-                   against its own full-strength search measures ~46cp (median
-                   40, p90 95) over 408 decisions against a depth-1 opponent,
-                   and higher in sharper positions — the figure moves with the
-                   opposition, so treat it as a band, not a constant. Drop it to
-                   ~150 for a noticeably sharper opponent. It was
-                   220 while quiescence still delta-pruned; removing that
-                   pruning sharpened the scores enough to pull the average loss
-                   down to ~87cp, and 260 puts the weakness back where it was
-                   calibrated.
+                   deterministic; higher = looser. What it really controls, now
+                   that BOT_RANK_DECAY handles the near-tie crowd, is how often
+                   the bot plays a move a full pawn or two below best: at the
+                   1200-era 260, a 330cp-worse move kept 28% relative weight and
+                   the gauntlet caught the bot strolling past hanging bishops.
+                   130 cuts that same move to 8% before the decay touches it.
+                   Tuned against test/gauntlet.js and the self-play ACPL harness
+                   together — turn it up without re-running both and the "never
+                   looks dumb" properties below silently soften.
      BOT_RECAPTURE_BIAS  multiplies the weight of a move that captures on the square
                    the opponent just captured on. This is the fix for "the bot does
                    not take back", and it is a HUMAN-LIKENESS knob rather than a
@@ -78,21 +77,17 @@ var FILES = "abcdefgh";
                    hanging next move too. The engine does not believe recapturing is
                    urgent, and it is correct. A 1200-rated human takes back
                    reflexively anyway, so that has to be stated, not tuned for.
-                   Measured with test/recapture.js over five positions where taking
-                   back IS the honest best move:
-                       bias    1     6    25    60   120
-                       mean  38%   61%   81%   89%   95%
-                       worst  5%   22%   53%   73%   88%
-                   120 is deliberately large: it means "recapture unless the safety
-                   ceiling forbids it". Crucially it costs nothing elsewhere —
-                   average loss 52.4cp before, 50.9 after; best-move rate 12.1%
-                   before, 13.8% after. It only ever moves the decision in positions
-                   where a capture just happened.
-                   Accepted consequence: the bot will take back into a mildly bad
-                   recapture, and can be baited by a sacrifice deeper than its
-                   horizon. BOT_MAX_LOSS still filters anything catastrophic, and
-                   "always takes back" is itself a very human 1200 weakness — far
-                   more human than ignoring a capture altogether.
+                   Sized 120 in the AL-1200 era, when the loose softmax needed a
+                   shove that big to reach a 95% recapture rate. After the 1600
+                   buff the decay and temperature carry recaptures on merit
+                   (99.4% at bias 40, measured), and the leftover job of a large
+                   bias was amplifying the BAD recaptures inside the safety band
+                   — the gauntlet traced most residual 200-299cp slips to it.
+                   40 keeps the human "takes back by reflex" flavour without
+                   promoting the reflex over the search's judgement.
+                   Accepted consequence, unchanged: it can still be baited by a
+                   sacrifice deeper than the horizon; BOT_MAX_LOSS filters
+                   anything catastrophic.
      BOT_RANK_DECAY  multiplies a move's weight by DECAY^rank — THE strength dial,
                    set to 0.74 when Alex asked the bot to play at his own rating
                    (~1600: his blitz 1542 / bullet 1665 / rapid 1716). At 0.74,
@@ -116,10 +111,14 @@ var FILES = "abcdefgh";
                    roll-up, the checkmate jackpot and the Unlock-everything button
                    still cover weaker visitors. Restore 1.0 for the old soft bot.
      BOT_MAX_LOSS  hard ceiling on how much worse than best a played move may
-                   be. This is the whole safety story. 350 sits above a knight
-                   (320) and below a rook (500): AL-1600 can drop a piece, and
-                   does, but it can never shed a rook or a queen for nothing
-                   and it can never walk into a mate it can see.
+                   be. This is the whole safety story. 300 sits BELOW a knight
+                   (320): since the buff to Alex's rating, cleanly hanging a
+                   piece is structurally impossible, not just unlikely — the
+                   gauntlet asserts zero >=300cp choices across every flagged
+                   position. What remains possible is the 200-299cp slip, a
+                   two-pawn misjudgement, which is the mistake a real 1600
+                   actually makes. (It was 350 in the AL-1200 era, when "can
+                   drop a piece, and does" was the point.)
                    It is also the ONLY guarantee here that does not depend on the
                    knobs above: test/recapture.js keeps a position whose recapture
                    is forced by this ceiling alone and asserts it at 100%.
@@ -134,10 +133,10 @@ var MATE = 100000;
 var MATE_MIN = MATE - 1000;
 
 var BOT_DEPTH = 4;
-var BOT_TEMP = 260;
-var BOT_RANK_DECAY = 0.74;     /* the ~1600 setting — the note above is the dial */
-var BOT_RECAPTURE_BIAS = 120;
-var BOT_MAX_LOSS = 350;
+var BOT_TEMP = 130;
+var BOT_RANK_DECAY = 0.78;     /* the ~1600 setting — the note above is the dial */
+var BOT_RECAPTURE_BIAS = 40;
+var BOT_MAX_LOSS = 300;
 
 /* Zobrist keys — two 32-bit halves per component, so a position key is a full
    64 bits and repetition detection does not collide in practice. Each half is
@@ -575,16 +574,46 @@ var PST = [null,
     20,20,0,0,0,0,20,20, 20,30,10,0,0,10,30,20]
 ];
 
+/* MOP-UP: the gradient material + PST cannot provide once the win is banked.
+   With K+Q vs K every queen move scores the same +900, the PSTs whisper +-20,
+   and the search shuffles until the fifty-move rule — test/gauntlet.js caught
+   exactly that (3 of 4 won endgames unconverted in 45 moves). This term pays
+   the winning side for driving the bare king toward a corner and marching its
+   own king in, which is how those mates are actually delivered.
+   Gated hard: only when one side is >=400cp ahead AND the loser is down to at
+   most one minor. Everywhere else it is a single comparison per eval. Max
+   ~224cp — towers over PST noise, invisible next to the material it rides on. */
+function mopUp(loserK, winnerK) {
+  var lf = loserK & 7, lr = loserK >> 4;
+  var cornered = Math.abs(2 * lf - 7) + Math.abs(2 * lr - 7);           /* 2..14 */
+  var close = 14 - (Math.abs(lf - (winnerK & 7)) + Math.abs(lr - (winnerK >> 4)));
+  return 6 * cornered + 10 * close;
+}
+
 /* score from the side-to-move's perspective (for negamax) */
 function evaluate(game) {
-  var score = 0, b = game.board, r, f, p, pt;
+  var score = 0, matW = 0, matB = 0, b = game.board, r, f, p, pt;
   for (r = 0; r < 8; r++) {
     for (f = 0; f < 8; f++) {
       p = b[r * 16 + f];
       if (p === 0) continue;
-      if (p > 0) score += PIECE_VAL[p] + PST[p][(7 - r) * 8 + f];
-      else { pt = -p; score -= PIECE_VAL[pt] + PST[pt][r * 8 + f]; }
+      if (p > 0) { score += PIECE_VAL[p] + PST[p][(7 - r) * 8 + f]; matW += PIECE_VAL[p]; }
+      else { pt = -p; score -= PIECE_VAL[pt] + PST[pt][r * 8 + f]; matB += PIECE_VAL[pt]; }
     }
+  }
+  /* The winner's own MIDGAME king table has to be cancelled inside the gate:
+     it charges up to -50 for centralising, which swamps the +10-a-step march
+     bonus — with it in force the rook mates never converged (the king simply
+     refused to walk in; the queen mates passed only because the queen does the
+     boxing alone). The loser keeps the table: it already pushes toward the
+     corner, which is where mop-up wants it anyway. */
+  var k;
+  if (matW - matB >= 400 && matB <= 330) {
+    k = game.kings[0];
+    score += mopUp(game.kings[1], k) - PST[KING][(7 - (k >> 4)) * 8 + (k & 7)];
+  } else if (matB - matW >= 400 && matW <= 330) {
+    k = game.kings[1];
+    score -= mopUp(game.kings[0], k) - PST[KING][(k >> 4) * 8 + (k & 7)];
   }
   return game.turn === WHITE ? score : -score;
 }
@@ -1007,11 +1036,31 @@ function bookMove(game) {
   return cand[cand.length - 1][0];
 }
 
+/* True in exactly the positions the mop-up eval fires for: a banked win against
+   a bare-ish king. There the weakness model has to come OFF — the mop-up
+   gradient is ~12-16cp a step, which the softmax reads as a near-tie, so a
+   sampled bot dissolves the gradient and shuffles (test/gauntlet.js: 0 of 4
+   won endgames converted). Playing the honest move here costs nothing that
+   matters: a player this far ahead is not being "beatable", and wandering
+   instead of mating is the one mistake everyone recognises as dumb. */
+function wonEndgame(game) {
+  var b = game.board, mine = 0, theirs = 0, s, p, v;
+  for (s = 0; s < 128; s++) {
+    if (s & 0x88) { s += 7; continue; }
+    p = b[s];
+    if (p === 0) continue;
+    v = PIECE_VAL[p > 0 ? p : -p];
+    if ((p > 0) === (game.turn === WHITE)) mine += v; else theirs += v;
+  }
+  return mine - theirs >= 400 && theirs <= 330;
+}
+
 function botMove(game) {
   var bm = bookMove(game);
   if (bm) return bm;
   var scored = searchRoot(game, BOT_DEPTH, ROOT_NARROW), n = scored.length;
   if (n === 0) return null;
+  if (wonEndgame(game)) return scored[0].m;
   var best = scored[0].v;
   /* a mate it can see is a mate it plays — and mate-distance scoring means
      scored[0] is the *fastest* one. Mated whatever it plays: scored[0] is the

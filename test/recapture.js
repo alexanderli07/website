@@ -34,7 +34,7 @@ const CASES = [
   { name: "cxd4 — pawn takes back a pawn (Sicilian)",
     line: "e2e4 c7c5 g1f3 b8c6 d2d4 c5d4 f3d4 g8f6 b1c3 e7e6 c3d5 e6d5" },
   /* CONTROL. White's rook just took the queen on d8 and is undefended; declining
-     costs 500cp, which is outside BOT_MAX_LOSS (350). The safety ceiling — not the
+     costs 500cp, which is outside BOT_MAX_LOSS (300). The safety ceiling — not the
      softmax — should force this one, so it must sit at 100% whatever the temperature
      is. If this ever drops below 100 the ceiling itself is broken.
      Given as a FEN because a forced recapture is fiddly to reach from the start, and
