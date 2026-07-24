@@ -5,68 +5,125 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>404 &mdash; off the board &middot; Alexander Li</title>
 <meta name="robots" content="noindex" />
-<meta name="color-scheme" content="light" />
+<meta name="color-scheme" content="light dark" />
 <meta name="theme-color" content="#f4ecd9" />
 <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
 <link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png" />
 <link rel="icon" href="/favicon.ico" sizes="32x32" />
 <!-- Deliberately self-contained: no stylesheet, no webfonts. A 404 is the one
      page that has to render when something else has already gone wrong, and it
-     is served for missing asset paths too. System serif and mono only. -->
+     is served for missing asset paths too. System serif and mono only.
+     It DOES follow the site's theme: the same gate the main page uses, reading
+     the same key, because landing on a paper-white 404 out of the dark world
+     reads as a second error. -->
+<script>
+  try {
+    if (localStorage.getItem("gambit-theme") === "dark")
+      document.documentElement.setAttribute("data-theme", "dark");
+  } catch (e) {}
+</script>
 <style>
+  :root{
+    --paper: #f4ecd9; --ink: #241a0f;
+    --walnut: #5b3a24; --walnut-2: #7a5230; --walnut-3: #9a7a52;
+    --red: #a4211b;
+    --sq-l: #f3e8cf; --sq-d: #c8a878;
+    --shade: 36,26,15;
+    color-scheme: light;
+  }
+  html[data-theme="dark"]{
+    --paper: #171009; --ink: #efe4cb;
+    --walnut: #b3906b; --walnut-2: #c9a87d; --walnut-3: #785d3f;
+    --red: #e4674f;
+    --sq-l: #7b6040; --sq-d: #48341e;
+    --shade: 240,228,203;
+    color-scheme: dark;
+  }
   *{ margin: 0; box-sizing: border-box; }
   html, body{ height: 100%; }
   body{
     display: flex; align-items: center; justify-content: center;
     padding: 28px 20px;
-    background: #f4ecd9;
-    color: #241a0f;
+    background: var(--paper);
+    color: var(--ink);
     font-family: Georgia, "Times New Roman", serif;
   }
   .card{
     width: min(560px, 100%);
-    background: #f4ecd9;
-    border: 1px solid #5b3a24;
-    box-shadow: 4px 4px 0 rgba(36,26,15,.20);
+    background: var(--paper);
+    border: 1px solid var(--walnut);
+    box-shadow: 4px 4px 0 rgba(var(--shade),.20);
     padding: 30px 30px 26px;
   }
   .eyebrow{
     font-family: Consolas, "Courier New", monospace;
     font-size: 10px; letter-spacing: .26em; text-transform: uppercase;
-    color: #7a5230;
+    color: var(--walnut-2);
   }
   h1{
     margin-top: 14px;
     font-size: clamp(2.1rem, 8vw, 3.2rem);
     font-weight: 700; line-height: 1.04; letter-spacing: -.01em;
   }
-  h1 .dot{ color: #a4211b; }
+  h1 .dot{ color: var(--red); }
   p{
     margin-top: 14px;
-    font-size: 16.5px; line-height: 1.6; color: #5b3a24;
+    font-size: 16.5px; line-height: 1.6; color: var(--walnut-2);
     max-width: 46ch;
   }
-  .rule{ margin-top: 22px; border-top: 1px solid #9a7a52; }
+  /* The scene of the crime: a strip of board with the missing square itself.
+     The knight peers into the hole. Pure CSS + one glyph, nothing to load. */
+  .strip{
+    margin-top: 22px;
+    display: flex;
+  }
+  .strip .sq{
+    width: 52px; height: 52px; flex: none;
+    display: flex; align-items: center; justify-content: center;
+    font-family: "Segoe UI Symbol", "Apple Symbols", "Noto Sans Symbols 2",
+                 "DejaVu Sans", "Arial Unicode MS", sans-serif;
+    font-size: 34px; line-height: 1;
+    font-variant-emoji: text;
+  }
+  .strip .l{ background: var(--sq-l); }
+  .strip .d{ background: var(--sq-d); }
+  .strip .pc{ color: #241a0f; text-shadow: 0 1px 0 rgba(244,236,217,.35); }
+  html[data-theme="dark"] .strip .pc{ -webkit-text-stroke: .5px rgba(244,236,217,.45); }
+  /* the 404 itself: the square that is not there */
+  .strip .gone{
+    background: none;
+    border: 2px dashed var(--walnut-3);
+    color: var(--walnut-3);
+    font-family: Consolas, "Courier New", monospace;
+    font-size: 11px; letter-spacing: .08em;
+  }
+  .engine-note{
+    margin-top: 10px;
+    font-family: Consolas, "Courier New", monospace;
+    font-size: 10.5px; letter-spacing: .04em; line-height: 1.5;
+    color: var(--walnut-3);
+  }
+  .rule{ margin-top: 22px; border-top: 1px solid var(--walnut-3); }
   a.home{
     display: inline-block; margin-top: 20px;
     font-family: Consolas, "Courier New", monospace;
     font-size: 11px; font-weight: 600;
     letter-spacing: .16em; text-transform: uppercase;
     text-decoration: none;
-    color: #f4ecd9; background: #241a0f;
-    border: 1px solid #241a0f;
-    box-shadow: 2px 2px 0 rgba(36,26,15,.20);
+    color: var(--paper); background: var(--ink);
+    border: 1px solid var(--ink);
+    box-shadow: 2px 2px 0 rgba(var(--shade),.20);
     padding: 9px 15px 8px;
     transition: background .18s ease, transform .14s cubic-bezier(.2,.7,.2,1),
                 box-shadow .18s ease;
   }
   a.home:hover{
-    background: #a4211b; border-color: #a4211b;
+    background: var(--red); border-color: var(--red);
     transform: translate(-1px,-1px);
-    box-shadow: 3px 3px 0 rgba(36,26,15,.26);
+    box-shadow: 3px 3px 0 rgba(var(--shade),.26);
   }
-  a.home:active{ transform: translate(2px,2px); box-shadow: 0 0 0 rgba(36,26,15,0); }
-  a.home:focus-visible{ outline: 3px solid #241a0f; outline-offset: 2px; }
+  a.home:active{ transform: translate(2px,2px); box-shadow: 0 0 0 rgba(var(--shade),0); }
+  a.home:focus-visible{ outline: 3px solid var(--ink); outline-offset: 2px; }
   @media (prefers-reduced-motion: reduce){
     a.home{ transition: none; }
     a.home:hover, a.home:active{ transform: none; }
@@ -81,8 +138,21 @@
       There is nothing on this square. The file you were after may have moved,
       or the link that sent you here was never a legal one.
     </p>
+    <div class="strip" aria-hidden="true">
+      <span class="sq d"></span><span class="sq l pc">&#9822;&#xFE0E;</span><span class="sq gone">404</span><span class="sq l"></span><span class="sq d"></span>
+    </div>
+    <p class="engine-note">
+      the engine agrees: (sq &amp; 0x88) !== 0 &mdash; this square fails its own
+      bounds check. see engine.js
+    </p>
     <div class="rule"></div>
     <a class="home" href="/">Back to the board &#8594;</a>
   </main>
+  <!-- Vercel Web Analytics, plain-HTML flavour. Same-origin script; does not
+       exist on localhost, and `defer` makes that failure silent. -->
+  <script>
+    window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
+  </script>
+  <script defer src="/_vercel/insights/script.js"></script>
 </body>
 </html>

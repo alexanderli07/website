@@ -74,8 +74,9 @@
 }
 </script>
 
-<!-- TWO GATES, ONE INLINE SCRIPT IN THE HEAD — the only script tag on the page
-     outside the ld+json. Both decisions have to land before ANYTHING paints:
+<!-- TWO GATES, ONE INLINE SCRIPT IN THE HEAD (the analytics tags at the end of
+     the body are the only other scripts besides the ld+json and the app itself).
+     Both decisions have to land before ANYTHING paints:
      · the one-time curtain: pure CSS, so it starts animating the moment its element
        is parsed — well before app.js runs at the end of the body. Deciding it there
        would show a returning visitor several frames of curtain before tear-out.
@@ -513,5 +514,16 @@
      a bot with amnesia about its openings, not a broken page. -->
 <script src="book.js"></script>
 <script src="app.js"></script>
+<!-- Vercel Web Analytics + Speed Insights, plain-HTML flavour (this is a static
+     deploy — the npm packages the Vercel bot once PR'd are for framework builds
+     and never fit here, which is why analytics "existed" but never reported).
+     Both scripts are same-origin and only exist ON Vercel, and only once the
+     matching toggles are on in the dashboard; on localhost they 404 and `defer`
+     keeps that silent. Last in the body so they can never delay the game. -->
+<script>
+  window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
+</script>
+<script defer src="/_vercel/insights/script.js"></script>
+<script defer src="/_vercel/speed-insights/script.js"></script>
 </body>
 </html>
