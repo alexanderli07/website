@@ -181,18 +181,26 @@
     flex: none;
   }
   .topnav .brand .dot{ color: var(--red); }
-  /* One typeface for the whole lockup — mixing mono into a 19px nav item reads
-     busy at this size, so the shape of it comes from weight, colour and tracking.
-     THE NAME NO LONGER STEPS BACK. It sat at walnut/700 against the wordmark's
-     ink/900, which made GAMBIT the loud half of a lockup whose entire job is to say
-     whose site this is. ALEX now matches it on both counts and takes a little extra
-     tracking on top, so it carries at least as much weight as the wordmark. The colon
-     stays walnut-3, which is what keeps the two halves legible as separate words now
-     that they share a colour, and the red stays on the full stop so there is still
-     only one accent in the bar.
-     Moving to ink also fixes the contrast: walnut measures 5.9:1 on paper, ink 13:1. */
-  .topnav .brand .bn{ font-weight: 900; color: var(--ink); letter-spacing: .05em; }
-  .topnav .brand .bx{ font-weight: 700; color: var(--walnut-3); margin: 0 .06em; }
+  /* The lockup is a MONOGRAM CHIP plus the wordmark, replacing ALEX:GAMBIT. —
+     the colon mashed name and mark into one awkward string, and Alex never
+     warmed to it. The chip separates the jobs: AL says whose site this is (the
+     favicon is the same monogram on a board square, so the browser tab and the
+     bar now agree), and GAMBIT stays a clean word with its red stop as the
+     bar's single accent.
+     Built from the flipping tokens, same as the theme toggle's swatch: an ink
+     chip with paper initials on the light page, a paper chip with ink initials
+     on the dark one — no theme-specific rule needed. Sized in em so the 15px
+     mobile brand shrinks it in step. */
+  .topnav .brand{ display: inline-flex; align-items: center; gap: .42em; }
+  .topnav .brand .mchip{
+    display: inline-flex; align-items: center; justify-content: center;
+    /* font-size shrinks FIRST, so these ems measure against the chip's own
+       11.4px text: 2.2em x 1.95em = ~25x22px at the desktop brand size, and
+       everything scales together when the mobile rule drops the brand to 15px */
+    font-size: .6em; font-weight: 900; letter-spacing: .02em; line-height: 1;
+    width: 2.2em; height: 1.95em;
+    background: var(--ink); color: var(--paper);
+  }
   .nav-links{ display: flex; gap: 6px; flex-wrap: wrap; min-width: 0; }
   /* These used to snap a 1px red rectangle around the label on hover, with no
      transition declared at all — an outlined box appearing instantly, which read
@@ -303,12 +311,11 @@
   @media (max-width: 720px){
     .topnav{ flex-wrap: wrap; gap: 6px 10px; padding: 6px 12px 5px; }
     .topnav .brand{ font-size: 15px; }
-    /* Below ~360px the name no longer fits beside the two action buttons: the
-       brand went 68px -> 114px when ALEX: was added, which pushed the bar to the
-       three ragged rows the comment above says to avoid. Drop back to the bare
-       wordmark there — the document title still carries the name. */
+    /* Below ~360px the full lockup no longer fits beside the action buttons
+       (the same squeeze that once cost ALEX: its place). The chip goes; the
+       bare wordmark stays; the document title still carries the name. */
     @media (max-width: 360px){
-      .topnav .brand .bn, .topnav .brand .bx{ display: none; }
+      .topnav .brand .mchip{ display: none; }
     }
     .nav-right{ margin-left: auto; gap: 6px; }
     .nav-links{
