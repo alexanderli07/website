@@ -23,6 +23,14 @@
     { tier: "Best Game Mechanic", ev: "AngelHacks '23", short: "AngelHacks '23" }
   ];
   var PROJECTS = [
+    { title: "Earshot", yr: "Jul 2026",
+      blurb: "A Raspberry Pi that listens for the sounds that matter — smoke alarms, doorbells, a crying baby — and turns each one into light, vibration and a phone push within a second. Built for Deaf and hard-of-hearing users.",
+      hl: "Built at Hack the 6ix 2026", quiet: true,
+      tags: ["Raspberry Pi", "YAMNet / TFLite", "FastAPI"],
+      img: "assets/images/earshot.svg", links: [{ l: "GitHub", h: "https://github.com/alexanderli07/Earshot" }, { l: "Devpost", h: "https://devpost.com/software/earshot-boihqx" }],
+      problem: "A smoke alarm is useless to someone who can't hear it. For millions of Deaf and hard-of-hearing people, sound-based warnings simply don't reach them — and the existing fixes cost a fortune.",
+      approach: "YAMNet runs fully offline on the Pi, scoring live mic audio, reinforced by a purpose-trained alarm head; a FastAPI backend fans each event out over WebSocket to an LED-and-vibration wearable, a phone push and a live dashboard in about a second. Teach mode learns any new sound — a kettle, a dryer buzzer — from ~3 examples, no cloud, no retraining.",
+      outcome: "Detection that holds up in a loud room, not just on clean clips, with audio that never leaves the device. Built with a team of three at Hack the 6ix 2026." },
     { title: "SnaipShot", yr: "Oct 2024",
       blurb: "A memory-support wearable for people with dementia — smart glasses that read your surroundings and daily summaries aloud, so there's no screen to check.",
       hl: "Best Use of AI — Hack the Valley 9", quiet: false,
@@ -93,15 +101,7 @@
       img: "assets/images/BAC.webp", links: [{ l: "GitHub", h: "https://github.com/alexanderli07/Brampton-Arts-and-Culture-Coin" }],
       problem: "The theme was \"AI takeover.\" We flipped it: what if AI rewarded human creativity with real economic value?",
       approach: "Designed the token economy ($BAC): an AI art detector verifies originality, views mint coins, and coins trade for tax rebates or buy pieces as NFTs — a full incentive + payments loop.",
-      outcome: "3rd at WolfHacks — and my first build where the interesting part was the economics, not just the code." },
-    { title: "ecoin", yr: "Jul 2024",
-      blurb: "A climate-action reward currency — verified green purchases and recycling mint ecoin, redeemable with eco-conscious partners.",
-      hl: "Built at StarterHacks 2024", quiet: true,
-      tags: ["Python", "Flask", "SQLAlchemy"],
-      img: "assets/images/ecoin.webp", links: [{ l: "GitHub", h: "https://github.com/HetavP2/Ecoin" }, { l: "Devpost", h: "https://devpost.com/software/ecoin-p0t9l1" }],
-      problem: "Climate anxiety stalls action. What if sustainable choices paid you back — a currency that turns good habits into spendable value and links people to greener businesses?",
-      approach: "Designed a points-based reward economy on a Flask + SQLAlchemy backend: green transactions (sustainable purchases, recycling) mint ecoin, which connects consumers to partner companies — a closed incentive loop tying behaviour to value.",
-      outcome: "Built at StarterHacks 2024 — my first real go at incentive design: modelling how a currency reshapes what people choose to do." }
+      outcome: "3rd at WolfHacks — and my first build where the interesting part was the economics, not just the code." }
   ];
   var JOBS = [
     { role: "Finance Developer", org: "Quintessence Wealth",
