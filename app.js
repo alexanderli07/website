@@ -22,11 +22,21 @@
     { tier: "Best AI/ML", ev: "Hack the Valley 9 '24", short: "HTV9 '24" },
     { tier: "Best Game Mechanic", ev: "AngelHacks '23", short: "AngelHacks '23" }
   ];
-  /* NEWEST FIRST, and the order is the data — no runtime sort parses "Dec 2023"
-     strings. Keep it sorted when adding a card; ranges ("2022 - present") sort by
-     their start year. Unlock order follows array order, so visitors unseal the
-     most recent work first. */
+  /* NEWEST FIRST with ONE exception, and the order is the data — no runtime sort
+     parses "Dec 2023" strings. invisibilis leads by Alex's request: it is "2022 -
+     present", the ongoing flagship (10k+ players) and the metaphor behind this
+     whole site, so the range reads by its "present" end. Everything after it is
+     strictly newest-first; keep it that way when adding a card. Unlock order
+     follows array order. */
   var PROJECTS = [
+    { title: "invīsibilis", yr: "2022 – present",
+      blurb: "A horror game where an invisible maze is only revealed through a lidar gun — built in Roblox Studio with Lua. 10,000+ players.",
+      hl: "Best Game Mechanic — AngelHacks 2023", quiet: false,
+      tags: ["Roblox Studio", "Lua", "Lidar"],
+      img: "assets/images/invisibilis.webp", links: [{ l: "Play on Roblox", h: "https://www.roblox.com/games/13512108865/inv-sibilis" }],
+      problem: "What if you couldn't see the level at all, and seeing it was the gameplay?",
+      approach: "Engineered lidar-based visibility mechanics in Lua, optimizing game logic and rendering loops so the maze and monsters only exist for a moment after each scan.",
+      outcome: "10,000+ players on this prototype alone — part of 1,000,000+ visits across my games — and Best Game Mechanic at AngelHacks. Its reveal mechanic is the metaphor behind this site." },
     { title: "Earshot", yr: "Jul 2026",
       blurb: "A Raspberry Pi that listens for the sounds that matter — smoke alarms, doorbells, a crying baby — and turns each one into light, vibration and a phone push within a second. Built for Deaf and hard-of-hearing users.",
       hl: "Built at Hack the 6ix 2026", quiet: true,
@@ -97,15 +107,7 @@
       img: "assets/images/dragonflai.webp", links: [{ l: "GitHub", h: "https://github.com/SpiritByte/dragonfl.ai" }, { l: "Devpost", h: "https://devpost.com/software/dragonfl-ai" }],
       problem: "How much of the world is closed off if you can't see it? We set out to give blind users a real-time sense of what's around them.",
       approach: "Built an image-recognition device with object, face and text recognition; all readings stream to a dashboard accessible through a frontend website.",
-      outcome: "Won 1st overall at RythmHacks 2023 — the project that turned ML from a buzzword into something I wanted to truly understand." },
-    { title: "invīsibilis", yr: "2022 – present",
-      blurb: "A horror game where an invisible maze is only revealed through a lidar gun — built in Roblox Studio with Lua. 10,000+ players.",
-      hl: "Best Game Mechanic — AngelHacks 2023", quiet: false,
-      tags: ["Roblox Studio", "Lua", "Lidar"],
-      img: "assets/images/invisibilis.webp", links: [{ l: "Play on Roblox", h: "https://www.roblox.com/games/13512108865/inv-sibilis" }],
-      problem: "What if you couldn't see the level at all, and seeing it was the gameplay?",
-      approach: "Engineered lidar-based visibility mechanics in Lua, optimizing game logic and rendering loops so the maze and monsters only exist for a moment after each scan.",
-      outcome: "10,000+ players on this prototype alone — part of 1,000,000+ visits across my games — and Best Game Mechanic at AngelHacks. Its reveal mechanic is the metaphor behind this site." }
+      outcome: "Won 1st overall at RythmHacks 2023 — the project that turned ML from a buzzword into something I wanted to truly understand." }
   ];
   var JOBS = [
     { role: "Finance Developer", org: "Quintessence Wealth",
