@@ -45,6 +45,14 @@
       problem: "A smoke alarm is useless to someone who can't hear it. For millions of Deaf and hard-of-hearing people, sound-based warnings simply don't reach them — and the existing fixes cost a fortune.",
       approach: "YAMNet runs fully offline on the Pi, scoring live mic audio, reinforced by a purpose-trained alarm head; a FastAPI backend fans each event out over WebSocket to an LED-and-vibration wearable, a phone push and a live dashboard in about a second. Teach mode learns any new sound — a kettle, a dryer buzzer — from ~3 examples, no cloud, no retraining.",
       outcome: "Detection that holds up in a loud room, not just on clean clips, with audio that never leaves the device. Built with a team of three at Hack the 6ix 2026." },
+    { title: "Alphia", yr: "Mar 2026",
+      blurb: "A Chrome extension and web app that saves clothing from any online store into one smart cart — then has Gemini render a photo of you actually wearing the outfit.",
+      hl: "Two-person build", quiet: true,
+      tags: ["Chrome Extension", "React / Vite", "Gemini API"],
+      img: "assets/images/alphia.svg", links: [{ l: "GitHub", h: "https://github.com/Parsa1ll/Alphia" }],
+      problem: "Online shopping scatters your finds across a dozen stores' carts, and none of them can tell you whether the pieces work together — or on you.",
+      approach: "A Manifest V3 extension drops a floating button on every store page that scrapes title, price, image, brand, size and colour into a local smart cart; a React dashboard picks the pieces, and an Express proxy hands the real product images to Gemini, which renders you wearing the outfit and returns styling feedback with a rating.",
+      outcome: "Save from any store, try it on without a fitting room — a full extension-to-AI pipeline built by two people." },
     { title: "Min-Volatility Portfolio Optimizer", yr: "Dec 2025",
       blurb: "A Python engine that builds a defensive, low-volatility equity portfolio — screening by liquidity and volatility, then weighting under real diversification limits.",
       hl: "CFM 101 portfolio competition — Waterloo", quiet: true,
@@ -131,7 +139,9 @@
   ];
   /* cumulative reveal counts per capture */
   var PAWN_CUM = [1, 2, 3, 4, 5, 6, 8, 10];
-  var MINOR_CUM = [2, 4, 7, 10];
+  /* 4 minors -> 11 projects since Alphia joined; the curve keeps the gentle
+     2-first start so an early knight capture still feels generous */
+  var MINOR_CUM = [2, 5, 8, 11];
   var ROOK_CUM = [3, 6];
   /* The pawn carries U+FE0E, the text-presentation selector, written as an escape
      so it is visible in source. U+265F is the only piece with an emoji form, and
@@ -159,7 +169,7 @@
     var all = state.all || state.mate;
     return {
       wins: all ? 10 : (state.pawns ? PAWN_CUM[Math.min(state.pawns, 8) - 1] : 0),
-      projects: all ? 10 : (state.minors ? MINOR_CUM[Math.min(state.minors, 4) - 1] : 0),
+      projects: all ? 11 : (state.minors ? MINOR_CUM[Math.min(state.minors, 4) - 1] : 0),
       jobs: all ? 6 : (state.rooks ? ROOK_CUM[Math.min(state.rooks, 2) - 1] : 0),
       /* the file — résumé AND contact, one card, carried by the queen */
       resume: all || state.queen > 0,
@@ -333,15 +343,15 @@
        immediately — growing them there would replay the reveal on every visit. */
     var anim = !!(cascade && !reduced);
     for (i = 0; i < 10; i++) if (i < c.wins && openAt($("win-" + i), delay, anim)) delay += step;
-    for (i = 0; i < 10; i++) if (i < c.projects && openAt($("proj-" + i), delay, anim)) delay += step;
+    for (i = 0; i < 11; i++) if (i < c.projects && openAt($("proj-" + i), delay, anim)) delay += step;
     for (i = 0; i < 6; i++) if (i < c.jobs && openAt($("job-" + i), delay, anim)) delay += step;
     if (c.resume) openAt($("resume-card"), delay, anim);
     $("prog-wins").textContent = c.wins + "/10";
-    $("prog-proj").textContent = c.projects + "/10";
+    $("prog-proj").textContent = c.projects + "/11";
     $("prog-jobs").textContent = c.jobs + "/6";
     $("prog-resume").textContent = c.resume ? "open" : "sealed";
     /* the mate bonus: reads "checkmate" until nothing is left sealed */
-    var everythingOpen = c.wins === 10 && c.projects === 10 && c.jobs === 6 && c.resume;
+    var everythingOpen = c.wins === 10 && c.projects === 11 && c.jobs === 6 && c.resume;
     $("prog-contact").textContent = everythingOpen ? "open" : "checkmate";
     /* once nothing is left sealed, the shortcut stops shouting */
     var ua = $("btn-unlock-all");
@@ -352,7 +362,7 @@
          unlock — a second control would only be dead weight for the entire
          first visit. `allDone` is the single source of truth for the label, the
          glyph, the quiet styling AND what the click does, so they cannot drift. */
-      allDone = c.wins === 10 && c.projects === 10 && c.jobs === 6 && c.resume;
+      allDone = c.wins === 10 && c.projects === 11 && c.jobs === 6 && c.resume;
       ua.classList.toggle("is-done", allDone);
       uaLabel.textContent = allDone ? "Reset unlocks" : "Unlock everything";
       uaKey.textContent = allDone ? "↺" : "⚿";   /* ↺ reset / ⚿ key */
@@ -418,7 +428,7 @@
   function resealBeyond() {
     var c = counts(), i, el;
     for (i = c.wins; i < 10; i++) { el = $("win-" + i); if (el) el.classList.remove("open"); }
-    for (i = c.projects; i < 10; i++) { el = $("proj-" + i); if (el) el.classList.remove("open"); }
+    for (i = c.projects; i < 11; i++) { el = $("proj-" + i); if (el) el.classList.remove("open"); }
     for (i = c.jobs; i < 6; i++) { el = $("job-" + i); if (el) el.classList.remove("open"); }
     if (!c.resume) $("resume-card").classList.remove("open");
   }

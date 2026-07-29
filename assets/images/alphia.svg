@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 600" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Alphia smart cart: clothing items saved from stores flow into an AI-generated outfit preview">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#101726"/>
+      <stop offset="1" stop-color="#090d18"/>
+    </linearGradient>
+    <linearGradient id="ai" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#a78bfa"/>
+      <stop offset="1" stop-color="#38bdf8"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="600" fill="url(#bg)"/>
+  <text x="80" y="70" fill="#6b7aa0" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="20" letter-spacing="3">ALPHIA · SMART CART → AI TRY-ON</text>
+
+  <!-- the cart: three saved items scraped from different stores -->
+  <g font-family="ui-monospace, SFMono-Regular, Menlo, monospace">
+    <g>
+      <rect x="80" y="130" width="170" height="220" rx="10" fill="#182135" stroke="#2a3854" stroke-width="2"/>
+      <path d="M120 175 l20 -14 h50 l20 14 -12 18 -8 -6 v66 h-50 v-66 l-8 6 z" fill="#38bdf8" opacity=".85"/>
+      <text x="100" y="300" fill="#8b98bb" font-size="17">shirt</text>
+      <text x="100" y="328" fill="#5f6f93" font-size="16">$42 · saved</text>
+    </g>
+    <g>
+      <rect x="270" y="130" width="170" height="220" rx="10" fill="#182135" stroke="#2a3854" stroke-width="2"/>
+      <path d="M320 165 h60 l6 110 -24 0 -12 -70 -12 70 -24 0 z" fill="#f472b6" opacity=".8"/>
+      <text x="290" y="300" fill="#8b98bb" font-size="17">pants</text>
+      <text x="290" y="328" fill="#5f6f93" font-size="16">$68 · saved</text>
+    </g>
+    <g>
+      <rect x="460" y="130" width="170" height="220" rx="10" fill="#182135" stroke="#2a3854" stroke-width="2"/>
+      <path d="M495 250 q0 -22 22 -22 l30 2 q10 -14 24 -10 l16 6 q14 26 -6 30 l-64 6 q-22 4 -22 -12 z" fill="#facc15" opacity=".85"/>
+      <text x="480" y="300" fill="#8b98bb" font-size="17">shoes</text>
+      <text x="480" y="328" fill="#5f6f93" font-size="16">$95 · saved</text>
+    </g>
+    <text x="80" y="410" fill="#5f6f93" font-size="18">3 items · 3 stores · one cart</text>
+  </g>
+
+  <!-- the flow into Gemini -->
+  <g stroke="url(#ai)" stroke-width="5" fill="none" stroke-linecap="round">
+    <path d="M660 240 h90"/>
+    <path d="M735 222 l24 18 -24 18"/>
+  </g>
+  <g fill="#a78bfa">
+    <path d="M700 150 l7 18 18 7 -18 7 -7 18 -7 -18 -18 -7 18 -7 z"/>
+    <path d="M745 300 l5 12 12 5 -12 5 -5 12 -5 -12 -12 -5 12 -5 z" opacity=".7"/>
+  </g>
+
+  <!-- the try-on: a generated preview of the person wearing all three -->
+  <g>
+    <rect x="810" y="105" width="310" height="400" rx="12" fill="#161d30" stroke="url(#ai)" stroke-width="3"/>
+    <circle cx="965" cy="195" r="34" fill="#33415e"/>
+    <path d="M905 350 q0 -95 60 -95 q60 0 60 95 l0 40 h-24 l-6 76 h-60 l-6 -76 h-24 z" fill="#33415e"/>
+    <path d="M913 300 q52 -34 104 0 l0 44 h-104 z" fill="#38bdf8" opacity=".75"/>
+    <path d="M929 344 h72 l-8 92 h-56 z" fill="#f472b6" opacity=".7"/>
+    <rect x="922" y="440" width="34" height="14" rx="7" fill="#facc15" opacity=".85"/>
+    <rect x="972" y="440" width="34" height="14" rx="7" fill="#facc15" opacity=".85"/>
+    <text x="838" y="486" fill="#8b98bb" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="17">outfit rating · 9/10</text>
+  </g>
+</svg>
