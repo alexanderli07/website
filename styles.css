@@ -2310,7 +2310,11 @@
   footer a:hover::after, footer a:focus-visible::after,
   .dcard.open:hover .dopen::after,
   .dcard.open:focus-visible .dopen::after{ transform: scaleX(1); }
-  .topnav .brand{ --wipe-bottom: 4px; }
+  /* -4px, not 4: the offset was set for the one-line lockup, where "4px above
+     the bottom" tucked the wipe under the text. On the two-line masthead that
+     same offset runs the red rule straight THROUGH the name line. Negative
+     puts it 4px clear below the whole block — the bar has ~10px of slack. */
+  .topnav .brand{ --wipe-bottom: -4px; }
   .topnav .brand:active{ color: var(--red); }
   .topnav .brand:active .dot{ color: var(--ink); }
   .dopen{ --wipe-bottom: 0; padding-bottom: 5px; }

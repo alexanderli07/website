@@ -39,7 +39,6 @@
       outcome: "10,000+ players on this prototype alone — part of 1,000,000+ visits across my games — and Best Game Mechanic at AngelHacks. Its reveal mechanic is the metaphor behind this site." },
     { title: "Earshot", yr: "Jul 2026",
       blurb: "A Raspberry Pi that listens for the sounds that matter — smoke alarms, doorbells, a crying baby — and turns each one into light, vibration and a phone push within a second. Built for Deaf and hard-of-hearing users.",
-      hl: "Built at Hack the 6ix 2026", quiet: true,
       tags: ["Raspberry Pi", "YAMNet / TFLite", "FastAPI"],
       img: "assets/images/earshot.svg", links: [{ l: "GitHub", h: "https://github.com/alexanderli07/Earshot" }, { l: "Devpost", h: "https://devpost.com/software/earshot-boihqx" }],
       problem: "A smoke alarm is useless to someone who can't hear it. For millions of Deaf and hard-of-hearing people, sound-based warnings simply don't reach them — and the existing fixes cost a fortune.",
@@ -47,7 +46,6 @@
       outcome: "Detection that holds up in a loud room, not just on clean clips, with audio that never leaves the device. Built with a team of three at Hack the 6ix 2026." },
     { title: "Alphia", yr: "Mar 2026",
       blurb: "A Chrome extension and web app that saves clothing from any online store into one smart cart — then has Gemini render a photo of you actually wearing the outfit.",
-      hl: "Two-person build", quiet: true,
       tags: ["Chrome Extension", "React / Vite", "Gemini API"],
       img: "assets/images/alphia.svg", links: [{ l: "GitHub", h: "https://github.com/Parsa1ll/Alphia" }],
       problem: "Online shopping scatters your finds across a dozen stores' carts, and none of them can tell you whether the pieces work together — or on you.",
@@ -55,14 +53,12 @@
       outcome: "Save from any store, try it on without a fitting room — a full extension-to-AI pipeline built by two people." },
     { title: "Min-Volatility Portfolio Optimizer", yr: "Dec 2025",
       blurb: "A Python engine that builds a defensive, low-volatility equity portfolio — screening by liquidity and volatility, then weighting under real diversification limits.",
-      hl: "CFM 101 portfolio competition — Waterloo", quiet: true,
       tags: ["Portfolio Optimization", "Python / pandas", "yfinance"],
       img: "assets/images/cfm101.svg", links: [{ l: "GitHub", h: "https://github.com/alexanderli07/CFM101" }],
       problem: "Build a $1M book that barely flinches over a volatile week — maximum stability, hard real-world constraints, and no hand-picking your favourites.",
       approach: "Pulls price and volume history with yfinance, screens candidates for liquidity (minimum average volume, full trading months) and 30-day volatility, then scores each on volatility, liquidity and market cap — with a Groq LLM tuning the metric weights. The optimizer forces one large-cap and one small-cap, caps any position at 15% and any sector at 40%, and clips weights for diversification across 10–25 names, all inside a $1,000,000 CAD budget." },
     { title: "ServiceSwap", yr: "Jul 2025",
       blurb: "A peer-to-peer marketplace where people trade skills instead of cash — semantic matching pairs what you need with whoever can offer it.",
-      hl: "Built at Hack404 2025", quiet: true,
       tags: ["sentence-transformers", "Flask", "Socket.IO", "Geolocation"],
       img: "assets/images/serviceswap.svg", links: [{ l: "Video", h: "https://youtu.be/0sAJfKkeAMY" }, { l: "Devpost", h: "https://devpost.com/software/serviceswap" }],
       problem: "Plenty of people can't afford services but hold skills worth trading. A market only works if supply and demand can actually find each other.",
@@ -217,7 +213,7 @@
         '<div class="dbody"><div class="dmove"><span class="mv-no">' + String(i + 1).padStart(2, "0") + '.</span>' +
         '<span class="yr">' + p.yr + '</span></div><h3>' + p.title + '</h3>' +
         '<p class="blurb">' + p.blurb + '</p>' +
-        '<p class="dhl' + (p.quiet ? ' quiet' : '') + '">' + p.hl + '</p>' +
+        (p.hl ? '<p class="dhl' + (p.quiet ? ' quiet' : '') + '">' + p.hl + '</p>' : '') +
         '<div class="dtags">' + p.tags.map(function (t) { return '<span>' + t + '</span>'; }).join('') + '</div>' +
         cue +
         '</div></div></article>';
