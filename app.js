@@ -808,7 +808,7 @@
     queen: "the queen falls — the file is yours"
   };
   var ROLL_KICKER = {
-    minors: "every win is already in — this capture pays into the projects",
+    minors: "every achievement is already in — this capture pays into the projects",
     rooks: "every project is already in — this capture opens the employment record",
     queen: "everything below is open — this capture takes the file"
   };
