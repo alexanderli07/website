@@ -1,0 +1,54 @@
+# AL-1600 keeps up with Alex. Every Monday this fetches his latest chess.com
+# games, regenerates the opening book from them, proves the artifact against
+# the engine, and pushes only when something actually changed — the push then
+# triggers the normal Vercel deploy. Run it by hand from the Actions tab any
+# time (workflow_dispatch), e.g. right after a repertoire change.
+#
+# Failure modes are all safe: if chess.com is unreachable the fetch exits 1 and
+# nothing is touched; if the regenerated book fails test/book.js the commit
+# never happens; if nothing changed there is no commit at all (the generator is
+# deterministic, so identical games produce a byte-identical book).
+name: Refresh the opening book
+
+on:
+  schedule:
+    - cron: "0 10 * * 1"   # Mondays 10:00 UTC = early morning Toronto
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: refresh-book
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Fetch the latest games
+        run: node tools/fetch-games.mjs /tmp/pgn
+
+      - name: Regenerate the book
+        run: node tools/make-book.mjs /tmp/pgn
+
+      - name: Prove the book against the engine
+        run: node test/book.js
+
+      - name: Commit if the repertoire moved
+        run: |
+          if git diff --quiet book.js; then
+            echo "book unchanged — no new lines this week"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add book.js
+          git commit -m "Refresh AL-1600's opening book from TheFaix's latest games"
+          git push
