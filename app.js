@@ -757,6 +757,13 @@
     themeBusy = true;
     applyTheme(next);
     replayIntro();
+    /* AL-1600's opening waits for the curtain. applyTheme's newGame scheduled it
+       650ms in, which meant White's first move landed while the screen was still
+       covered — the reveal showed a board with a move already made instead of an
+       opponent making it. Rescheduling here (the setter clears the earlier timer)
+       holds the move until the halves have parted and settled, so switching to
+       the dark side ends with you WATCHING Alex's engine open the game. */
+    scheduleBotOpening(INTRO_MS + 450);
     setTimeout(function () { themeBusy = false; }, INTRO_MS);
   }
 
@@ -808,7 +815,7 @@
     queen: "the queen falls — the file is yours"
   };
   var ROLL_KICKER = {
-    minors: "every achievement is already in — this capture pays into the projects",
+    minors: "every award is already in — this capture pays into the projects",
     rooks: "every project is already in — this capture opens the employment record",
     queen: "everything below is open — this capture takes the file"
   };
