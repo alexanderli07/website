@@ -610,6 +610,14 @@
     font-family: var(--mono); font-size: 8.5px; letter-spacing: .04em;
     color: var(--walnut-2); line-height: 1.4;
   }
+  /* The footnote's one link — the way into the engine-room page. Red so it
+     reads as a door, not more footnote. */
+  .rail-note a{
+    color: var(--red); text-decoration: underline;
+    text-decoration-thickness: 1px; text-underline-offset: 2px;
+    text-decoration-color: rgba(var(--hatch), .5);
+  }
+  .rail-note a:hover{ text-decoration-color: var(--red); }
   .bounty{
     list-style: none; margin: 0; padding: 0;
     overflow-y: auto;

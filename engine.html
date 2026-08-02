@@ -1,0 +1,578 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+<title>How AL-1600 works — the engine behind GAMBIT</title>
+<meta name="description" content="Build notes for AL-1600, the from-scratch JavaScript chess engine on alexanderli.dev: the search, the deliberately fallible move choice, and an opening book distilled from Alexander Li's own games." />
+<meta name="author" content="Alexander Li" />
+<meta name="color-scheme" content="light" />
+<meta name="theme-color" content="#f4ecd9" />
+<link rel="canonical" href="https://alexanderli.dev/engine.html" />
+
+<link rel="icon" href="favicon.svg" type="image/svg+xml" />
+<link rel="icon" href="favicon-32.png" sizes="32x32" type="image/png" />
+<link rel="icon" href="favicon-16.png" sizes="16x16" type="image/png" />
+<link rel="apple-touch-icon" href="apple-touch-icon.png" />
+
+<meta property="og:type" content="article" />
+<meta property="og:site_name" content="Alexander Li" />
+<meta property="og:url" content="https://alexanderli.dev/engine.html" />
+<meta property="og:title" content="How AL-1600 works — the engine behind GAMBIT" />
+<meta property="og:description" content="No library, no Stockfish behind a curtain. Build notes for the from-scratch engine trained on Alexander Li's own games." />
+<meta property="og:image" content="https://alexanderli.dev/assets/og-card.png" />
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&family=Playfair+Display:ital,wght@0,500;0,600;0,700;0,900;1,500;1,700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css" />
+
+<!-- Same theme gate as the front page, same key, before anything paints.
+     There is no curtain here, so only the theme half is needed. -->
+<script>
+  try {
+    if (localStorage.getItem("gambit-theme") === "dark")
+      document.documentElement.setAttribute("data-theme", "dark");
+  } catch (e) {}
+</script>
+
+<style>
+  /* ================= THE ENGINE ROOM =================
+     Everything global — palette, fonts, nav, dark mode — rides styles.css.
+     These rules are the article itself, all namespaced .eg- so nothing here
+     can reach back into the front page's classes. */
+  .eg{
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 96px 22px 30px;
+  }
+  .eg-kicker{
+    font-family: var(--mono); font-size: 10px; font-weight: 600;
+    letter-spacing: .32em; text-transform: uppercase;
+    color: var(--walnut-2); margin: 0 0 14px;
+  }
+  .eg-kicker .no{ color: var(--red); margin-right: .6em; }
+  .eg h2 .eg-kicker{ display: block; margin: 0 0 8px; }
+  .eg h1{
+    font-family: var(--serif); font-weight: 900;
+    font-size: clamp(34px, 6.4vw, 52px); line-height: 1.04;
+    letter-spacing: .01em; margin: 0 0 18px;
+  }
+  .eg h1 .dot, .eg h2 .dot{ color: var(--red); }
+  .eg-stand{
+    font-size: 19px; line-height: 1.6; font-style: italic;
+    color: var(--ink); margin: 0 0 34px; max-width: 60ch;
+  }
+  .eg section{ margin: 0 0 14px; }
+  .eg h2{
+    font-family: var(--serif); font-weight: 700; font-size: 26px;
+    line-height: 1.15; margin: 44px 0 4px;
+  }
+  .eg h2 + .eg-rule{ margin-top: 10px; }
+  .eg-rule{
+    border: 0; border-top: 1px dotted var(--walnut-3);
+    margin: 10px 0 16px;
+  }
+  .eg p{ margin: 0 0 15px; max-width: 66ch; }
+  .eg p b{ font-weight: 700; }
+  .eg code{
+    font-family: var(--mono); font-size: .82em; font-weight: 500;
+    background: rgba(var(--hatch), .08);
+    border: 1px solid rgba(var(--hatch), .18);
+    border-radius: 2px; padding: 1px 5px; white-space: nowrap;
+  }
+  .eg a{
+    color: var(--red); text-decoration: underline;
+    text-decoration-thickness: 1px; text-underline-offset: 3px;
+    text-decoration-color: rgba(var(--hatch), .45);
+  }
+  .eg a:hover{ text-decoration-color: var(--red); }
+
+  /* The spec plate — the engine's nameplate, screwed to the top of the page.
+     Same double-rule idiom as the intro's plate border. */
+  .eg-plate{
+    border: 3px double var(--ink);
+    padding: 14px 16px 12px;
+    margin: 0 0 8px;
+  }
+  .eg-plate-title{
+    font-family: var(--mono); font-size: 9px; font-weight: 600;
+    letter-spacing: .3em; text-transform: uppercase;
+    color: var(--walnut-2); margin: 0 0 10px;
+    display: flex; justify-content: space-between; gap: 12px;
+  }
+  .eg-plate-title .rt{ color: var(--red); letter-spacing: .18em; }
+  .eg-plate dl{
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 10px 14px; margin: 0;
+  }
+  .eg-plate dt{
+    font-family: var(--mono); font-size: 8.5px; font-weight: 600;
+    letter-spacing: .14em; text-transform: uppercase;
+    color: var(--walnut-2); margin: 0 0 2px;
+  }
+  .eg-plate dd{
+    font-family: var(--mono); font-size: 13px; font-weight: 600;
+    color: var(--ink); margin: 0;
+  }
+  .eg-plate dd i{ font-style: normal; font-size: 9.5px; font-weight: 500; color: var(--walnut-2); }
+  @media (max-width: 560px){ .eg-plate dl{ grid-template-columns: repeat(2, 1fr); } }
+
+  /* Field notes — asides in the margin voice, for the stories that explain
+     why the code is shaped the way it is. */
+  .eg-note{
+    border-left: 3px solid var(--red);
+    background: rgba(var(--hatch), .05);
+    padding: 12px 16px 10px; margin: 20px 0 22px;
+    font-size: 15px; line-height: 1.55; max-width: 62ch;
+  }
+  .eg-note .nt{
+    display: block; font-family: var(--mono); font-size: 9px; font-weight: 600;
+    letter-spacing: .22em; text-transform: uppercase;
+    color: var(--red); margin: 0 0 7px;
+  }
+  .eg-note p{ margin: 0 0 10px; }
+  .eg-note p:last-child{ margin-bottom: 0; }
+
+  /* Figures — drawn in ink, red where it matters, themed by currentColor. */
+  .eg figure{ margin: 24px 0 26px; }
+  .eg figure svg{ display: block; width: 100%; height: auto; color: var(--ink); }
+  .eg figcaption{
+    font-family: var(--mono); font-size: 10px; line-height: 1.6;
+    letter-spacing: .05em; color: var(--walnut-2);
+    border-top: 1px dotted var(--walnut-3);
+    padding-top: 8px; margin-top: 10px; max-width: 66ch;
+  }
+  .eg figcaption b{ color: var(--red); font-weight: 600; }
+
+  /* The measured dial — a scoresheet-style table. */
+  .eg-tablewrap{ overflow-x: auto; margin: 20px 0 8px; }
+  .eg-dial{
+    border-collapse: collapse; width: 100%; min-width: 430px;
+    font-family: var(--mono); font-size: 11.5px;
+  }
+  .eg-dial caption{
+    text-align: left; font-size: 9px; font-weight: 600;
+    letter-spacing: .22em; text-transform: uppercase;
+    color: var(--walnut-2); padding: 0 0 8px;
+  }
+  .eg-dial th, .eg-dial td{
+    text-align: right; padding: 6px 10px;
+    border-bottom: 1px dotted var(--walnut-3);
+  }
+  .eg-dial th{
+    font-weight: 600; font-size: 9px; letter-spacing: .12em;
+    text-transform: uppercase; color: var(--walnut-2);
+    border-bottom: 1px solid var(--walnut-2);
+  }
+  .eg-dial th:first-child, .eg-dial td:first-child{ text-align: left; }
+  .eg-dial tr.shipped td{
+    font-weight: 600; color: var(--ink);
+    background: rgba(var(--hatch), .07);
+  }
+  .eg-dial tr.shipped td:first-child{ box-shadow: inset 3px 0 0 var(--red); }
+  .eg-dial td .mark{ color: var(--red); font-weight: 600; margin-left: .5em; }
+
+  /* Guarantees — the contract, set like the bounty list. */
+  .eg-vows{ list-style: none; margin: 18px 0 6px; padding: 0; max-width: 64ch; }
+  .eg-vows li{
+    position: relative; padding: 0 0 0 22px; margin: 0 0 10px;
+    font-size: 16px; line-height: 1.5;
+  }
+  .eg-vows li::before{
+    content: "\2020"; /* the dagger — the site's award mark, here a promise mark */
+    position: absolute; left: 2px; top: 0;
+    color: var(--red); font-family: var(--serif); font-weight: 700;
+  }
+
+  /* Sign-off */
+  .eg-foot{
+    margin: 52px 0 0; padding: 18px 0 0;
+    border-top: 3px double var(--ink);
+  }
+  .eg-foot p{ margin: 0 0 6px; }
+  .eg-foot .fx{
+    font-family: var(--mono); font-size: 10px; letter-spacing: .06em;
+    color: var(--walnut-2);
+  }
+  .eg-back{
+    display: inline-block; margin: 10px 0 0;
+    font-family: var(--mono); font-size: 12px; font-weight: 600;
+    letter-spacing: .08em; text-transform: uppercase;
+    color: var(--paper); background: var(--ink);
+    padding: 10px 16px; text-decoration: none;
+    border: 1px solid var(--ink);
+  }
+  .eg-back:hover{ background: var(--red); border-color: var(--red); color: #f6efe0; }
+</style>
+</head>
+<body>
+
+<nav class="topnav" aria-label="Sections">
+  <a class="brand" href="/"><span class="bw">GAMBIT<span class="dot">.</span></span><span class="bsub">Alexander Li</span></a>
+
+  <div class="nav-links">
+    <a class="nav-jump" href="/#board-arena">The board</a>
+    <a class="nav-jump" href="/#spoils">Awards</a>
+    <a class="nav-jump" href="/#projects">Projects</a>
+    <a class="nav-jump" href="/#resume">R&eacute;sum&eacute;</a>
+  </div>
+
+  <div class="nav-right">
+    <!-- Same chip as the front page, same stored key — but here it only swaps
+         the palette. The seat change (dark deals you Black) happens where the
+         board lives; the inline script at the end of the body handles this one. -->
+    <button class="nav-btn side-btn" id="btn-side" type="button" aria-pressed="false" aria-label="Dark mode">
+      <svg class="sb-moon" aria-hidden="true" viewBox="0 0 24 24" focusable="false">
+        <path fill="currentColor" d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/>
+      </svg>
+      <svg class="sb-sun" aria-hidden="true" viewBox="0 0 24 24" focusable="false">
+        <circle cx="12" cy="12" r="4.4" fill="currentColor"/>
+        <path d="M12 2.2v3M12 18.8v3M2.2 12h3M18.8 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M19.1 4.9L17 7M7 17l-2.1 2.1"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/>
+      </svg>
+    </button>
+  </div>
+</nav>
+
+<main class="eg" id="main">
+
+  <header>
+    <p class="eg-kicker">The engine room &middot; build notes</p>
+    <h1>How AL&#8209;1600 works<span class="dot">.</span></h1>
+    <p class="eg-stand">
+      No chess library, no Stockfish behind a curtain, no server doing the thinking.
+      AL&#8209;1600 is under 1,200 lines of plain JavaScript in a single hand-written file,
+      running entirely in your browser &mdash; and the reason it feels like playing Alex
+      is everything wrapped <em>around</em> the search. These are the build notes.
+    </p>
+
+    <div class="eg-plate" role="group" aria-label="Engine specification plate">
+      <p class="eg-plate-title"><span>AL&#8209;1600 &middot; specification</span><span class="rt">engine.js</span></p>
+      <dl>
+        <div><dt>Search</dt><dd>4 plies <i>+6 quiescence</i></dd></div>
+        <div><dt>Hash table</dt><dd>65,536 <i>entries</i></dd></div>
+        <div><dt>Temperature</dt><dd>130 <i>centipawns</i></dd></div>
+        <div><dt>Rank decay</dt><dd>&times;0.78 <i>per rank</i></dd></div>
+        <div><dt>Blunder ceiling</dt><dd>300 cp <i>&lt; one knight</i></dd></div>
+        <div><dt>Opening book</dt><dd>293 <i>positions, his games</i></dd></div>
+      </dl>
+    </div>
+  </header>
+
+  <section aria-labelledby="s1">
+    <h2 id="s1"><span class="eg-kicker"><span class="no">01</span>representation</span>The board it thinks on<span class="dot">.</span></h2>
+    <hr class="eg-rule" />
+    <p>
+      The board is a <b>0x88 array</b> &mdash; 128 slots, laid out as if two boards sat side
+      by side, with the real game on the left half. The layout buys one very cheap trick:
+      a square is off the board exactly when <code>(sq &amp; 0x88) !== 0</code>, a single
+      bitwise test, so move generation never bounds-checks anything. Pieces are signed
+      integers, White positive, Black negative.
+    </p>
+    <p>
+      Every position also carries a 64-bit <b>Zobrist fingerprint</b>, built from two 32-bit
+      halves drawn from two independent fixed-seed random streams, updated incrementally as
+      moves are made and unmade. The fingerprint powers threefold-repetition detection and
+      the transposition table below &mdash; and because the seeds are fixed, the Hint button
+      gives the same advice in the same position, every time.
+    </p>
+  </section>
+
+  <section aria-labelledby="s2">
+    <h2 id="s2"><span class="eg-kicker"><span class="no">02</span>search</span>Looking four moves ahead<span class="dot">.</span></h2>
+    <hr class="eg-rule" />
+    <p>
+      The core is <b>negamax with alpha&ndash;beta pruning</b>, four plies deep: assume both
+      sides play their best move, and stop reading any branch the moment it provably cannot
+      change the answer. Pruning only bites if the likely-best moves are read first, so moves
+      are ordered before they are searched &mdash; the hash table&rsquo;s remembered best move,
+      then captures ranked <i>most valuable victim, least valuable attacker</i>, then
+      &ldquo;killer&rdquo; moves that caused cutoffs at the same depth, then a history score.
+      After the first move at a node, the rest are searched with a null window just to prove
+      they are worse (<b>principal variation search</b>); only a surprise gets re-searched in full.
+    </p>
+    <p>
+      At the four-ply horizon the engine does not simply open its eyes mid-trade and call the
+      position even. A <b>quiescence search</b> keeps resolving captures and check evasions
+      for up to six further plies, so every number the engine believes comes from a quiet
+      position. And a 65,536-entry <b>transposition table</b> remembers what was already
+      searched, keyed by the Zobrist fingerprint and stamped by generation so entries from
+      an old position quietly expire.
+    </p>
+    <figure role="img" aria-label="A search tree in which alpha-beta pruning crosses out branches that cannot change the result">
+      <svg viewBox="0 0 700 210" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <g fill="none" stroke="currentColor" stroke-width="1.4">
+          <path d="M350 26 L170 82" /><path d="M350 26 L350 82" /><path d="M350 26 L530 82" />
+          <path d="M170 82 L100 144" /><path d="M170 82 L170 144" /><path d="M170 82 L240 144" />
+          <path d="M350 82 L310 144" />
+          <path d="M530 82 L490 144" />
+        </g>
+        <g fill="none" stroke="currentColor" stroke-width="1.4" stroke-dasharray="3 5" opacity=".45">
+          <path d="M350 82 L390 144" />
+          <path d="M530 82 L570 144" />
+          <path d="M490 144 L470 190" /><path d="M490 144 L510 190" />
+        </g>
+        <g fill="currentColor" font-family="IBM Plex Mono, monospace" font-size="11">
+          <circle cx="350" cy="22" r="5"/>
+          <circle cx="170" cy="82" r="4.5"/><circle cx="350" cy="82" r="4.5"/><circle cx="530" cy="82" r="4.5"/>
+          <circle cx="100" cy="148" r="4"/><circle cx="170" cy="148" r="4"/><circle cx="240" cy="148" r="4"/>
+          <circle cx="310" cy="148" r="4"/><circle cx="490" cy="148" r="4"/>
+          <g opacity=".45"><circle cx="390" cy="148" r="4"/><circle cx="570" cy="148" r="4"/></g>
+          <text x="86" y="172">+0.4</text><text x="158" y="172">+1.1</text><text x="228" y="172">&#8722;0.2</text>
+          <text x="296" y="172">&#8722;0.8</text>
+        </g>
+        <g font-family="IBM Plex Mono, monospace" font-size="10.5" style="fill:var(--red)">
+          <path d="M370 100 L410 126 M410 100 L370 126" stroke="var(--red)" stroke-width="1.6" fill="none"/>
+          <path d="M550 100 L590 126 M590 100 L550 126" stroke="var(--red)" stroke-width="1.6" fill="none"/>
+          <text x="420" y="118">cut&nbsp;off</text>
+          <text x="600" y="118">cut&nbsp;off</text>
+        </g>
+      </svg>
+      <figcaption>
+        Alpha&ndash;beta in one picture: once one reply already refutes a move, the
+        <b>remaining branches are never read at all</b>. Good move ordering is what makes
+        the crossed-out part most of the tree.
+      </figcaption>
+    </figure>
+    <aside class="eg-note">
+      <span class="nt">Field note &mdash; the pruning that got removed</span>
+      <p>
+        Quiescence search usually ships with <i>delta pruning</i> &mdash; skip a capture if even
+        winning the victim outright could not raise the score enough to matter. It is standard,
+        it is fast, and it was cut from this engine on purpose: a pruned node&rsquo;s score
+        quietly depends on the search window it was computed under, and those scores get shared
+        through the transposition table. Measured over 1,255 root moves, <b>12.4% of scores
+        disagreed with a cold re-search of the same move</b>, some by 460 centipawns. The
+        safety ceiling in &sect;04 works by comparing scores across searches, so a search that
+        disagrees with itself is poison. Without delta pruning the same 1,255 moves agree
+        exactly, every time, for about 40% more nodes &mdash; a price worth paying.
+      </p>
+    </aside>
+  </section>
+
+  <section aria-labelledby="s3">
+    <h2 id="s3"><span class="eg-kicker"><span class="no">03</span>evaluation</span>What a position is worth<span class="dot">.</span></h2>
+    <hr class="eg-rule" />
+    <p>
+      When the search runs out of depth it asks the evaluation for a number:
+      <b>material</b> (pawn 100, knight 320, bishop 330, rook 500, queen 900) plus
+      <b>piece-square tables</b> &mdash; small bonuses that pull knights toward the centre,
+      push pawns forward, and keep the king hidden in the middlegame. That is deliberately
+      all: no pawn-structure terms, no king-safety heuristics. At four plies plus quiescence,
+      the search itself carries the tactics, and a thin evaluation stays fast and debuggable.
+    </p>
+    <p>
+      One exception earns its keep. In a <b>won endgame</b> &mdash; up at least four pawns of
+      material against a nearly bare king &mdash; the evaluation switches goals: drive the
+      enemy king to the edge, walk your own king toward it. The middlegame
+      &ldquo;stay hidden&rdquo; king table is switched off inside that mode, because it was
+      measured fighting the march &mdash; an engine up a whole rook would happily shuffle
+      forever rather than expose its king to deliver mate.
+    </p>
+  </section>
+
+  <section aria-labelledby="s4">
+    <h2 id="s4"><span class="eg-kicker"><span class="no">04</span>the weakness model</span>Playing worse, on purpose<span class="dot">.</span></h2>
+    <hr class="eg-rule" />
+    <p>
+      A chess engine&rsquo;s natural state is <i>far</i> stronger than any human it imitates,
+      so the interesting problem runs backwards: how do you make it fallible without making
+      it embarrassing? The usual trick &mdash; searching shallower, or mixing in random moves
+      &mdash; produces blunders no human would make. AL&#8209;1600 does it differently:
+      <b>it always searches at full strength, then chooses imperfectly.</b> Its mistakes are
+      mistakes of choice, never of sight.
+    </p>
+    <p>
+      Every legal root move is scored by the honest search, then weighted by a
+      <b>softmax</b>: a move&rsquo;s weight is <code>exp((score &minus; best) / 130)</code>,
+      so near-equal moves stay live and clearly-worse ones fade exponentially. Each weight is
+      then multiplied by <b>0.78 per rank</b> down the list &mdash; and that rank decay, not
+      the temperature, is the real strength dial. A plain softmax has no term for <i>how many</i>
+      near-ties exist: in a bushy 32-move position the long tail of &ldquo;almost as good&rdquo;
+      moves collectively outvoted the best move about 20-to-1, and the old bot played its own
+      best move only 12&ndash;14% of the time.
+    </p>
+
+    <div class="eg-tablewrap">
+      <table class="eg-dial">
+        <caption>The strength dial, measured &mdash; 240 self-play decisions per setting</caption>
+        <thead>
+          <tr><th scope="col">rank decay</th><th scope="col">avg loss (cp)</th><th scope="col">plays best move</th><th scope="col">reads as</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>1.00</td><td>52.4</td><td>12%</td><td>the old AL-1200</td></tr>
+          <tr><td>0.92</td><td>32.9</td><td>22%</td><td>casual</td></tr>
+          <tr><td>0.85</td><td>22.0</td><td>30%</td><td>club-curious</td></tr>
+          <tr class="shipped"><td>0.78</td><td>17.4</td><td>43%</td><td>~1600<span class="mark">&larr; shipped</span></td></tr>
+          <tr><td>0.74</td><td>13.6</td><td>44%</td><td>a strong day</td></tr>
+          <tr><td>0.70</td><td>11.6</td><td>52%</td><td>stronger than him</td></tr>
+          <tr><td>0.62</td><td>8.1</td><td>60%</td><td>no longer human</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>
+      0.78 lands the engine around Alex&rsquo;s own live ratings (blitz 1542, bullet 1665,
+      rapid 1716 when it was tuned) &mdash; <i>1600-ish by construction, not a certified Elo</i>.
+      One more human touch rides on top: a move that <b>recaptures</b> on the square the
+      opponent just took on gets its weight nudged &times;40. The search is often right that
+      recapturing can wait a move &mdash; but a human takes back on reflex, and the bot should
+      too (measured: it recaptures 99.4% of the time).
+    </p>
+
+    <figure role="img" aria-label="Bar chart of move weights after softmax and rank decay, with everything past the 300 centipawn ceiling struck out">
+      <svg viewBox="0 0 700 220" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <g fill="currentColor">
+          <rect x="40"  y="30"  width="52" height="150"/>
+          <rect x="112" y="62"  width="52" height="118" opacity=".85"/>
+          <rect x="184" y="96"  width="52" height="84"  opacity=".7"/>
+          <rect x="256" y="124" width="52" height="56"  opacity=".55"/>
+          <rect x="328" y="146" width="52" height="34"  opacity=".42"/>
+          <rect x="400" y="162" width="52" height="18"  opacity=".3"/>
+        </g>
+        <g fill="none" stroke="currentColor" stroke-width="1.2" stroke-dasharray="3 4" opacity=".38">
+          <rect x="500" y="168" width="52" height="12"/>
+          <rect x="572" y="172" width="52" height="8"/>
+        </g>
+        <line x1="482" y1="16" x2="482" y2="196" stroke="var(--red)" stroke-width="1.6" stroke-dasharray="6 4"/>
+        <g font-family="IBM Plex Mono, monospace" font-size="10.5">
+          <g fill="currentColor" opacity=".75">
+            <text x="40" y="196">best</text>
+            <text x="112" y="196">&#8722;22cp</text>
+            <text x="184" y="196">&#8722;58cp</text>
+            <text x="256" y="196">&#8722;104cp</text>
+            <text x="328" y="196">&#8722;170cp</text>
+            <text x="400" y="196">&#8722;240cp</text>
+            <text x="500" y="212">&#8722;310cp</text>
+            <text x="572" y="212">&#8722;450cp</text>
+          </g>
+          <g style="fill:var(--red)">
+            <text x="492" y="28">300cp &mdash; the ceiling</text>
+            <text x="492" y="42">never played, ever</text>
+          </g>
+        </g>
+        <path d="M506 160 L546 188 M546 160 L506 188 M578 160 L618 188 M618 160 L578 188" stroke="var(--red)" stroke-width="1.5" fill="none"/>
+      </svg>
+      <figcaption>
+        The choice distribution over one position&rsquo;s ranked moves. Weights fall by
+        temperature and rank; everything worse than best by 300&nbsp;centipawns &mdash;
+        <b>less than a knight</b> &mdash; is cut outright, so cleanly hanging a piece is
+        structurally impossible rather than merely unlikely.
+      </figcaption>
+    </figure>
+
+    <p>The contract, in full &mdash; each line is asserted by a test, not hoped for:</p>
+    <ul class="eg-vows">
+      <li>No move more than <b>300 centipawns</b> below best is ever played &mdash; below the value of a knight, enforced by comparing exact scores.</li>
+      <li>A move that allows a <b>forced mate</b> is excluded outright, whatever its weight; a mate the bot can see is always played.</li>
+      <li>In a <b>won endgame</b> the dice are put away entirely &mdash; the bot converts with its honest best move until it mates you.</li>
+      <li>The <b>Hint never gambles</b>: it is the same search with the weakness model switched off, deterministic and at full strength.</li>
+    </ul>
+    <aside class="eg-note">
+      <span class="nt">Field note &mdash; the cheap part was the hard part</span>
+      <p>
+        Alpha&ndash;beta proves most root moves are <i>worse</i> than the best without saying
+        by how much &mdash; exact scores for all ~30 candidates would cost a wide, slow search
+        every move. So the sampler cheats honestly: it draws from an optimistic envelope built
+        from those loose bounds (<b>rejection sampling</b>), and only buys the exact score of
+        the one candidate the dice actually land on, re-searching just that move. Same
+        distribution as scoring everything, at a fraction of the cost &mdash; and the ceiling
+        still gets the exact numbers it needs.
+      </p>
+    </aside>
+  </section>
+
+  <section aria-labelledby="s5">
+    <h2 id="s5"><span class="eg-kicker"><span class="no">05</span>openings</span>The part that is actually him<span class="dot">.</span></h2>
+    <hr class="eg-rule" />
+    <p>
+      Out of the opening, AL&#8209;1600 does not consult theory &mdash; it consults
+      <b>Alex&rsquo;s own games</b>. A generator replays every 2025-onward game from his
+      chess.com account and distils them into a book: positions he has reached at least three
+      times, replies he has played at least twice, up to sixteen plies deep. Today that is
+      <b>293 positions and 406 weighted moves</b>. Weights are how often he actually played
+      each reply, so the bot doesn&rsquo;t just play his openings &mdash; it plays them at his
+      frequencies: the Queen&rsquo;s Gambit as White (the White half of the book is built
+      exclusively from his 1.d4 games), the ...d5/...c5 counterattack against the London and
+      1...e5 against 1.e4 as Black.
+    </p>
+    <p>
+      The book belongs to the bot alone &mdash; <b>the Hint never reads it</b>, so the advice
+      you get is always what the search honestly believes, never repertoire. And the book does
+      not go stale: a scheduled job runs every Monday morning, pulls his newest games,
+      regenerates the book deterministically, proves every line legal against the
+      engine&rsquo;s own move generator, and commits only if the repertoire actually moved.
+      He keeps playing; the bot keeps up.
+    </p>
+  </section>
+
+  <section aria-labelledby="s6">
+    <h2 id="s6"><span class="eg-kicker"><span class="no">06</span>verification</span>Keeping it honest<span class="dot">.</span></h2>
+    <hr class="eg-rule" />
+    <p>
+      A bot that carries someone&rsquo;s name cannot be allowed to look stupid, so the test
+      suite is built to embarrass it. <b>Perft</b> counts every leaf of the move tree from
+      tricky reference positions and matches the published, independently verified node
+      counts (197,281 from the start position at depth four; castling, en-passant, promotion
+      and pin traps included) &mdash; any miscount means move generation is broken. A tactics
+      suite checks it finds mates and wins material. A <b>gauntlet</b> throws scholar&rsquo;s-mate
+      cheese and random movers at it, then audits every move with a wider search &mdash; zero
+      choices &ge;300cp below best, across everything flagged &mdash; and hands it won endgames
+      from awkward corners, where it must force mate against best defence, not shuffle.
+      The opening book passes three separate legality fences before a single move ships.
+    </p>
+    <p>
+      None of this asks to be taken on faith. The entire site &mdash; engine, book, generator,
+      tests, this page &mdash; is public at
+      <a href="https://github.com/alexanderli07/website">github.com/alexanderli07/website</a>.
+      Read the source. Then come beat it.
+    </p>
+  </section>
+
+  <footer class="eg-foot">
+    <p><b>AL&#8209;1600 is waiting.</b> Every capture you make unseals part of the portfolio;
+    checkmate opens all of it. Dark mode deals you Black &mdash; he&rsquo;ll take White,
+    and he opens 1.d4.</p>
+    <p class="fx">engine.js &middot; no libraries &middot; no servers &middot; your move</p>
+    <a class="eg-back" href="/#board-arena">&larr; Back to the board</a>
+  </footer>
+
+</main>
+
+<!-- The theme chip, standalone. The front page's app.js owns the full swap
+     (palette AND seat); here there is no board, so this only flips the
+     attribute and the stored key — matching applyTheme's storage exactly:
+     "dark" when dark, key REMOVED when light. -->
+<script>
+  (function () {
+    var btn = document.getElementById("btn-side");
+    var root = document.documentElement;
+    function paint() {
+      var dark = root.getAttribute("data-theme") === "dark";
+      btn.setAttribute("aria-pressed", dark ? "true" : "false");
+      btn.setAttribute("aria-label", dark ? "Light mode" : "Dark mode");
+    }
+    btn.addEventListener("click", function () {
+      var dark = root.getAttribute("data-theme") === "dark";
+      if (dark) root.removeAttribute("data-theme");
+      else root.setAttribute("data-theme", "dark");
+      try {
+        if (dark) localStorage.removeItem("gambit-theme");
+        else localStorage.setItem("gambit-theme", "dark");
+      } catch (e) {}
+      paint();
+    });
+    paint();
+  })();
+</script>
+
+<!-- Vercel Web Analytics + Speed Insights — same plain-HTML flavour as the
+     front page; same-origin, only exist on Vercel, silent 404 locally. -->
+<script>
+  window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
+</script>
+<script defer src="/_vercel/insights/script.js"></script>
+<script defer src="/_vercel/speed-insights/script.js"></script>
+</body>
+</html>
