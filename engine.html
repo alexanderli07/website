@@ -210,7 +210,8 @@
      lift on hover, the push-in on click. No rest-state transform on purpose —
      see .nav-btn's note about mono letterforms on their own raster layer. */
   .eg-foot .eg-back{
-    display: inline-block; margin: 16px auto 0;
+    display: inline-flex; align-items: center; gap: 9px;
+    margin: 16px auto 0;
     font-family: var(--mono); font-size: 11px; font-weight: 600;
     letter-spacing: .16em; text-transform: uppercase;
     color: var(--paper); background: var(--ink);
@@ -220,8 +221,17 @@
     transition: background .18s ease, border-color .18s ease,
                 transform .14s cubic-bezier(.2,.7,.2,1), box-shadow .18s ease;
   }
+  /* The arrow gets its own size — at the label's 11px it read as lint.
+     line-height 0 keeps the bigger glyph from stretching the button. */
+  .eg-foot .eg-back .ar{
+    font-size: 17px; line-height: 0; font-weight: 400;
+    letter-spacing: 0;
+    transform: translateY(-.5px);
+  }
+  /* var(--paper), not a hardcoded cream: in dark mode the chip's hover red is
+     light, so the text has to flip dark — same pairing as the unlock button. */
   .eg-foot .eg-back:hover{
-    background: var(--red); border-color: var(--red); color: #f6efe0;
+    background: var(--red); border-color: var(--red); color: var(--paper);
     transform: translate(-1px,-1px);
     box-shadow: 4px 4px 0 rgba(var(--shade), .26);
   }
@@ -243,6 +253,7 @@
     <a class="nav-jump" href="/#board-arena">The board</a>
     <a class="nav-jump" href="/#spoils">Awards</a>
     <a class="nav-jump" href="/#projects">Projects</a>
+    <a class="nav-jump" href="/#experience">Experiences</a>
     <a class="nav-jump" href="/#resume">R&eacute;sum&eacute;</a>
   </div>
 
@@ -559,10 +570,9 @@
 
   <footer class="eg-foot">
     <p><b>AL&#8209;1600 is waiting.</b> Every capture you make unseals part of the portfolio;
-    checkmate opens all of it. Dark mode deals you Black &mdash; he&rsquo;ll take White,
-    and he opens 1.d4.</p>
+    checkmate opens all of it.</p>
     <p class="fx">engine.js &middot; no libraries &middot; no servers &middot; your move</p>
-    <a class="eg-back" href="/#board-arena">&larr; Back to the board</a>
+    <a class="eg-back" href="/#board-arena"><span class="ar" aria-hidden="true">&larr;</span>Back to the board</a>
   </footer>
 
 </main>
