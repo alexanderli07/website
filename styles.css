@@ -498,6 +498,14 @@
   }
   .sc-role b{ font-weight: 600; color: var(--ink); }
   .sc-role em{ font-style: normal; color: var(--red); font-weight: 600; }
+  /* The one link in the pitch — the claim, pointing at the page that proves it.
+     Same format as the scoresheet rail's footnote link. */
+  .sc-role a{
+    color: var(--red); text-decoration: underline;
+    text-decoration-thickness: 1px; text-underline-offset: 2px;
+    text-decoration-color: rgba(var(--hatch), .5);
+  }
+  .sc-role a:hover{ text-decoration-color: var(--red); }
   @media (max-width: 640px){
     .sc-fields{ grid-template-columns: 1fr 1fr; }
     .sc-field:nth-child(2){ border-right: 0; }
