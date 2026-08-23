@@ -1,0 +1,1129 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+<title>Guess the Elo — Alexander Li</title>
+<meta name="description" content="Watch one real chess game — names and ratings sealed. Call the average Elo, see how far off you were, and climb the standings. A side game on alexanderli.dev." />
+<meta name="author" content="Alexander Li" />
+<meta name="color-scheme" content="light" />
+<meta name="theme-color" content="#f4ecd9" />
+<link rel="canonical" href="https://alexanderli.dev/elo.html" />
+
+<link rel="icon" href="favicon.svg" type="image/svg+xml" />
+<link rel="icon" href="favicon-32.png" sizes="32x32" type="image/png" />
+<link rel="icon" href="favicon-16.png" sizes="16x16" type="image/png" />
+<link rel="apple-touch-icon" href="apple-touch-icon.png" />
+
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="Alexander Li" />
+<meta property="og:url" content="https://alexanderli.dev/elo.html" />
+<meta property="og:title" content="Guess the Elo — Alexander Li" />
+<meta property="og:description" content="One real game, ratings sealed. Call the number, climb the standings." />
+<meta property="og:image" content="https://alexanderli.dev/assets/og-card.png" />
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&family=Playfair+Display:ital,wght@0,500;0,600;0,700;0,900;1,500;1,700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css" />
+
+<!-- Same theme gate as every page, same key, before anything paints. -->
+<script>
+  try {
+    if (localStorage.getItem("gambit-theme") === "dark")
+      document.documentElement.setAttribute("data-theme", "dark");
+  } catch (e) {}
+</script>
+
+<style>
+  /* ================= GUESS THE ELO =================
+     Globals — palette, fonts, nav, dark mode — ride styles.css. Everything
+     below is this page, namespaced .ge- so nothing reaches the front page's
+     classes. The replay board deliberately repeats the main board's exact
+     square and piece recipes (they are pinned literals there, not tokens —
+     see the "board pieces are literal" note in styles.css). */
+  .ge{
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 88px 22px 30px;
+  }
+  .ge-stand{
+    font-size: 17px; line-height: 1.55; font-style: italic;
+    margin: 0 0 26px; max-width: 72ch;
+  }
+
+  /* ---------- the arena: rail / board / scoresheet ---------- */
+  .ge-arena{
+    display: grid;
+    grid-template-columns: minmax(0, 240px) minmax(280px, 560px) minmax(0, 300px);
+    gap: 22px;
+    justify-content: center;
+    align-items: start;
+  }
+  .ge-rail{
+    border: 1px solid var(--walnut-3);
+    padding: 12px 14px;
+    background: rgba(var(--linen), .5);
+  }
+  .ge-rail + .ge-rail{ margin-top: 16px; }
+  .ge-rt{
+    display: block;
+    font-family: var(--mono); font-size: 9px; font-weight: 600;
+    letter-spacing: .26em; text-transform: uppercase;
+    color: var(--red); margin: 0 0 8px;
+  }
+  .ge-rail p{ font-size: 13.5px; line-height: 1.5; margin: 0 0 8px; }
+  .ge-rules{ list-style: none; margin: 0; padding: 0; }
+  .ge-rules li{
+    display: flex; justify-content: space-between; gap: 10px;
+    font-family: var(--mono); font-size: 10.5px; letter-spacing: .03em;
+    color: var(--walnut-2);
+    padding: 5px 0;
+    border-bottom: 1px dotted var(--walnut-3);
+  }
+  .ge-rules li:last-child{ border-bottom: 0; }
+  .ge-rules b{ color: var(--ink); font-weight: 600; white-space: nowrap; }
+  .ge-rules .pos{ color: var(--red); font-weight: 600; }
+
+  /* your standing */
+  .ge-me{ list-style: none; margin: 0; padding: 0; }
+  .ge-me li{
+    display: flex; justify-content: space-between; align-items: baseline; gap: 10px;
+    font-family: var(--mono); font-size: 10.5px; letter-spacing: .06em;
+    text-transform: uppercase; color: var(--walnut-2);
+    padding: 5px 0; border-bottom: 1px dotted var(--walnut-3);
+  }
+  .ge-me li:last-child{ border-bottom: 0; }
+  .ge-me b{ font-size: 14px; font-weight: 600; color: var(--ink); letter-spacing: .02em; }
+  .ge-name-btn{
+    border: 0; background: none; padding: 0;
+    font-family: var(--mono); font-size: 14px; font-weight: 600; color: var(--ink);
+    text-decoration: underline; text-underline-offset: 3px;
+    text-decoration-color: rgba(var(--hatch), .45);
+    cursor: pointer; max-width: 100%; overflow: hidden; text-overflow: ellipsis;
+  }
+  .ge-name-btn:hover{ text-decoration-color: var(--red); color: var(--red); }
+
+  /* recent calls */
+  .ge-hist{ list-style: none; margin: 0; padding: 0; }
+  .ge-hist li{
+    display: flex; justify-content: space-between; gap: 8px;
+    font-family: var(--mono); font-size: 10px; letter-spacing: .03em;
+    color: var(--walnut-2);
+    padding: 5px 0; border-bottom: 1px dotted var(--walnut-3);
+  }
+  .ge-hist li:last-child{ border-bottom: 0; }
+  .ge-hist .d-pos{ color: var(--red); font-weight: 600; }
+  .ge-hist .d-neg{ color: var(--walnut-2); font-weight: 600; }
+  .ge-empty{ font-family: var(--mono); font-size: 10px; color: var(--walnut-2); letter-spacing: .04em; }
+
+  /* ---------- centre column: clocks + board + transport ---------- */
+  .ge-center{ display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+  .ge-clockrow{
+    display: flex; justify-content: space-between; align-items: center; gap: 10px;
+  }
+  .ge-side{
+    font-family: var(--mono); font-size: 10px; font-weight: 600;
+    letter-spacing: .14em; text-transform: uppercase; color: var(--walnut-2);
+  }
+  .ge-side .who{ color: var(--ink); }
+  .ge-side .elo{ color: var(--red); font-weight: 600; margin-left: .5em; }
+  .ge-clock{
+    font-family: var(--mono); font-size: 15px; font-weight: 600;
+    color: var(--ink);
+    border: 1px solid var(--walnut-3);
+    padding: 4px 10px 3px;
+    background: rgba(var(--linen), .5);
+    min-width: 64px; text-align: center;
+  }
+  .ge-clock.active{ border-color: var(--red); box-shadow: inset 3px 0 0 var(--red); }
+  .ge-clock.low{ color: var(--red); }
+
+  /* THE BOARD — the main board's recipes verbatim (pinned literals on purpose):
+     squares #f3e8cf/#c8a878 (dark theme #7b6040/#48341e), white pieces paper
+     with an ink stroke, black pieces pinned near-black with the dark theme's
+     half-pixel rim. Sized by container query so the glyphs track the width. */
+  .ge-board{
+    display: grid;
+    grid-template-columns: repeat(8, minmax(0, 1fr));
+    grid-template-rows: repeat(8, minmax(0, 1fr));
+    width: 100%; aspect-ratio: 1;
+    border: 2px solid var(--walnut);
+    outline: 1px solid rgba(var(--hatch), .25);
+    outline-offset: 3px;
+    container-type: inline-size;
+  }
+  .ge-sq{ position: relative; display: flex; align-items: center; justify-content: center; }
+  .ge-sq.l{ background: #f3e8cf; }
+  .ge-sq.d{ background: #c8a878; }
+  .ge-sq.hl::after{
+    content: ""; position: absolute; inset: 0;
+    background: rgba(164, 33, 27, .18);
+    pointer-events: none;
+  }
+  .ge-pc{
+    font-family: var(--pieces);
+    /* the clamp is the fallback for browsers without container-query units —
+       the cqw line below wins wherever it parses */
+    font-size: clamp(24px, 6vw, 52px);
+    font-size: 9.4cqw;
+    line-height: 1;
+    pointer-events: none; transform: translateY(-2%);
+  }
+  .ge-pc.w{
+    color: #fbf4e0;
+    -webkit-text-stroke: 1px rgba(36,26,15,.9);
+    text-shadow: 0 2px 2px rgba(36,26,15,.28);
+  }
+  .ge-pc.b{
+    color: #241a0f;
+    text-shadow: 0 1px 0 rgba(244,236,217,.35);
+  }
+  .ge-coord{
+    position: absolute; font-family: var(--mono); font-size: 8px; font-weight: 600;
+    color: rgba(91,58,36,.55); pointer-events: none;
+  }
+  .ge-coord.f{ right: 2px; bottom: 1px; }
+  .ge-coord.r{ left: 2px; top: 1px; }
+  html[data-theme="dark"] .ge-sq.l{ background: #7b6040; }
+  html[data-theme="dark"] .ge-sq.d{ background: #48341e; }
+  html[data-theme="dark"] .ge-pc.b{
+    color: #1a1309;
+    -webkit-text-stroke: .5px rgba(244,236,217,.45);
+    text-shadow: 0 1px 0 rgba(0,0,0,.4);
+  }
+  html[data-theme="dark"] .ge-sq.hl::after{ background: rgba(228,103,79,.22); }
+  html[data-theme="dark"] .ge-coord{ color: rgba(226,196,150,.5); }
+
+  /* transport */
+  .ge-transport{ display: flex; gap: 6px; justify-content: center; margin-top: 2px; }
+  .ge-tbtn{
+    font-family: var(--mono); font-size: 12px; font-weight: 600;
+    color: var(--ink); background: rgba(var(--linen), .5);
+    border: 1px solid var(--walnut-3);
+    min-width: 40px; padding: 7px 8px 6px;
+    transition: border-color .15s ease, color .15s ease;
+  }
+  .ge-tbtn:hover{ border-color: var(--red); color: var(--red); }
+  .ge-tbtn[aria-pressed="true"]{ background: var(--ink); color: var(--paper); border-color: var(--ink); }
+  .ge-ply{
+    align-self: center;
+    font-family: var(--mono); font-size: 9.5px; letter-spacing: .12em;
+    color: var(--walnut-2); text-transform: uppercase;
+  }
+
+  /* ---------- right rail: the game file ---------- */
+  .ge-meta{
+    display: flex; justify-content: space-between; align-items: baseline; gap: 8px;
+    font-family: var(--mono); font-size: 10px; letter-spacing: .06em;
+    text-transform: uppercase; color: var(--walnut-2);
+    padding-bottom: 8px; border-bottom: 1px solid var(--walnut-2);
+  }
+  .ge-meta b{ color: var(--ink); font-weight: 600; }
+  .ge-moves{
+    /* position:relative so the rows' offsetTop is measured from THIS box —
+       without it the auto-scroll math reads page coordinates and pins the
+       sheet to its bottom from the first move. */
+    position: relative;
+    height: 218px; overflow-y: auto;
+    margin: 8px 0 0;
+    font-family: var(--mono); font-size: 11px;
+  }
+  .ge-mrow{
+    display: grid; grid-template-columns: 30px 1fr 1fr; gap: 4px;
+    padding: 2.5px 0; border-bottom: 1px dotted rgba(var(--hatch), .18);
+  }
+  .ge-mrow.now{ background: rgba(var(--hatch), .07); }
+  .ge-mno{ color: var(--walnut-2); }
+  .ge-mv{
+    border: 0; background: none; padding: 0 2px; text-align: left;
+    font: inherit; color: var(--ink); cursor: pointer;
+  }
+  .ge-mv:hover{ color: var(--red); }
+  .ge-mv.cur{ color: var(--red); font-weight: 600; }
+
+  /* the guess panel */
+  .ge-guess{ margin-top: 14px; padding-top: 10px; border-top: 1px dotted var(--walnut-3); }
+  .ge-guess-num{
+    display: flex; align-items: baseline; justify-content: center; gap: 8px;
+    margin: 4px 0 8px;
+  }
+  .ge-guess-num input{
+    font-family: var(--mono); font-size: 26px; font-weight: 600;
+    color: var(--ink); background: none;
+    border: 0; border-bottom: 2px solid var(--walnut-2);
+    width: 110px; text-align: center; padding: 0 0 2px;
+  }
+  .ge-guess-num input:focus{ outline: none; border-color: var(--red); }
+  .ge-guess-num .unit{
+    font-family: var(--mono); font-size: 9px; letter-spacing: .18em;
+    text-transform: uppercase; color: var(--walnut-2);
+  }
+  .ge-slider{ width: 100%; accent-color: var(--red); margin: 2px 0 4px; }
+  .ge-scale{
+    display: flex; justify-content: space-between;
+    font-family: var(--mono); font-size: 8.5px; color: var(--walnut-2);
+    margin-bottom: 10px;
+  }
+  .ge-btn{
+    display: block; width: 100%;
+    font-family: var(--mono); font-size: 11px; font-weight: 600;
+    letter-spacing: .14em; text-transform: uppercase;
+    color: var(--paper); background: var(--ink);
+    border: 1px solid var(--ink);
+    padding: 11px 14px 10px; text-align: center; text-decoration: none;
+    box-shadow: 3px 3px 0 rgba(var(--shade), .20);
+    transition: background .18s ease, border-color .18s ease,
+                transform .14s cubic-bezier(.2,.7,.2,1), box-shadow .18s ease;
+    cursor: pointer;
+  }
+  .ge-btn:hover{
+    background: var(--red); border-color: var(--red); color: var(--paper);
+    transform: translate(-1px,-1px);
+    box-shadow: 4px 4px 0 rgba(var(--shade), .26);
+  }
+  .ge-btn:active{ transform: translate(2px,2px); box-shadow: 0 0 0 rgba(36,26,15,0); }
+  .ge-btn:disabled{ opacity: .45; pointer-events: none; }
+  .ge-btn:focus-visible{ outline: 2px solid var(--red); outline-offset: 2px; }
+
+  /* the reveal */
+  .ge-reveal[hidden]{ display: none; }
+  .ge-verdict{
+    text-align: center;
+    border: 3px double var(--ink);
+    padding: 12px 10px 10px; margin: 2px 0 10px;
+  }
+  .ge-verdict .vt{
+    display: block; font-family: var(--mono); font-size: 9px; font-weight: 600;
+    letter-spacing: .26em; text-transform: uppercase; color: var(--walnut-2);
+    margin-bottom: 4px;
+  }
+  .ge-verdict .vn{
+    font-family: var(--serif); font-size: 40px; font-weight: 900; line-height: 1;
+    color: var(--ink);
+  }
+  .ge-verdict .vs{
+    display: block; margin-top: 5px;
+    font-family: var(--mono); font-size: 10px; color: var(--walnut-2); letter-spacing: .05em;
+  }
+  .ge-facts{ list-style: none; margin: 0 0 12px; padding: 0; }
+  .ge-facts li{
+    display: flex; justify-content: space-between; gap: 10px;
+    font-family: var(--mono); font-size: 10.5px; letter-spacing: .06em;
+    text-transform: uppercase; color: var(--walnut-2);
+    padding: 5px 0; border-bottom: 1px dotted var(--walnut-3);
+  }
+  .ge-facts b{ color: var(--ink); font-weight: 600; }
+  .ge-facts .d-pos{ color: var(--red); }
+
+  /* ---------- the standings ---------- */
+  /* padding:0 kills styles.css's bare `section` padding (56px top) — the
+     margin here is the whole intended offset */
+  .ge-standings{ max-width: 720px; margin: 46px auto 0; padding: 0; }
+  .ge h2{
+    font-family: var(--serif); font-weight: 700; font-size: 24px;
+    margin: 0 0 4px;
+  }
+  .ge h2 .dot{ color: var(--red); }
+  .ge-rule{ border: 0; border-top: 1px dotted var(--walnut-3); margin: 10px 0 14px; }
+  .ge-tablewrap{ overflow-x: auto; }
+  .ge-lb{
+    border-collapse: collapse; width: 100%; min-width: 430px;
+    font-family: var(--mono); font-size: 11.5px;
+  }
+  .ge-lb th, .ge-lb td{
+    text-align: right; padding: 6px 10px;
+    border-bottom: 1px dotted var(--walnut-3);
+  }
+  .ge-lb th{
+    font-weight: 600; font-size: 9px; letter-spacing: .12em;
+    text-transform: uppercase; color: var(--walnut-2);
+    border-bottom: 1px solid var(--walnut-2);
+  }
+  .ge-lb th:nth-child(2), .ge-lb td:nth-child(2){ text-align: left; }
+  .ge-lb td:first-child{ color: var(--walnut-2); }
+  .ge-lb tr.me td{
+    font-weight: 600; color: var(--ink);
+    background: rgba(var(--hatch), .07);
+  }
+  .ge-lb tr.me td:first-child{ box-shadow: inset 3px 0 0 var(--red); }
+  .ge-lb .rt{ font-weight: 600; }
+
+  /* ---------- sign the scoresheet (name dialog) ---------- */
+  .ge-cover{
+    position: fixed; inset: 0; z-index: 140;
+    display: flex; align-items: center; justify-content: center;
+    /* PINNED ink, not rgba(var(--shade)) — the shade token flips to pale
+       cream in dark mode (it's a shadow token), which made the scrim brighter
+       than the card. The site's own dialogs pin ink in both themes. */
+    background: rgba(36, 26, 15, .5);
+    backdrop-filter: blur(3px);
+    padding: 20px;
+  }
+  .ge-cover[hidden]{ display: none; }
+  .ge-card{
+    background: var(--paper);
+    border: 3px double var(--ink);
+    box-shadow: 6px 6px 0 rgba(var(--shade), .25);
+    padding: 22px 24px 20px;
+    max-width: 380px; width: 100%;
+  }
+  .ge-card .ck{
+    display: block; font-family: var(--mono); font-size: 9px; font-weight: 600;
+    letter-spacing: .3em; text-transform: uppercase; color: var(--red);
+    margin: 0 0 8px;
+  }
+  .ge-card h2{ margin: 0 0 8px; font-size: 26px; }
+  .ge-card p{ font-size: 14px; line-height: 1.55; margin: 0 0 14px; }
+  .ge-card input{
+    display: block; width: 100%;
+    font-family: var(--mono); font-size: 15px; font-weight: 600;
+    color: var(--ink); background: rgba(var(--linen), .5);
+    border: 1px solid var(--walnut-2);
+    padding: 9px 11px; margin: 0 0 6px;
+  }
+  .ge-card input:focus{ outline: none; border-color: var(--red); }
+  .ge-err{
+    font-family: var(--mono); font-size: 9.5px; color: var(--red);
+    letter-spacing: .04em; margin: 0 0 8px; min-height: 13px;
+  }
+
+  .ge-toast{
+    position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%);
+    z-index: 150;
+    font-family: var(--mono); font-size: 11px; letter-spacing: .05em;
+    color: var(--paper); background: var(--ink);
+    border: 1px solid var(--ink);
+    padding: 9px 14px; opacity: 0; pointer-events: none;
+    transition: opacity .25s ease;
+  }
+  .ge-toast.show{ opacity: 1; }
+
+  /* ---------- foot ---------- */
+  .ge-foot{
+    margin: 44px 0 0; padding: 22px 0 0;
+    border-top: 3px double var(--ink);
+    text-align: center;
+    font-family: var(--mono); font-size: 10px; letter-spacing: .1em;
+    color: var(--walnut-2);
+  }
+  /* styles.css's colophon `footer a` rules apply here additively (this IS a
+     footer element) — kill its border-bottom underline and red wipe so the
+     links carry ONE line, and out-specify its hover colour. */
+  .ge-foot a{
+    color: var(--red); text-decoration: underline; text-underline-offset: 3px;
+    border-bottom: 0;
+  }
+  .ge-foot a::after{ display: none; }
+  .ge-foot a:hover{ color: var(--red); text-decoration-color: var(--red); }
+
+  /* ---------- responsive: stack the arena ---------- */
+  @media (max-width: 1000px){
+    .ge-arena{ grid-template-columns: minmax(0, 560px); justify-content: center; }
+    .ge-rail-l{ order: 3; }
+    .ge-center{ order: 1; }
+    .ge-rail-r{ order: 2; }
+    .ge-moves{ height: 150px; }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .ge-btn, .ge-tbtn{ transition: none; }
+  }
+  @media print{
+    .ge-cover, .ge-toast, .ge-transport{ display: none !important; }
+    .ge{ padding-top: 0; }
+    /* styles.css re-pins the tokens to light for print, but these literals
+       would survive it — re-pin the board too */
+    html[data-theme="dark"] .ge-sq.l{ background: #f3e8cf; }
+    html[data-theme="dark"] .ge-sq.d{ background: #c8a878; }
+    html[data-theme="dark"] .ge-pc.b{ color: #241a0f; -webkit-text-stroke: 0; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="topnav" aria-label="Sections">
+  <a class="brand" href="/"><span class="bw">GAMBIT<span class="dot">.</span></span><span class="bsub">Alexander Li</span></a>
+
+  <div class="nav-links">
+    <a class="nav-jump" href="/#board-arena">The board</a>
+    <a class="nav-jump" href="/#spoils">Awards</a>
+    <a class="nav-jump" href="/#projects">Projects</a>
+    <a class="nav-jump" href="/#experience">Experiences</a>
+    <a class="nav-jump" href="/#resume">R&eacute;sum&eacute;</a>
+    <a class="nav-jump" href="engine.html">The engine</a>
+  </div>
+
+  <div class="nav-right">
+    <button class="nav-btn side-btn" id="btn-side" type="button" aria-pressed="false" aria-label="Dark mode">
+      <svg class="sb-moon" aria-hidden="true" viewBox="0 0 24 24" focusable="false">
+        <path fill="currentColor" d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/>
+      </svg>
+      <svg class="sb-sun" aria-hidden="true" viewBox="0 0 24 24" focusable="false">
+        <circle cx="12" cy="12" r="4.4" fill="currentColor"/>
+        <path d="M12 2.2v3M12 18.8v3M2.2 12h3M18.8 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M19.1 4.9L17 7M7 17l-2.1 2.1"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/>
+      </svg>
+    </button>
+  </div>
+</nav>
+
+<main class="ge" id="main">
+
+  <noscript><p class="ge-stand">This game needs JavaScript — the replay, the guessing and the standings are all live.</p></noscript>
+
+  <div class="ge-arena">
+
+    <!-- left rail: the wager + your standing -->
+    <aside class="ge-rail-l" aria-label="Scoring and your standing">
+      <div class="ge-rail">
+        <span class="ge-rt">The wager</span>
+        <ul class="ge-rules">
+          <li><span>everyone starts at</span><b>1000</b></li>
+          <li><span>dead-on call</span><b class="pos">+30</b></li>
+          <li><span>300 off breaks even</span><b>&plusmn;0</b></li>
+          <li><span>600+ off</span><b>&minus;30</b></li>
+          <li><span>each game</span><b>one guess</b></li>
+        </ul>
+      </div>
+      <div class="ge-rail">
+        <span class="ge-rt">Your standing</span>
+        <ul class="ge-me">
+          <li><span>signed as</span><button class="ge-name-btn" id="me-name" type="button" title="Change name">&mdash;</button></li>
+          <li><span>rating</span><b id="me-rating">&mdash;</b></li>
+          <li><span>games called</span><b id="me-games">&mdash;</b></li>
+          <li><span>best call, off by</span><b id="me-best">&mdash;</b></li>
+        </ul>
+      </div>
+      <div class="ge-rail">
+        <span class="ge-rt">Recent calls</span>
+        <ul class="ge-hist" id="hist"><li class="ge-empty">nothing yet &mdash; call one</li></ul>
+      </div>
+    </aside>
+
+    <!-- centre: clocks + board + transport -->
+    <div class="ge-center">
+      <div class="ge-clockrow">
+        <span class="ge-side"><span class="who">Black</span><span class="elo" id="elo-b">????</span></span>
+        <span class="ge-clock" id="clock-b">&ndash;:&ndash;&ndash;</span>
+      </div>
+      <!-- id is NOT "board" — styles.css targets #board with ID specificity
+           and would capture this element's frame, shadow and background -->
+      <div class="ge-board" id="geboard" role="img" aria-label="Replay board"></div>
+      <div class="ge-clockrow">
+        <span class="ge-side"><span class="who">White</span><span class="elo" id="elo-w">????</span></span>
+        <span class="ge-clock" id="clock-w">&ndash;:&ndash;&ndash;</span>
+      </div>
+      <div class="ge-transport" role="group" aria-label="Replay controls">
+        <button class="ge-tbtn" id="t-start" type="button" title="Start (Home)">&#8676;</button>
+        <button class="ge-tbtn" id="t-prev" type="button" title="Back one (&larr;)">&#8249;</button>
+        <button class="ge-tbtn" id="t-play" type="button" title="Play / pause (Space)" aria-pressed="false">&#9654;</button>
+        <button class="ge-tbtn" id="t-next" type="button" title="Forward one (&rarr;)">&#8250;</button>
+        <button class="ge-tbtn" id="t-end" type="button" title="End (End)">&#8677;</button>
+        <button class="ge-tbtn" id="t-speed" type="button" title="Playback speed">1&times;</button>
+      </div>
+      <span class="ge-ply" id="ply">move 0 / 0</span>
+    </div>
+
+    <!-- right rail: the game file, the guess, the reveal -->
+    <aside class="ge-rail-r" aria-label="Game file and your guess">
+      <div class="ge-rail">
+        <span class="ge-rt">The game file</span>
+        <div class="ge-meta"><span id="meta-tc">&mdash;</span><b id="meta-result">&mdash;</b></div>
+        <div class="ge-moves" id="moves"></div>
+
+        <div class="ge-guess" id="guess-panel">
+          <span class="ge-rt">Your call</span>
+          <div class="ge-guess-num">
+            <input id="g-num" type="number" min="400" max="3200" step="25" value="1800"
+                   inputmode="numeric" aria-label="Your Elo guess" />
+            <span class="unit">avg elo</span>
+          </div>
+          <input class="ge-slider" id="g-slider" type="range" min="400" max="3200" step="25" value="1800"
+                 aria-label="Your Elo guess, slider" />
+          <!-- 1800 IS the midpoint of 400–3200 — the centre label has to be the
+               value the thumb actually has under it -->
+          <div class="ge-scale"><span>400</span><span>1800</span><span>3200</span></div>
+          <button class="ge-btn" id="g-submit" type="button">Guess</button>
+        </div>
+
+        <div class="ge-guess ge-reveal" id="reveal-panel" hidden>
+          <div class="ge-verdict">
+            <span class="vt">The ratings, unsealed</span>
+            <span class="vn" id="r-actual">&mdash;</span>
+            <span class="vs" id="r-elos">&mdash;</span>
+          </div>
+          <ul class="ge-facts">
+            <li><span>your call</span><b id="r-guess">&mdash;</b></li>
+            <li><span>off by</span><b id="r-err">&mdash;</b></li>
+            <li><span>rating change</span><b id="r-delta">&mdash;</b></li>
+            <li><span>your rating</span><b id="r-rating">&mdash;</b></li>
+          </ul>
+          <button class="ge-btn" id="g-next" type="button">Deal the next game</button>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <!-- the standings -->
+  <section class="ge-standings" aria-labelledby="lb-title">
+    <h2 id="lb-title">The standings<span class="dot">.</span></h2>
+    <hr class="ge-rule" />
+    <div class="ge-tablewrap">
+      <table class="ge-lb">
+        <thead>
+          <tr><th>#</th><th>name</th><th>rating</th><th>calls</th><th>avg off</th><th>best</th></tr>
+        </thead>
+        <tbody id="lb-body">
+          <tr><td colspan="6" style="text-align:center">&mdash;</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <footer class="ge-foot">
+    <p>games: lichess open database &middot; ratings sealed server-side &middot; one call per game</p>
+    <p style="margin-top:8px"><a href="/#board-arena">&larr; back to the board</a> &middot; <a href="engine.html">how the bot works</a></p>
+  </footer>
+
+</main>
+
+<!-- sign the scoresheet -->
+<div class="ge-cover" id="cover" role="dialog" aria-modal="true" aria-labelledby="cover-h" hidden>
+  <div class="ge-card">
+    <span class="ck">Official entry form</span>
+    <h2 id="cover-h">Sign the scoresheet<span class="dot" style="color:var(--red)">.</span></h2>
+    <p>A name for the standings &mdash; that&rsquo;s the whole form. Your rating starts at 1000
+    and every call moves it.</p>
+    <input id="name-input" type="text" maxlength="20" placeholder="your name"
+           autocomplete="nickname" aria-label="Your name for the standings" />
+    <p class="ge-err" id="name-err"></p>
+    <button class="ge-btn" id="name-join" type="button">Take the pen &mdash; play</button>
+  </div>
+</div>
+
+<div class="ge-toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function () {
+  "use strict";
+
+  /* ---- API base: the Worker. Local dev talks to `wrangler dev`. ---- */
+  var API = (location.hostname === "localhost" || location.hostname === "127.0.0.1")
+    ? "http://localhost:8791"
+    : "https://guess-the-elo.thefaix.workers.dev";
+
+  var $ = function (id) { return document.getElementById(id); };
+
+  /* =========================================================
+     Replay — UCI needs no legality checking; only castling,
+     en passant and promotion need handling. Board = array of
+     64, index 0 = a1 … 63 = h8, uppercase = White.
+     ========================================================= */
+  var GLYPH = { k: "♚", q: "♛", r: "♜", b: "♝", n: "♞", p: "♟︎" };
+
+  function startBoard() {
+    var b = new Array(64).fill(null);
+    var back = ["R", "N", "B", "Q", "K", "B", "N", "R"];
+    for (var f = 0; f < 8; f++) {
+      b[f] = back[f]; b[8 + f] = "P";
+      b[48 + f] = "p"; b[56 + f] = back[f].toLowerCase();
+    }
+    return b;
+  }
+  function sqi(s) { return (s.charCodeAt(1) - 49) * 8 + (s.charCodeAt(0) - 97); }
+  function sqName(i) { return "abcdefgh"[i % 8] + (Math.floor(i / 8) + 1); }
+
+  function applyMove(board, uci) {
+    var from = sqi(uci.slice(0, 2)), to = sqi(uci.slice(2, 4)), promo = uci[4];
+    var piece = board[from];
+    var white = piece === piece.toUpperCase();
+    var capture = !!board[to];
+    var label;
+
+    /* en passant: a pawn moving diagonally onto an empty square */
+    if (piece.toLowerCase() === "p" && from % 8 !== to % 8 && !board[to]) {
+      board[white ? to - 8 : to + 8] = null;
+      capture = true;
+    }
+    if (piece.toLowerCase() === "k" && Math.abs((to % 8) - (from % 8)) === 2) {
+      var rank = from - (from % 8);
+      if (to % 8 === 6) { board[rank + 5] = board[rank + 7]; board[rank + 7] = null; }
+      else { board[rank + 3] = board[rank]; board[rank] = null; }
+      label = to % 8 === 6 ? "O-O" : "O-O-O";
+    } else if (piece.toLowerCase() === "p") {
+      label = (capture ? uci[0] + "x" : "") + sqName(to) + (promo ? "=" + promo.toUpperCase() : "");
+    } else {
+      label = GLYPH[piece.toLowerCase()] + (capture ? "x" : "") + sqName(to);
+    }
+    board[to] = promo ? (white ? promo.toUpperCase() : promo.toLowerCase()) : piece;
+    board[from] = null;
+    return { from: from, to: to, label: label };
+  }
+
+  /* Precompute every position so stepping is O(1). */
+  function buildReplay(moves) {
+    var positions = [startBoard()], highlights = [null], labels = [];
+    var board = positions[0];
+    for (var i = 0; i < moves.length; i++) {
+      board = board.slice();
+      var m = applyMove(board, moves[i]);
+      positions.push(board); highlights.push([m.from, m.to]); labels.push(m.label);
+    }
+    return { positions: positions, highlights: highlights, labels: labels };
+  }
+
+  /* =========================================================
+     State
+     ========================================================= */
+  var SPEEDS = [{ label: "1×", ms: 1500 }, { label: "2×", ms: 800 },
+                { label: "4×", ms: 400 }, { label: "8×", ms: 200 }];
+  var NAME_RE = /^\w[\w .-]{0,19}$/;
+  var NAME_KEY = "gambit-elo-name";
+
+  var state = {
+    name: "",
+    game: null, replay: null, ply: 0,
+    playing: false, timer: 0, speedIdx: 0,
+    baseSeconds: 0, guessed: false,
+  };
+  try { state.name = localStorage.getItem(NAME_KEY) || ""; } catch (e) {}
+
+  /* =========================================================
+     Rendering
+     ========================================================= */
+  function renderBoard() {
+    var el = $("geboard");
+    el.textContent = "";
+    var board = state.replay ? state.replay.positions[state.ply] : startBoard();
+    var hl = state.replay ? state.replay.highlights[state.ply] : null;
+
+    for (var rank = 7; rank >= 0; rank--) {
+      for (var file = 0; file < 8; file++) {
+        var i = rank * 8 + file;
+        var cell = document.createElement("div");
+        cell.className = "ge-sq " + ((rank + file) % 2 ? "l" : "d");
+        if (hl && (hl[0] === i || hl[1] === i)) cell.classList.add("hl");
+        if (rank === 0) {
+          var cf = document.createElement("span");
+          cf.className = "ge-coord f"; cf.textContent = "abcdefgh"[file];
+          cell.appendChild(cf);
+        }
+        if (file === 0) {
+          var cr = document.createElement("span");
+          cr.className = "ge-coord r"; cr.textContent = String(rank + 1);
+          cell.appendChild(cr);
+        }
+        var piece = board[i];
+        if (piece) {
+          var span = document.createElement("span");
+          span.className = "ge-pc " + (piece === piece.toUpperCase() ? "w" : "b");
+          span.textContent = GLYPH[piece.toLowerCase()];
+          cell.appendChild(span);
+        }
+        el.appendChild(cell);
+      }
+    }
+  }
+
+  function fmtClock(s) {
+    if (s == null) return "–:––";
+    s = Math.max(0, Math.round(s));
+    return Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0");
+  }
+  /* clocks[i] = mover's remaining time after move i (white = even i). */
+  function clockAt(color, ply) {
+    var clocks = state.game && state.game.clocks;
+    if (!clocks) return null;
+    var parity = color === "w" ? 0 : 1;
+    for (var i = ply - 1; i >= 0; i--) if (i % 2 === parity) return clocks[i];
+    return state.baseSeconds;
+  }
+  function renderClocks() {
+    var total = state.replay ? state.replay.labels.length : 0;
+    [["w", "clock-w"], ["b", "clock-b"]].forEach(function (pair) {
+      var el = $(pair[1]);
+      var secs = clockAt(pair[0], state.ply);
+      el.textContent = fmtClock(secs);
+      var toMove = state.ply < total && (state.ply % 2 === 0 ? "w" : "b") === pair[0];
+      el.classList.toggle("active", toMove);
+      el.classList.toggle("low", secs != null && secs < 20);
+    });
+  }
+
+  function renderMoves() {
+    var total = state.replay ? state.replay.labels.length : 0;
+    $("ply").textContent = "move " + Math.ceil(state.ply / 2) + " / " + Math.ceil(total / 2);
+    var list = $("moves");
+    list.textContent = "";
+    for (var i = 0; i < total; i += 2) {
+      var row = document.createElement("div");
+      row.className = "ge-mrow" + (state.ply - 1 === i || state.ply - 1 === i + 1 ? " now" : "");
+      var no = document.createElement("span");
+      no.className = "ge-mno"; no.textContent = (i / 2 + 1) + ".";
+      row.appendChild(no);
+      for (var k = 0; k < 2; k++) {
+        var j = i + k;
+        if (j >= total) break;
+        var btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "ge-mv" + (j === state.ply - 1 ? " cur" : "");
+        btn.textContent = state.replay.labels[j];
+        btn.onclick = (function (p) { return function () { pause(); goto(p); }; })(j + 1);
+        row.appendChild(btn);
+      }
+      list.appendChild(row);
+    }
+    /* scroll only the sheet — scrollIntoView would drag the page */
+    var cur = list.querySelector(".now");
+    if (cur) list.scrollTop = cur.offsetTop - list.clientHeight / 2;
+  }
+
+  function goto(ply) {
+    var total = state.replay ? state.replay.labels.length : 0;
+    state.ply = Math.max(0, Math.min(total, ply));
+    renderBoard(); renderClocks(); renderMoves();
+    if (state.ply === total) pause();
+  }
+  function play() {
+    if (!state.replay || state.ply >= state.replay.labels.length) return;
+    state.playing = true;
+    $("t-play").innerHTML = "&#9646;&#9646;";
+    $("t-play").setAttribute("aria-pressed", "true");
+    clearInterval(state.timer);
+    state.timer = setInterval(function () {
+      if (state.ply >= state.replay.labels.length) return pause();
+      goto(state.ply + 1);
+    }, SPEEDS[state.speedIdx].ms);
+  }
+  function pause() {
+    state.playing = false;
+    $("t-play").innerHTML = "&#9654;";
+    $("t-play").setAttribute("aria-pressed", "false");
+    clearInterval(state.timer);
+  }
+
+  /* =========================================================
+     Meta
+     ========================================================= */
+  function tcInfo(tc) {
+    var parts = (tc || "0+0").split("+");
+    var base = Number(parts[0]) || 0, inc = Number(parts[1]) || 0;
+    var est = base + 40 * inc;
+    var cat = est < 30 ? "UltraBullet" : est < 180 ? "Bullet" : est < 480 ? "Blitz" : est < 1500 ? "Rapid" : "Classical";
+    return { base: base, label: Math.floor(base / 60) + "+" + inc + " · " + cat };
+  }
+  function resultText(g) {
+    var res = g.result === "1/2-1/2" ? "½–½" : g.result.replace("-", "–");
+    return res + (g.termination === "Time forfeit" ? " · on time" : "");
+  }
+
+  /* =========================================================
+     API
+     ========================================================= */
+  function api(path, opts) {
+    return fetch(API + path, opts).then(function (res) {
+      return res.json().then(function (data) {
+        if (!res.ok) throw new Error(data.error || ("HTTP " + res.status));
+        return data;
+      });
+    });
+  }
+
+  var toastTimer = 0;
+  function toast(msg) {
+    var t = $("toast");
+    t.textContent = msg;
+    t.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { t.classList.remove("show"); }, 2800);
+  }
+
+  function loadGame() {
+    pause();
+    $("elo-w").textContent = "????";
+    $("elo-b").textContent = "????";
+    $("reveal-panel").hidden = true;
+    $("guess-panel").hidden = false;
+    state.guessed = false;
+
+    return api("/api/game?player=" + encodeURIComponent(state.name)).then(function (g) {
+      if (g.done) {
+        /* nothing left to guess — clear the table rather than leaving the
+           last game's final position sitting there looking sealed */
+        state.game = null; state.replay = null; state.ply = 0;
+        renderBoard(); renderClocks(); renderMoves();
+        $("guess-panel").hidden = true;
+        $("meta-tc").textContent = "pool exhausted";
+        $("meta-result").textContent = "";
+        toast("You have called every game in the pool.");
+        return;
+      }
+      state.game = g;
+      state.replay = buildReplay(g.moves);
+      var tc = tcInfo(g.timeControl);
+      state.baseSeconds = tc.base;
+      $("meta-tc").textContent = tc.label;
+      $("meta-result").textContent = resultText(g);
+      $("g-submit").disabled = false;
+      /* dealt paused, at move zero — stepping is yours, and the ▶ button
+         (with the speed toggle beside it) rolls the tape automatically */
+      goto(0);
+    });
+  }
+
+  function submitGuess() {
+    if (state.guessed) return;
+    if (!state.game) {
+      /* a failed boot-time deal left the panel up with nothing behind it —
+         make the button the retry */
+      loadGame().catch(function (err) { toast("Could not load a game: " + err.message); });
+      return;
+    }
+    var guess = Number($("g-num").value);
+    if (!Number.isInteger(guess) || guess < 400 || guess > 3200) {
+      toast("Call a number between 400 and 3200.");
+      return;
+    }
+    $("g-submit").disabled = true;
+
+    api("/api/guess", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ player: state.name, gameId: state.game.id, guess: guess }),
+    }).then(function (r) {
+      state.guessed = true;
+      $("elo-w").textContent = r.whiteElo;
+      $("elo-b").textContent = r.blackElo;
+      $("r-actual").textContent = r.actual;
+      $("r-elos").textContent = "White " + r.whiteElo + " · Black " + r.blackElo;
+      $("r-guess").textContent = r.guess;
+      $("r-err").textContent = r.err;
+      var d = $("r-delta");
+      d.textContent = (r.delta >= 0 ? "+" : "−") + Math.abs(r.delta);
+      d.className = r.delta >= 0 ? "d-pos" : "";
+      $("r-rating").textContent = r.rating;
+      $("me-rating").textContent = r.rating;
+      $("me-games").textContent = r.gamesPlayed;
+      if (r.bestGuess != null) $("me-best").textContent = r.bestGuess;
+      $("guess-panel").hidden = true;
+      $("reveal-panel").hidden = false;
+      goto(state.replay.labels.length);
+      loadLeaderboard(); loadHistory();
+    }).catch(function (err) {
+      /* "already guessed" = another tab under this name beat us to this game
+         (or it vanished) — retrying the same id can never succeed, deal fresh */
+      if (/already guessed|no such game/.test(err.message)) {
+        toast("That game was already called under this name — dealing another.");
+        loadGame().catch(function (e2) { toast("Could not load a game: " + e2.message); });
+        return;
+      }
+      $("g-submit").disabled = false;
+      toast("Guess failed: " + err.message);
+    });
+  }
+
+  function loadLeaderboard() {
+    return api("/api/leaderboard").then(function (rows) {
+      var body = $("lb-body");
+      body.textContent = "";
+      if (!rows.length) {
+        var tr0 = document.createElement("tr");
+        var td0 = document.createElement("td");
+        td0.colSpan = 6; td0.style.textAlign = "center";
+        td0.textContent = "no calls yet — the first name signs here";
+        tr0.appendChild(td0); body.appendChild(tr0);
+        return;
+      }
+      rows.forEach(function (p, i) {
+        var tr = document.createElement("tr");
+        if (p.name.toLowerCase() === state.name.toLowerCase()) {
+          tr.className = "me";
+          $("me-rating").textContent = p.rating;
+          $("me-games").textContent = p.games_played;
+          $("me-best").textContent = p.best_guess == null ? "—" : p.best_guess;
+        }
+        [i + 1, p.name, p.rating, p.games_played,
+         p.avg_err == null ? "—" : p.avg_err,
+         p.best_guess == null ? "—" : p.best_guess].forEach(function (v, col) {
+          var td = document.createElement("td");
+          if (col === 2) td.className = "rt";
+          td.textContent = v;
+          tr.appendChild(td);
+        });
+        body.appendChild(tr);
+      });
+    }).catch(function () {});
+  }
+
+  function loadHistory() {
+    return api("/api/history?player=" + encodeURIComponent(state.name)).then(function (rows) {
+      var list = $("hist");
+      list.textContent = "";
+      if (!rows.length) {
+        var li0 = document.createElement("li");
+        li0.className = "ge-empty";
+        li0.textContent = "nothing yet — call one";
+        list.appendChild(li0);
+        return;
+      }
+      rows.forEach(function (h) {
+        var li = document.createElement("li");
+        var a = document.createElement("span");
+        a.textContent = "called " + h.guess + ", was " + h.actual;
+        var b = document.createElement("span");
+        b.className = h.delta >= 0 ? "d-pos" : "d-neg";
+        b.textContent = (h.delta >= 0 ? "+" : "−") + Math.abs(h.delta);
+        li.appendChild(a); li.appendChild(b);
+        list.appendChild(li);
+      });
+    }).catch(function () {});
+  }
+
+  /* =========================================================
+     Wiring
+     ========================================================= */
+  $("t-start").onclick = function () { pause(); goto(0); };
+  $("t-prev").onclick = function () { pause(); goto(state.ply - 1); };
+  $("t-next").onclick = function () { pause(); goto(state.ply + 1); };
+  $("t-end").onclick = function () { pause(); goto(state.replay ? state.replay.labels.length : 0); };
+  $("t-play").onclick = function () { state.playing ? pause() : play(); };
+  $("t-speed").onclick = function () {
+    state.speedIdx = (state.speedIdx + 1) % SPEEDS.length;
+    $("t-speed").textContent = SPEEDS[state.speedIdx].label;
+    if (state.playing) play();
+  };
+
+  $("g-slider").oninput = function (e) { $("g-num").value = e.target.value; };
+  $("g-num").oninput = function (e) { $("g-slider").value = e.target.value; };
+  $("g-submit").onclick = submitGuess;
+  $("g-next").onclick = function () {
+    $("g-slider").value = 1800; $("g-num").value = 1800;
+    loadGame().catch(function (err) {
+      /* put the reveal (and its Deal button) back so there is still a
+         control on screen to retry with */
+      $("guess-panel").hidden = true;
+      $("reveal-panel").hidden = false;
+      toast("Could not load a game: " + err.message);
+    });
+  };
+
+  document.addEventListener("keydown", function (e) {
+    /* BUTTON exempt too: Space on a focused button must activate it, not
+       hijack the replay (preventDefault on keydown suppresses activation) */
+    if (e.target.tagName === "INPUT" || e.target.tagName === "BUTTON" || !$("cover").hidden) return;
+    if (e.key === "ArrowLeft") { pause(); goto(state.ply - 1); }
+    else if (e.key === "ArrowRight") { pause(); goto(state.ply + 1); }
+    else if (e.key === " ") { e.preventDefault(); state.playing ? pause() : play(); }
+    else if (e.key === "Home") { pause(); goto(0); }
+    else if (e.key === "End") { pause(); goto(state.replay ? state.replay.labels.length : 0); }
+  });
+
+  /* ---- your own stats, straight from the server — the leaderboard is
+          top-50 only, so a name below the cut would otherwise stay blank ---- */
+  function loadStanding() {
+    return api("/api/player?player=" + encodeURIComponent(state.name)).then(function (p) {
+      if (p && p.rating != null) {
+        $("me-rating").textContent = p.rating;
+        $("me-games").textContent = p.games_played;
+        $("me-best").textContent = p.best_guess == null ? "—" : p.best_guess;
+      }
+    }).catch(function () {});
+  }
+
+  /* ---- sign the scoresheet ---- */
+  function showCover() {
+    $("name-input").value = state.name;
+    $("name-err").textContent = "";
+    $("cover").hidden = false;
+    $("name-input").focus();
+  }
+  function hideCover() {
+    $("cover").hidden = true;
+    $("me-name").focus();
+  }
+  function join() {
+    var name = $("name-input").value.trim();
+    if (!NAME_RE.test(name)) {
+      $("name-err").textContent = "letters, digits, spaces, . _ or - — up to 20 characters, starting with a letter, digit or underscore.";
+      return;
+    }
+    var changed = name !== state.name;
+    state.name = name;
+    try { localStorage.setItem(NAME_KEY, name); } catch (e) {}
+    $("me-name").textContent = name;
+    hideCover();
+    if (!changed && state.game) return; /* reopened just to look — nothing to redo */
+    $("me-rating").textContent = "—";
+    $("me-games").textContent = "—";
+    $("me-best").textContent = "—";
+    loadGame().catch(function (err) { toast("Could not load a game: " + err.message); });
+    loadLeaderboard(); loadHistory(); loadStanding();
+  }
+  $("name-join").onclick = join;
+  $("name-input").addEventListener("keydown", function (e) { if (e.key === "Enter") join(); });
+  $("me-name").onclick = showCover;
+  /* aria-modal promises the background is inert — keep Tab inside the card,
+     and let Escape / a backdrop click cancel once a name already exists
+     (a first-time visitor has nothing to cancel back to) */
+  $("cover").addEventListener("click", function (e) {
+    if (e.target === this && state.name) hideCover();
+  });
+  document.addEventListener("keydown", function (e) {
+    if ($("cover").hidden) return;
+    if (e.key === "Escape" && state.name) { hideCover(); return; }
+    if (e.key === "Tab") {
+      var stops = [$("name-input"), $("name-join")];
+      var i = stops.indexOf(document.activeElement);
+      e.preventDefault();
+      stops[(i + (e.shiftKey ? -1 : 1) + stops.length) % stops.length].focus();
+    }
+  });
+
+  /* ---- boot ---- */
+  renderBoard();
+  loadLeaderboard();
+  if (state.name) {
+    $("me-name").textContent = state.name;
+    loadGame().catch(function (err) { toast("Could not load a game: " + err.message); });
+    loadHistory(); loadStanding();
+  } else {
+    showCover();
+  }
+})();
+</script>
+
+<!-- The theme chip, standalone — same contract as engine.html: set
+     gambit-theme="dark" for dark, REMOVE the key for light. -->
+<script>
+  (function () {
+    var btn = document.getElementById("btn-side");
+    var root = document.documentElement;
+    function paint() {
+      var dark = root.getAttribute("data-theme") === "dark";
+      btn.setAttribute("aria-pressed", dark ? "true" : "false");
+      btn.setAttribute("aria-label", dark ? "Light mode" : "Dark mode");
+    }
+    btn.addEventListener("click", function () {
+      var dark = root.getAttribute("data-theme") === "dark";
+      if (dark) root.removeAttribute("data-theme");
+      else root.setAttribute("data-theme", "dark");
+      try {
+        if (dark) localStorage.removeItem("gambit-theme");
+        else localStorage.setItem("gambit-theme", "dark");
+      } catch (e) {}
+      paint();
+    });
+    paint();
+  })();
+</script>
+
+<!-- Vercel Web Analytics + Speed Insights — same plain-HTML flavour as the
+     front page; same-origin, only exist on Vercel, silent 404 locally. -->
+<script>
+  window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
+</script>
+<script defer src="/_vercel/insights/script.js"></script>
+<script defer src="/_vercel/speed-insights/script.js"></script>
+</body>
+</html>
