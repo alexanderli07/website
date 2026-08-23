@@ -44,7 +44,7 @@
 <!-- ?v= busts stale caches: the page and its stylesheet must arrive as a pair,
      or new markup renders with old rules (an unstyled nav menu, once). Bump it
      whenever an HTML change depends on a styles.css change. -->
-<link rel="stylesheet" href="styles.css?v=5" />
+<link rel="stylesheet" href="styles.css?v=6" />
 
 <!-- With scripting off, the <noscript> block in the body carries the real
      content — but the shell around it would still paint: a nav whose buttons do
@@ -238,10 +238,10 @@
     <a class="nav-jump" href="#experience">Experiences</a>
     <a class="nav-jump" href="#resume">R&eacute;sum&eacute;</a>
     <details class="nav-other" id="nav-other">
-      <summary>Other</summary>
+      <summary><span class="lbl">Other</span></summary>
       <div class="nom">
-        <a href="elo.html">Guess the Elo<sup class="nv">new</sup></a>
-        <a href="engine.html">The engine</a>
+        <a href="elo.html"><span class="lbl">Guess the Elo</span><sup class="nv">new</sup></a>
+        <a href="engine.html"><span class="lbl">The engine</span></a>
       </div>
     </details>
   </div>
@@ -550,23 +550,39 @@
   (function () {
     var d = document.getElementById("nav-other");
     var sum = d.querySelector("summary"), m = d.querySelector(".nom");
-    /* Open by hand and animate with the Web Animations API, in the SAME task —
-       a CSS animation inside <details> is display-locked while closed, so any
-       restart lands a frame late and stutters. This starts at t=0 on the very
-       first painted frame, every open. */
+    var closing = false;
+    var EASE = "cubic-bezier(.2,.7,.2,1)";
+    var noMotion = function () { return matchMedia("(prefers-reduced-motion: reduce)").matches; };
+    /* Open AND close by hand, animated with the Web Animations API in the SAME
+       task — a CSS animation inside <details> is display-locked while closed,
+       so any restart lands a frame late and stutters. Closing plays the fold
+       in reverse and only then removes [open]. */
+    function openMenu() {
+      d.setAttribute("open", "");
+      if (!noMotion())
+        m.animate(
+          { opacity: [0, 1], transform: ["translateY(-8px)", "none"],
+            clipPath: ["inset(0 0 100% 0)", "inset(0 0 -14px 0)"] },
+          { duration: 200, easing: EASE });
+    }
+    function closeMenu() {
+      if (!d.open || closing) return;
+      if (noMotion()) { d.removeAttribute("open"); return; }
+      closing = true;
+      var done = function () { if (closing) { closing = false; d.removeAttribute("open"); } };
+      var a = m.animate(
+        { opacity: [1, 0], transform: ["none", "translateY(-8px)"],
+          clipPath: ["inset(0 0 -14px 0)", "inset(0 0 100% 0)"] },
+        { duration: 160, easing: EASE });
+      a.onfinish = a.oncancel = done;
+      setTimeout(done, 280);   /* a hidden tab pauses animations — never strand it open */
+    }
     sum.addEventListener("click", function (e) {
       e.preventDefault();
-      if (d.open) { d.removeAttribute("open"); return; }
-      d.setAttribute("open", "");
-      if (!matchMedia("(prefers-reduced-motion: reduce)").matches)
-        m.animate(
-          { opacity: [0, 1],
-            transform: ["translateY(-8px)", "none"],
-            clipPath: ["inset(0 0 100% 0)", "inset(0 0 -14px 0)"] },
-          { duration: 200, easing: "cubic-bezier(.2,.7,.2,1)" });
+      if (d.open) closeMenu(); else openMenu();
     });
-    document.addEventListener("click", function (e) { if (d.open && !d.contains(e.target)) d.removeAttribute("open"); });
-    document.addEventListener("keydown", function (e) { if (e.key === "Escape") d.removeAttribute("open"); });
+    document.addEventListener("click", function (e) { if (d.open && !d.contains(e.target)) closeMenu(); });
+    document.addEventListener("keydown", function (e) { if (e.key === "Escape") closeMenu(); });
   })();
 </script>
 

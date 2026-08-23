@@ -2357,24 +2357,29 @@
     .nav-other summary::after{ transition: none; }
   }
   .nav-other .nom a{
-    position: relative;
     display: block; padding: 8px 14px 7px;
     font-family: var(--mono); font-size: 10px; font-weight: 500;
     letter-spacing: .13em; text-transform: uppercase;
     text-decoration: none; color: var(--walnut);
     transition: color .2s ease;
   }
-  /* the same gesture as the bar's links: darken, and rule a red line in */
-  .nav-other .nom a::after{
+  .nav-other .nom a:hover{ color: var(--ink); }
+  .nav-other .nom a:active{ color: var(--red); }
+  /* The same gesture as the bar's links: darken, and rule a red line in — the
+     line lives on the .lbl span so it runs the LENGTH OF THE TEXT, not the
+     whole 160px box. The trigger keeps its line while the menu is open. */
+  .nav-other .lbl{ position: relative; }
+  .nav-other .lbl::after{
     content: "";
-    position: absolute; left: 14px; right: 14px; bottom: 4px;
+    position: absolute; left: 0; right: 0; bottom: -4px;
     height: 2px; background: var(--red);
     transform: scaleX(0); transform-origin: left center;
     transition: transform .26s cubic-bezier(.2,.7,.2,1);
   }
-  .nav-other .nom a:hover{ color: var(--ink); }
-  .nav-other .nom a:hover::after, .nav-other .nom a:focus-visible::after{ transform: scaleX(1); }
-  .nav-other .nom a:active{ color: var(--red); }
+  .nav-other summary:hover .lbl::after,
+  .nav-other[open] summary .lbl::after,
+  .nav-other .nom a:hover .lbl::after,
+  .nav-other .nom a:focus-visible .lbl::after{ transform: scaleX(1); }
   @media (max-width: 720px){
     .nav-other summary{ --pad-x: 7px; font-size: 9.5px; padding: 4px var(--pad-x) 4px; letter-spacing: .08em; }
     /* the trigger sits far right in the scrolling index row here — pin the
