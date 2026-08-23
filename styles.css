@@ -2365,6 +2365,9 @@
   }
   .nav-other .nom a:hover{ color: var(--ink); }
   .nav-other .nom a:active{ color: var(--red); }
+  /* these anchors live inside .nav-links, so the bar's own box-wide wipe
+     (.nav-links a::after) also matches them — the .lbl line replaces it */
+  .nav-other .nom a::after{ display: none; }
   /* The same gesture as the bar's links: darken, and rule a red line in — the
      line lives on the .lbl span so it runs the LENGTH OF THE TEXT, not the
      whole 160px box. The trigger keeps its line while the menu is open. */
