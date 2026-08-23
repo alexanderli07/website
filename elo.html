@@ -86,25 +86,6 @@
   .ge-rules b{ color: var(--ink); font-weight: 600; white-space: nowrap; }
   .ge-rules .pos{ color: var(--red); font-weight: 600; }
 
-  /* your standing */
-  .ge-me{ list-style: none; margin: 0; padding: 0; }
-  .ge-me li{
-    display: flex; justify-content: space-between; align-items: baseline; gap: 10px;
-    font-family: var(--mono); font-size: 10.5px; letter-spacing: .06em;
-    text-transform: uppercase; color: var(--walnut-2);
-    padding: 5px 0; border-bottom: 1px dotted var(--walnut-3);
-  }
-  .ge-me li:last-child{ border-bottom: 0; }
-  .ge-me b{ font-size: 14px; font-weight: 600; color: var(--ink); letter-spacing: .02em; }
-  .ge-name-btn{
-    border: 0; background: none; padding: 0;
-    font-family: var(--mono); font-size: 14px; font-weight: 600; color: var(--ink);
-    text-decoration: underline; text-underline-offset: 3px;
-    text-decoration-color: rgba(var(--hatch), .45);
-    cursor: pointer; max-width: 100%; overflow: hidden; text-overflow: ellipsis;
-  }
-  .ge-name-btn:hover{ text-decoration-color: var(--red); color: var(--red); }
-
   /* recent calls */
   .ge-hist{ list-style: none; margin: 0; padding: 0; }
   .ge-hist li{
@@ -260,8 +241,8 @@
   .ge-mv:hover{ color: var(--red); }
   .ge-mv.cur{ color: var(--red); font-weight: 600; }
 
-  /* the guess panel */
-  .ge-guess{ margin-top: 14px; padding-top: 10px; border-top: 1px dotted var(--walnut-3); }
+  /* the guess panel — leads its own rail box on the left */
+  .ge-guess{ margin: 0; }
   .ge-guess-num{
     display: flex; align-items: baseline; justify-content: center; gap: 8px;
     margin: 4px 0 8px;
@@ -440,9 +421,10 @@
   @media (max-width: 1000px){
     .ge-arena, .ge-clockbar{ grid-template-columns: minmax(0, 560px); justify-content: center; }
     .ge-clockbar .ge-clockrow{ grid-column: 1; }
-    .ge-rail-l{ order: 3; }
+    /* stacked: board first, then the guess (the point of the page), then the log */
     .ge-center{ order: 1; }
-    .ge-rail-r{ order: 2; }
+    .ge-rail-l{ order: 2; }
+    .ge-rail-r{ order: 3; }
     .ge-moves{ height: 150px; }
   }
   @media (prefers-reduced-motion: reduce){
@@ -502,51 +484,10 @@
 
   <div class="ge-arena">
 
-    <!-- left rail: your standing + recent calls (the wager lives in the
-         rules dialog, same as the front page keeps its rules) -->
-    <aside class="ge-rail-l" aria-label="Your standing">
+    <!-- left rail: the guess (or its reveal) + recent calls. The wager lives
+         in the rules dialog, same as the front page keeps its rules. -->
+    <aside class="ge-rail-l" aria-label="Your guess and recent calls">
       <div class="ge-rail">
-        <span class="ge-rt">Your standing</span>
-        <ul class="ge-me">
-          <li><span>signed as</span><button class="ge-name-btn" id="me-name" type="button" title="Change name">&mdash;</button></li>
-          <li><span>rating</span><b id="me-rating">&mdash;</b></li>
-          <li><span>games called</span><b id="me-games">&mdash;</b></li>
-          <li><span>best call, off by</span><b id="me-best">&mdash;</b></li>
-        </ul>
-      </div>
-      <div class="ge-rail">
-        <span class="ge-rt">Recent calls</span>
-        <ul class="ge-hist" id="hist"><li class="ge-empty">nothing yet &mdash; call one</li></ul>
-      </div>
-    </aside>
-
-    <!-- centre: board + transport (the clocks live in the bar above) -->
-    <div class="ge-center">
-      <!-- id is NOT "board" — styles.css targets #board with ID specificity
-           and would capture this element's frame, shadow and background -->
-      <div class="ge-board" id="geboard" role="img" aria-label="Replay board"></div>
-      <div class="ge-clockrow">
-        <span class="ge-side"><span class="who">White</span><span class="elo" id="elo-w">????</span></span>
-        <span class="ge-clock" id="clock-w">&ndash;:&ndash;&ndash;</span>
-      </div>
-    </div>
-
-    <!-- right rail: the game file, the guess, the reveal -->
-    <aside class="ge-rail-r" aria-label="Game file and your guess">
-      <div class="ge-rail">
-        <span class="ge-rt">The game file</span>
-        <div class="ge-meta"><span id="meta-tc">&mdash;</span><b id="meta-result">&mdash;</b></div>
-        <div class="ge-moves" id="moves"></div>
-        <div class="ge-transport" role="group" aria-label="Replay controls">
-          <button class="ge-tbtn" id="t-start" type="button" title="Start (Home)">&#8676;</button>
-          <button class="ge-tbtn" id="t-prev" type="button" title="Back one (&larr;)">&#8249;</button>
-          <button class="ge-tbtn" id="t-play" type="button" title="Play / pause (Space)" aria-pressed="false">&#9654;</button>
-          <button class="ge-tbtn" id="t-next" type="button" title="Forward one (&rarr;)">&#8250;</button>
-          <button class="ge-tbtn" id="t-end" type="button" title="End (End)">&#8677;</button>
-          <button class="ge-tbtn" id="t-speed" type="button" title="Playback speed">1&times;</button>
-        </div>
-        <span class="ge-ply" id="ply">move 0 / 0</span>
-
         <div class="ge-guess" id="guess-panel">
           <span class="ge-rt">Your call</span>
           <div class="ge-guess-num">
@@ -576,6 +517,39 @@
           </ul>
           <button class="ge-btn" id="g-next" type="button">Deal the next game</button>
         </div>
+      </div>
+      <div class="ge-rail">
+        <span class="ge-rt">Recent calls</span>
+        <ul class="ge-hist" id="hist"><li class="ge-empty">nothing yet &mdash; call one</li></ul>
+      </div>
+    </aside>
+
+    <!-- centre: board + transport (the clocks live in the bar above) -->
+    <div class="ge-center">
+      <!-- id is NOT "board" — styles.css targets #board with ID specificity
+           and would capture this element's frame, shadow and background -->
+      <div class="ge-board" id="geboard" role="img" aria-label="Replay board"></div>
+      <div class="ge-clockrow">
+        <span class="ge-side"><span class="who">White</span><span class="elo" id="elo-w">????</span></span>
+        <span class="ge-clock" id="clock-w">&ndash;:&ndash;&ndash;</span>
+      </div>
+    </div>
+
+    <!-- right rail: the game file — the log and the replay controls -->
+    <aside class="ge-rail-r" aria-label="Game file and replay controls">
+      <div class="ge-rail">
+        <span class="ge-rt">The game file</span>
+        <div class="ge-meta"><span id="meta-tc">&mdash;</span><b id="meta-result">&mdash;</b></div>
+        <div class="ge-moves" id="moves"></div>
+        <div class="ge-transport" role="group" aria-label="Replay controls">
+          <button class="ge-tbtn" id="t-start" type="button" title="Start (Home)">&#8676;</button>
+          <button class="ge-tbtn" id="t-prev" type="button" title="Back one (&larr;)">&#8249;</button>
+          <button class="ge-tbtn" id="t-play" type="button" title="Play / pause (Space)" aria-pressed="false">&#9654;</button>
+          <button class="ge-tbtn" id="t-next" type="button" title="Forward one (&rarr;)">&#8250;</button>
+          <button class="ge-tbtn" id="t-end" type="button" title="End (End)">&#8677;</button>
+          <button class="ge-tbtn" id="t-speed" type="button" title="Playback speed">1&times;</button>
+        </div>
+        <span class="ge-ply" id="ply">move 0 / 0</span>
       </div>
     </aside>
   </div>
@@ -931,9 +905,6 @@
       d.textContent = (r.delta >= 0 ? "+" : "−") + Math.abs(r.delta);
       d.className = r.delta >= 0 ? "d-pos" : "";
       $("r-rating").textContent = r.rating;
-      $("me-rating").textContent = r.rating;
-      $("me-games").textContent = r.gamesPlayed;
-      if (r.bestGuess != null) $("me-best").textContent = r.bestGuess;
       $("guess-panel").hidden = true;
       $("reveal-panel").hidden = false;
       goto(state.replay.labels.length);
@@ -965,12 +936,7 @@
       }
       rows.forEach(function (p, i) {
         var tr = document.createElement("tr");
-        if (p.name.toLowerCase() === state.name.toLowerCase()) {
-          tr.className = "me";
-          $("me-rating").textContent = p.rating;
-          $("me-games").textContent = p.games_played;
-          $("me-best").textContent = p.best_guess == null ? "—" : p.best_guess;
-        }
+        if (p.name.toLowerCase() === state.name.toLowerCase()) tr.className = "me";
         [i + 1, p.name, p.rating, p.games_played,
          p.avg_err == null ? "—" : p.avg_err,
          p.best_guess == null ? "—" : p.best_guess].forEach(function (v, col) {
@@ -1047,18 +1013,6 @@
     else if (e.key === "End") { pause(); goto(state.replay ? state.replay.labels.length : 0); }
   });
 
-  /* ---- your own stats, straight from the server — the leaderboard is
-          top-50 only, so a name below the cut would otherwise stay blank ---- */
-  function loadStanding() {
-    return api("/api/player?player=" + encodeURIComponent(state.name)).then(function (p) {
-      if (p && p.rating != null) {
-        $("me-rating").textContent = p.rating;
-        $("me-games").textContent = p.games_played;
-        $("me-best").textContent = p.best_guess == null ? "—" : p.best_guess;
-      }
-    }).catch(function () {});
-  }
-
   /* ---- sign the scoresheet ---- */
   function showCover() {
     $("name-input").value = state.name;
@@ -1069,7 +1023,7 @@
   }
   function hideCover() {
     $("cover").hidden = true;
-    $("me-name").focus();
+    $("btn-rules").focus();
   }
   function join() {
     var name = $("name-input").value.trim();
@@ -1080,18 +1034,13 @@
     var changed = name !== state.name;
     state.name = name;
     try { localStorage.setItem(NAME_KEY, name); } catch (e) {}
-    $("me-name").textContent = name;
     hideCover();
     if (!changed && state.game) return; /* reopened just to look — nothing to redo */
-    $("me-rating").textContent = "—";
-    $("me-games").textContent = "—";
-    $("me-best").textContent = "—";
     loadGame().catch(function (err) { toast("Could not load a game: " + err.message); });
-    loadLeaderboard(); loadHistory(); loadStanding();
+    loadLeaderboard(); loadHistory();
   }
   $("name-join").onclick = join;
   $("name-input").addEventListener("keydown", function (e) { if (e.key === "Enter") join(); });
-  $("me-name").onclick = showCover;
   $("btn-rules").onclick = showCover;
   $("cover-x").onclick = hideCover;
   /* aria-modal promises the background is inert — keep Tab inside the card,
@@ -1115,9 +1064,8 @@
   renderBoard();
   loadLeaderboard();
   if (state.name) {
-    $("me-name").textContent = state.name;
     loadGame().catch(function (err) { toast("Could not load a game: " + err.message); });
-    loadHistory(); loadStanding();
+    loadHistory();
   } else {
     showCover();
   }
