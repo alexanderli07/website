@@ -2309,7 +2309,11 @@
      A <details>, so it opens without script; each page adds the few lines that
      close it on outside click / Escape. The summary is dressed exactly like a
      .nav-links link. */
-  .nav-other{ position: relative; }
+  /* NO position on .nav-other, deliberately: the menu's containing block must
+     be the FIXED .topnav itself, so top:100% lands its top border exactly on
+     the bar's bottom rule (the two 1px walnut lines merge into one), and the
+     menu escapes the mobile index row's overflow clip. Left/right stay auto,
+     so horizontally it still sits at its static position — under the trigger. */
   .nav-other summary{
     --pad-x: 9px;
     display: inline-block; cursor: pointer; list-style: none;
@@ -2322,17 +2326,31 @@
   .nav-other summary::-webkit-details-marker{ display: none; }
   .nav-other summary::after{
     content: "\25BE";
+    display: inline-block;
     font-size: 8px; margin-left: 5px; vertical-align: 1px;
     color: var(--red);
+    transition: transform .22s cubic-bezier(.2,.7,.2,1);
   }
+  .nav-other[open] summary::after{ transform: rotate(180deg); }
   .nav-other summary:hover, .nav-other[open] summary{ color: var(--ink); }
   .nav-other .nom{
-    position: absolute; top: calc(100% + 6px); left: 0; z-index: 95;
+    position: absolute; top: 100%; z-index: 95;
     min-width: 160px;
     background: var(--paper);
     border: 1px solid var(--walnut);
+    border-top: 0;   /* the bar's own bottom rule is the top line */
     box-shadow: 3px 3px 0 rgba(var(--shade), .2);
     padding: 4px 0;
+  }
+  /* unfolds from under the bar's rule — clipped drop + fade, one beat */
+  .nav-other[open] .nom{ animation: nomIn .2s cubic-bezier(.2,.7,.2,1) both; }
+  @keyframes nomIn{
+    from{ opacity: 0; transform: translateY(-8px); clip-path: inset(0 0 100% 0); }
+    to{   opacity: 1; transform: none;             clip-path: inset(0 0 -14px 0); }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .nav-other[open] .nom{ animation: none; }
+    .nav-other summary::after{ transition: none; }
   }
   .nav-other .nom a{
     display: block; padding: 8px 14px 7px;
@@ -2345,9 +2363,10 @@
   }
   @media (max-width: 720px){
     .nav-other summary{ --pad-x: 7px; font-size: 9.5px; padding: 4px var(--pad-x) 4px; letter-spacing: .08em; }
-    /* the mobile bar's index row is an overflow-x scroller — an absolute menu
-       would be clipped inside it, so the menu pins under the two-row bar */
-    .nav-other .nom{ position: fixed; top: 74px; left: 12px; }
+    /* the trigger sits far right in the scrolling index row here — pin the
+       menu to the bar's right edge so it can't run off-screen (its containing
+       block is the bar, so it isn't clipped by the row's overflow) */
+    .nav-other .nom{ left: auto; right: 12px; }
   }
   @media print{ .elo-promo{ display: none; } }
 
