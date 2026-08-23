@@ -29,7 +29,7 @@
 <!-- ?v= busts stale caches: the page and its stylesheet must arrive as a pair,
      or new markup renders with old rules (an unstyled nav menu, once). Bump it
      whenever an HTML change depends on a styles.css change. -->
-<link rel="stylesheet" href="styles.css?v=4" />
+<link rel="stylesheet" href="styles.css?v=5" />
 
 <!-- Same theme gate as the front page, same key, before anything paints.
      There is no curtain here, so only the theme half is needed. -->
@@ -253,7 +253,6 @@
   <a class="brand" href="/"><span class="bw">GAMBIT<span class="dot">.</span></span><span class="bsub">Alexander Li</span></a>
 
   <div class="nav-links">
-    <a class="nav-jump" href="/#board-arena">The board</a>
     <a class="nav-jump" href="/#spoils">Awards</a>
     <a class="nav-jump" href="/#projects">Projects</a>
     <a class="nav-jump" href="/#experience">Experiences</a>
@@ -618,17 +617,24 @@
 <script>
   (function () {
     var d = document.getElementById("nav-other");
+    var sum = d.querySelector("summary"), m = d.querySelector(".nom");
+    /* Open by hand and animate with the Web Animations API, in the SAME task —
+       a CSS animation inside <details> is display-locked while closed, so any
+       restart lands a frame late and stutters. This starts at t=0 on the very
+       first painted frame, every open. */
+    sum.addEventListener("click", function (e) {
+      e.preventDefault();
+      if (d.open) { d.removeAttribute("open"); return; }
+      d.setAttribute("open", "");
+      if (!matchMedia("(prefers-reduced-motion: reduce)").matches)
+        m.animate(
+          { opacity: [0, 1],
+            transform: ["translateY(-8px)", "none"],
+            clipPath: ["inset(0 0 100% 0)", "inset(0 0 -14px 0)"] },
+          { duration: 200, easing: "cubic-bezier(.2,.7,.2,1)" });
+    });
     document.addEventListener("click", function (e) { if (d.open && !d.contains(e.target)) d.removeAttribute("open"); });
     document.addEventListener("keydown", function (e) { if (e.key === "Escape") d.removeAttribute("open"); });
-    /* closed <details> content is display-locked, so its animation is never
-       recomputed and would only ever play once — restart it on each open */
-    d.addEventListener("toggle", function () {
-      if (!d.open) return;
-      var m = d.querySelector(".nom");
-      m.style.animation = "none";
-      void m.offsetWidth;
-      m.style.animation = "";
-    });
   })();
 </script>
 

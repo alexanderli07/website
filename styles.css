@@ -2316,7 +2316,9 @@
      so horizontally it still sits at its static position — under the trigger. */
   .nav-other summary{
     --pad-x: 9px;
-    display: inline-block; cursor: pointer; list-style: none;
+    /* block, NOT inline-block: an inline-block summary baseline-floats ~6px
+       below the blockified sibling links inside the stretched details box */
+    display: block; cursor: pointer; list-style: none;
     font-family: var(--mono); font-size: 10.5px; font-weight: 500;
     letter-spacing: .13em; text-transform: uppercase;
     color: var(--walnut); padding: 6px var(--pad-x) 6px; white-space: nowrap;
@@ -2347,25 +2349,32 @@
        0   6px 18px -12px rgba(36,26,15,.5);
     padding: 4px 0;
   }
-  /* unfolds from under the bar's rule — clipped drop + fade, one beat */
-  .nav-other[open] .nom{ animation: nomIn .2s cubic-bezier(.2,.7,.2,1) both; }
-  @keyframes nomIn{
-    from{ opacity: 0; transform: translateY(-8px); clip-path: inset(0 0 100% 0); }
-    to{   opacity: 1; transform: none;             clip-path: inset(0 0 -14px 0); }
-  }
+  /* The unfold itself is a Web Animations call in each page's nav script,
+     started synchronously at open — a CSS animation can't replay cleanly from
+     inside a <details>, whose closed content is display-locked (the late
+     restart painted one settled frame first and stuttered). */
   @media (prefers-reduced-motion: reduce){
-    .nav-other[open] .nom{ animation: none; }
     .nav-other summary::after{ transition: none; }
   }
   .nav-other .nom a{
+    position: relative;
     display: block; padding: 8px 14px 7px;
     font-family: var(--mono); font-size: 10px; font-weight: 500;
     letter-spacing: .13em; text-transform: uppercase;
     text-decoration: none; color: var(--walnut);
+    transition: color .2s ease;
   }
-  .nav-other .nom a:hover, .nav-other .nom a:focus-visible{
-    color: var(--paper); background: var(--walnut);
+  /* the same gesture as the bar's links: darken, and rule a red line in */
+  .nav-other .nom a::after{
+    content: "";
+    position: absolute; left: 14px; right: 14px; bottom: 4px;
+    height: 2px; background: var(--red);
+    transform: scaleX(0); transform-origin: left center;
+    transition: transform .26s cubic-bezier(.2,.7,.2,1);
   }
+  .nav-other .nom a:hover{ color: var(--ink); }
+  .nav-other .nom a:hover::after, .nav-other .nom a:focus-visible::after{ transform: scaleX(1); }
+  .nav-other .nom a:active{ color: var(--red); }
   @media (max-width: 720px){
     .nav-other summary{ --pad-x: 7px; font-size: 9.5px; padding: 4px var(--pad-x) 4px; letter-spacing: .08em; }
     /* the trigger sits far right in the scrolling index row here — pin the
