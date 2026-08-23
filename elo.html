@@ -29,7 +29,7 @@
 <!-- ?v= busts stale caches: the page and its stylesheet must arrive as a pair,
      or new markup renders with old rules (an unstyled nav menu, once). Bump it
      whenever an HTML change depends on a styles.css change. -->
-<link rel="stylesheet" href="styles.css?v=3" />
+<link rel="stylesheet" href="styles.css?v=4" />
 
 <!-- Same theme gate as every page, same key, before anything paints. -->
 <script>
@@ -1139,6 +1139,15 @@
     var d = document.getElementById("nav-other");
     document.addEventListener("click", function (e) { if (d.open && !d.contains(e.target)) d.removeAttribute("open"); });
     document.addEventListener("keydown", function (e) { if (e.key === "Escape") d.removeAttribute("open"); });
+    /* closed <details> content is display-locked, so its animation is never
+       recomputed and would only ever play once — restart it on each open */
+    d.addEventListener("toggle", function () {
+      if (!d.open) return;
+      var m = d.querySelector(".nom");
+      m.style.animation = "none";
+      void m.offsetWidth;
+      m.style.animation = "";
+    });
   })();
 </script>
 

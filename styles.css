@@ -2339,7 +2339,12 @@
     background: var(--paper);
     border: 1px solid var(--walnut);
     border-top: 0;   /* the bar's own bottom rule is the top line */
-    box-shadow: 3px 3px 0 rgba(var(--shade), .2);
+    /* the bar's own shadow recipe (0 6px 18px -12px), cast from the left,
+       right and bottom edges — never the top, where the menu meets the rule */
+    box-shadow:
+      -6px 6px 18px -12px rgba(36,26,15,.5),
+       6px 6px 18px -12px rgba(36,26,15,.5),
+       0   6px 18px -12px rgba(36,26,15,.5);
     padding: 4px 0;
   }
   /* unfolds from under the bar's rule — clipped drop + fade, one beat */
