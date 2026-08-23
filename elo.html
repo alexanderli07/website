@@ -44,14 +44,19 @@
      square and piece recipes (they are pinned literals there, not tokens —
      see the "board pieces are literal" note in styles.css). */
   .ge{
-    max-width: 1180px;
+    max-width: 1560px;
     margin: 0 auto;
-    padding: 100px 22px 40px;
-    /* the board size, like the front page's --board: capped by the viewport
-       HEIGHT (nav + clock bar + white clock row + paddings ≈ 220px of chrome)
-       and by the viewport WIDTH (rails + gaps ≈ 640px), so the whole arena
-       fits the page instead of running off it */
-    --geb: clamp(280px, min(100svh - 220px, 100vw - 640px), 560px);
+    padding: 70px 22px 28px;
+    /* the front page's --board formula, with this page's own chrome measured
+       in: 70px nav clearance + ~40px clock bar + ~40px white clock row ≈ 150px
+       of vertical chrome (home reserves 140 for its trays), same 660px width
+       reserve, same 260–900px range — so the board here is the same size as
+       the board on the front page, and still fits the viewport */
+    --geb: clamp(260px, min(100svh - 150px, 100vw - 660px), 900px);
+  }
+  @media (max-width: 720px){
+    /* the bar is two rows here (same breakpoint as the front page) */
+    .ge{ padding-top: 92px; }
   }
   .ge-stand{
     font-size: 17px; line-height: 1.55; font-style: italic;
