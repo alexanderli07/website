@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
 <title>Guess the Elo — Alexander Li</title>
-<meta name="description" content="Watch one real chess game — names and ratings sealed. Call the average Elo, see how far off you were, and climb the standings. A side game on alexanderli.dev." />
+<meta name="description" content="Watch one real chess game — names and ratings sealed. Call the average Elo and see how far off you were. A side game on alexanderli.dev." />
 <meta name="author" content="Alexander Li" />
 <meta name="color-scheme" content="light" />
 <meta name="theme-color" content="#f4ecd9" />
@@ -20,7 +20,7 @@
 <meta property="og:site_name" content="Alexander Li" />
 <meta property="og:url" content="https://alexanderli.dev/elo.html" />
 <meta property="og:title" content="Guess the Elo — Alexander Li" />
-<meta property="og:description" content="One real game, ratings sealed. Call the number, climb the standings." />
+<meta property="og:description" content="One real game, ratings sealed. Call the number." />
 <meta property="og:image" content="https://alexanderli.dev/assets/og-card.png" />
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -358,38 +358,6 @@
   .ge-facts b{ color: var(--ink); font-weight: 600; }
   .ge-facts .d-pos{ color: var(--red); }
 
-  /* ---------- the standings ---------- */
-  /* padding:0 kills styles.css's bare `section` padding (56px top) — the
-     margin here is the whole intended offset */
-  .ge-standings{ max-width: 720px; margin: 46px auto 0; padding: 0; }
-  .ge h2{
-    font-family: var(--serif); font-weight: 700; font-size: 24px;
-    margin: 0 0 4px;
-  }
-  .ge h2 .dot{ color: var(--red); }
-  .ge-rule{ border: 0; border-top: 1px dotted var(--walnut-3); margin: 10px 0 14px; }
-  .ge-tablewrap{ overflow-x: auto; }
-  .ge-lb{
-    border-collapse: collapse; width: 100%; min-width: 430px;
-    font-family: var(--mono); font-size: 11.5px;
-  }
-  .ge-lb th, .ge-lb td{
-    text-align: right; padding: 6px 10px;
-    border-bottom: 1px dotted var(--walnut-3);
-  }
-  .ge-lb th{
-    font-weight: 600; font-size: 9px; letter-spacing: .12em;
-    text-transform: uppercase; color: var(--walnut-2);
-    border-bottom: 1px solid var(--walnut-2);
-  }
-  .ge-lb th:nth-child(2), .ge-lb td:nth-child(2){ text-align: left; }
-  .ge-lb td:first-child{ color: var(--walnut-2); }
-  .ge-lb tr.me td{
-    font-weight: 600; color: var(--ink);
-    background: rgba(var(--hatch), .07);
-  }
-  .ge-lb tr.me td:first-child{ box-shadow: inset 3px 0 0 var(--red); }
-  .ge-lb .rt{ font-weight: 600; }
 
   /* ---------- sign the scoresheet (name dialog) ---------- */
   .ge-cover{
@@ -505,7 +473,7 @@
 
 <main class="ge" id="main">
 
-  <noscript><p class="ge-stand">This game needs JavaScript — the replay, the guessing and the standings are all live.</p></noscript>
+  <noscript><p class="ge-stand">This game needs JavaScript — the replay and the guessing are both live.</p></noscript>
 
   <!-- Black's clock, over the board column and above the arena's shared top line -->
   <div class="ge-clockbar">
@@ -588,22 +556,6 @@
     </aside>
   </div>
 
-  <!-- the standings -->
-  <section class="ge-standings" aria-labelledby="lb-title">
-    <h2 id="lb-title">Leaderboard<span class="dot">.</span></h2>
-    <hr class="ge-rule" />
-    <div class="ge-tablewrap">
-      <table class="ge-lb">
-        <thead>
-          <tr><th>#</th><th>name</th><th>rating</th><th>calls</th><th>avg off</th><th>best</th></tr>
-        </thead>
-        <tbody id="lb-body">
-          <tr><td colspan="6" style="text-align:center">&mdash;</td></tr>
-        </tbody>
-      </table>
-    </div>
-  </section>
-
 </main>
 
 <!-- the front page's footer, verbatim minus its game-state links -->
@@ -624,7 +576,7 @@
     </div>
     <h2 id="cover-h">Guess the Elo<span class="dot" style="color:var(--red)">.</span></h2>
     <p>One real game &mdash; no names, no ratings, just the moves and the real clocks.
-    Watch it, then call the players&rsquo; <b>average rating</b>. The standings remember.</p>
+    Watch it, then call the players&rsquo; <b>average rating</b>.</p>
     <ul class="ge-rules">
       <li><span>everyone starts at</span><b>1000</b></li>
       <li><span>dead-on call</span><b class="pos">+30</b></li>
@@ -632,7 +584,7 @@
       <li><span>600+ off</span><b>&minus;30</b></li>
     </ul>
     <input id="name-input" type="text" maxlength="20" placeholder="your name"
-           autocomplete="nickname" aria-label="Your name for the standings" />
+           autocomplete="nickname" aria-label="Your name for the scoresheet" />
     <p class="ge-err" id="name-err"></p>
     <button class="ge-btn" id="name-join" type="button">Take the pen &mdash; play</button>
   </div>
@@ -942,7 +894,7 @@
       $("guess-panel").hidden = true;
       $("reveal-panel").hidden = false;
       goto(state.replay.labels.length);
-      loadLeaderboard(); loadHistory();
+      loadHistory();
     }).catch(function (err) {
       /* "already guessed" = another tab under this name beat us to this game
          (or it vanished) — retrying the same id can never succeed, deal fresh */
@@ -956,33 +908,6 @@
     });
   }
 
-  function loadLeaderboard() {
-    return api("/api/leaderboard").then(function (rows) {
-      var body = $("lb-body");
-      body.textContent = "";
-      if (!rows.length) {
-        var tr0 = document.createElement("tr");
-        var td0 = document.createElement("td");
-        td0.colSpan = 6; td0.style.textAlign = "center";
-        td0.textContent = "no calls yet — the first name signs here";
-        tr0.appendChild(td0); body.appendChild(tr0);
-        return;
-      }
-      rows.forEach(function (p, i) {
-        var tr = document.createElement("tr");
-        if (p.name.toLowerCase() === state.name.toLowerCase()) tr.className = "me";
-        [i + 1, p.name, p.rating, p.games_played,
-         p.avg_err == null ? "—" : p.avg_err,
-         p.best_guess == null ? "—" : p.best_guess].forEach(function (v, col) {
-          var td = document.createElement("td");
-          if (col === 2) td.className = "rt";
-          td.textContent = v;
-          tr.appendChild(td);
-        });
-        body.appendChild(tr);
-      });
-    }).catch(function () {});
-  }
 
   function loadHistory() {
     return api("/api/history?player=" + encodeURIComponent(state.name)).then(function (rows) {
@@ -1072,7 +997,7 @@
     hideCover();
     if (!changed && state.game) return; /* reopened just to look — nothing to redo */
     loadGame().catch(function (err) { toast("Could not load a game: " + err.message); });
-    loadLeaderboard(); loadHistory();
+    loadHistory();
   }
   $("name-join").onclick = join;
   $("name-input").addEventListener("keydown", function (e) { if (e.key === "Enter") join(); });
@@ -1097,7 +1022,6 @@
 
   /* ---- boot ---- */
   renderBoard();
-  loadLeaderboard();
   if (state.name) {
     loadGame().catch(function (err) { toast("Could not load a game: " + err.message); });
     loadHistory();
