@@ -46,7 +46,7 @@
   .ge{
     max-width: 1180px;
     margin: 0 auto;
-    padding: 88px 22px 30px;
+    padding: 100px 22px 40px;
   }
   .ge-stand{
     font-size: 17px; line-height: 1.55; font-style: italic;
@@ -118,11 +118,29 @@
   .ge-hist .d-neg{ color: var(--walnut-2); font-weight: 600; }
   .ge-empty{ font-family: var(--mono); font-size: 10px; color: var(--walnut-2); letter-spacing: .04em; }
 
-  /* ---------- centre column: clocks + board + transport ---------- */
-  .ge-center{ display: flex; flex-direction: column; gap: 8px; min-width: 0; }
-  .ge-clockrow{
-    display: flex; justify-content: space-between; align-items: center; gap: 10px;
+  /* ---------- the clock bar ----------
+     Both clocks live in one strip ABOVE the arena, tracked to the same three
+     columns so they sit exactly over the board — that is what lets the board's
+     top edge line up with the rails beside it. */
+  .ge-clockbar{
+    display: grid;
+    grid-template-columns: minmax(0, 240px) minmax(280px, 560px) minmax(0, 300px);
+    gap: 22px;
+    justify-content: center;
+    margin: 0 0 18px;
   }
+  .ge-clocks{
+    grid-column: 2;
+    display: flex; justify-content: space-between; align-items: center; gap: 10px;
+    padding: 10px 12px;
+    border: 1px solid var(--walnut-3);
+    background: rgba(var(--linen), .5);
+  }
+  .ge-cside{ display: flex; align-items: center; gap: 10px; min-width: 0; }
+  .ge-cside .elo:first-child{ margin-left: 0; margin-right: .5em; }
+
+  /* ---------- centre column: board + transport ---------- */
+  .ge-center{ display: flex; flex-direction: column; gap: 8px; min-width: 0; }
   .ge-side{
     font-family: var(--mono); font-size: 10px; font-weight: 600;
     letter-spacing: .14em; text-transform: uppercase; color: var(--walnut-2);
@@ -420,7 +438,8 @@
 
   /* ---------- responsive: stack the arena ---------- */
   @media (max-width: 1000px){
-    .ge-arena{ grid-template-columns: minmax(0, 560px); justify-content: center; }
+    .ge-arena, .ge-clockbar{ grid-template-columns: minmax(0, 560px); justify-content: center; }
+    .ge-clocks{ grid-column: 1; }
     .ge-rail-l{ order: 3; }
     .ge-center{ order: 1; }
     .ge-rail-r{ order: 2; }
@@ -472,6 +491,20 @@
 
   <noscript><p class="ge-stand">This game needs JavaScript — the replay, the guessing and the standings are all live.</p></noscript>
 
+  <!-- the clocks, over the board column — Black on the left, White on the right -->
+  <div class="ge-clockbar">
+    <div class="ge-clocks">
+      <div class="ge-cside">
+        <span class="ge-side"><span class="who">Black</span><span class="elo" id="elo-b">????</span></span>
+        <span class="ge-clock" id="clock-b">&ndash;:&ndash;&ndash;</span>
+      </div>
+      <div class="ge-cside">
+        <span class="ge-clock" id="clock-w">&ndash;:&ndash;&ndash;</span>
+        <span class="ge-side"><span class="elo" id="elo-w">????</span><span class="who">White</span></span>
+      </div>
+    </div>
+  </div>
+
   <div class="ge-arena">
 
     <!-- left rail: the wager + your standing -->
@@ -501,19 +534,11 @@
       </div>
     </aside>
 
-    <!-- centre: clocks + board + transport -->
+    <!-- centre: board + transport (the clocks live in the bar above) -->
     <div class="ge-center">
-      <div class="ge-clockrow">
-        <span class="ge-side"><span class="who">Black</span><span class="elo" id="elo-b">????</span></span>
-        <span class="ge-clock" id="clock-b">&ndash;:&ndash;&ndash;</span>
-      </div>
       <!-- id is NOT "board" — styles.css targets #board with ID specificity
            and would capture this element's frame, shadow and background -->
       <div class="ge-board" id="geboard" role="img" aria-label="Replay board"></div>
-      <div class="ge-clockrow">
-        <span class="ge-side"><span class="who">White</span><span class="elo" id="elo-w">????</span></span>
-        <span class="ge-clock" id="clock-w">&ndash;:&ndash;&ndash;</span>
-      </div>
       <div class="ge-transport" role="group" aria-label="Replay controls">
         <button class="ge-tbtn" id="t-start" type="button" title="Start (Home)">&#8676;</button>
         <button class="ge-tbtn" id="t-prev" type="button" title="Back one (&larr;)">&#8249;</button>
