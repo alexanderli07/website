@@ -26,7 +26,10 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&family=Playfair+Display:ital,wght@0,500;0,600;0,700;0,900;1,500;1,700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css" />
+<!-- ?v= busts stale caches: the page and its stylesheet must arrive as a pair,
+     or new markup renders with old rules (an unstyled nav menu, once). Bump it
+     whenever an HTML change depends on a styles.css change. -->
+<link rel="stylesheet" href="styles.css?v=2" />
 
 <!-- Same theme gate as the front page, same key, before anything paints.
      There is no curtain here, so only the theme half is needed. -->
