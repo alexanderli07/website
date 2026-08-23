@@ -255,7 +255,13 @@
     <a class="nav-jump" href="/#projects">Projects</a>
     <a class="nav-jump" href="/#experience">Experiences</a>
     <a class="nav-jump" href="/#resume">R&eacute;sum&eacute;</a>
-    <a class="nav-jump" href="elo.html">Guess the Elo<sup class="nv">new</sup></a>
+    <details class="nav-other" id="nav-other">
+      <summary>Other</summary>
+      <div class="nom">
+        <a href="elo.html">Guess the Elo<sup class="nv">new</sup></a>
+        <a href="engine.html">The engine</a>
+      </div>
+    </details>
   </div>
 
   <div class="nav-right">
@@ -602,6 +608,15 @@
       paint();
     });
     paint();
+  })();
+</script>
+
+<!-- the "Other" nav menu closes on outside click / Escape -->
+<script>
+  (function () {
+    var d = document.getElementById("nav-other");
+    document.addEventListener("click", function (e) { if (d.open && !d.contains(e.target)) d.removeAttribute("open"); });
+    document.addEventListener("keydown", function (e) { if (e.key === "Escape") d.removeAttribute("open"); });
   })();
 </script>
 

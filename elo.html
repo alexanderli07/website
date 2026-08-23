@@ -46,13 +46,13 @@
   .ge{
     max-width: 1560px;
     margin: 0 auto;
-    padding: 70px 22px 28px;
-    /* the front page's --board formula, with this page's own chrome measured
-       in: 70px nav clearance + ~40px clock bar + ~40px white clock row ≈ 150px
-       of vertical chrome (home reserves 140 for its trays), same 660px width
-       reserve, same 260–900px range — so the board here is the same size as
-       the board on the front page, and still fits the viewport */
-    --geb: clamp(260px, min(100svh - 150px, 100vw - 660px), 900px);
+    padding: 60px 22px 28px;
+    /* the front page's --board formula VERBATIM — same 140px height reserve,
+       same 660px width reserve, same 260–900px range — so this board computes
+       the exact same size as the front board at any window. This page's own
+       chrome (62px nav clearance + clock bar + white clock row) is trimmed to
+       fit inside that same 140px. */
+    --geb: clamp(260px, min(100svh - 140px, 100vw - 660px), 900px);
   }
   @media (max-width: 720px){
     /* the bar is two rows here (same breakpoint as the front page) */
@@ -68,7 +68,9 @@
     display: grid;
     /* the middle track IS the board variable — board, clock strip and rails
        all key off the same width */
-    grid-template-columns: minmax(0, 240px) var(--geb) minmax(0, 300px);
+    /* 290/300 rails — the front arena's exact tracks, so the board lands in
+       the same spot on the page */
+    grid-template-columns: minmax(0, 290px) var(--geb) minmax(0, 300px);
     gap: 22px;
     justify-content: center;
     align-items: start;
@@ -137,10 +139,10 @@
      under the board, like a board seat. */
   .ge-clockbar{
     display: grid;
-    grid-template-columns: minmax(0, 240px) var(--geb) minmax(0, 300px);
+    grid-template-columns: minmax(0, 290px) var(--geb) minmax(0, 300px);
     gap: 22px;
     justify-content: center;
-    margin: 0 0 10px;
+    margin: 0 0 6px;
   }
   .ge-clockbar .ge-clockrow{ grid-column: 2; }
   .ge-clockrow{
@@ -437,24 +439,6 @@
   }
   .ge-toast.show{ opacity: 1; }
 
-  /* ---------- foot ---------- */
-  .ge-foot{
-    margin: 44px 0 0; padding: 22px 0 0;
-    border-top: 3px double var(--ink);
-    text-align: center;
-    font-family: var(--mono); font-size: 10px; letter-spacing: .1em;
-    color: var(--walnut-2);
-  }
-  /* styles.css's colophon `footer a` rules apply here additively (this IS a
-     footer element) — kill its border-bottom underline and red wipe so the
-     links carry ONE line, and out-specify its hover colour. */
-  .ge-foot a{
-    color: var(--red); text-decoration: underline; text-underline-offset: 3px;
-    border-bottom: 0;
-  }
-  .ge-foot a::after{ display: none; }
-  .ge-foot a:hover{ color: var(--red); text-decoration-color: var(--red); }
-
   /* ---------- responsive: stack the arena ---------- */
   @media (max-width: 1000px){
     .ge-arena, .ge-clockbar{ grid-template-columns: minmax(0, 560px); justify-content: center; }
@@ -493,7 +477,13 @@
     <a class="nav-jump" href="/#projects">Projects</a>
     <a class="nav-jump" href="/#experience">Experiences</a>
     <a class="nav-jump" href="/#resume">R&eacute;sum&eacute;</a>
-    <a class="nav-jump" href="engine.html">The engine</a>
+    <details class="nav-other" id="nav-other">
+      <summary>Other</summary>
+      <div class="nom">
+        <a href="elo.html">Guess the Elo<sup class="nv">new</sup></a>
+        <a href="engine.html">The engine</a>
+      </div>
+    </details>
   </div>
 
   <div class="nav-right">
@@ -612,12 +602,12 @@
     </div>
   </section>
 
-  <footer class="ge-foot">
-    <p>games: lichess open database &middot; ratings sealed server-side &middot; one call per game</p>
-    <p style="margin-top:8px"><a href="/#board-arena">&larr; back to the board</a> &middot; <a href="engine.html">how the bot works</a></p>
-  </footer>
-
 </main>
+
+<!-- the front page's footer, verbatim minus its game-state links -->
+<footer>
+  GAMBIT <span class="r">&middot;</span> made with <span class="r" aria-hidden="true">&hearts;</span><span class="vh">love</span> by Alex
+</footer>
 
 <!-- the rules / entry dialog — same pattern as the front page's cover: shown
      on the first visit, reopenable any time from the Rules button in the bar -->
@@ -1045,9 +1035,10 @@
   };
 
   document.addEventListener("keydown", function (e) {
-    /* BUTTON exempt too: Space on a focused button must activate it, not
-       hijack the replay (preventDefault on keydown suppresses activation) */
-    if (e.target.tagName === "INPUT" || e.target.tagName === "BUTTON" || !$("cover").hidden) return;
+    /* BUTTON and SUMMARY exempt too: Space on a focused control must activate
+       it, not hijack the replay (preventDefault on keydown suppresses it) */
+    if (e.target.tagName === "INPUT" || e.target.tagName === "BUTTON" ||
+        e.target.tagName === "SUMMARY" || !$("cover").hidden) return;
     if (e.key === "ArrowLeft") { pause(); goto(state.ply - 1); }
     else if (e.key === "ArrowRight") { pause(); goto(state.ply + 1); }
     else if (e.key === " ") { e.preventDefault(); state.playing ? pause() : play(); }
@@ -1136,6 +1127,15 @@
       paint();
     });
     paint();
+  })();
+</script>
+
+<!-- the "Other" nav menu closes on outside click / Escape -->
+<script>
+  (function () {
+    var d = document.getElementById("nav-other");
+    document.addEventListener("click", function (e) { if (d.open && !d.contains(e.target)) d.removeAttribute("open"); });
+    document.addEventListener("keydown", function (e) { if (e.key === "Escape") d.removeAttribute("open"); });
   })();
 </script>
 

@@ -2298,12 +2298,56 @@
     transition: background .18s ease, border-color .18s ease;
   }
   .ep-card:hover .ep-cta{ background: var(--red); border-color: var(--red); }
-  /* the nav's little "new" flag on the Guess the Elo link */
-  .nav-jump .nv{
+  /* the little red "new" flag on the Guess the Elo link */
+  .nav-jump .nv, .nom .nv{
     color: var(--red);
     font-family: var(--mono); font-size: 7px; font-weight: 700;
     letter-spacing: .1em; text-transform: uppercase;
     vertical-align: super; margin-left: 3px;
+  }
+  /* ---------- the "Other" nav menu (the side pages: Guess the Elo, The engine)
+     A <details>, so it opens without script; each page adds the few lines that
+     close it on outside click / Escape. The summary is dressed exactly like a
+     .nav-links link. */
+  .nav-other{ position: relative; }
+  .nav-other summary{
+    --pad-x: 9px;
+    display: inline-block; cursor: pointer; list-style: none;
+    font-family: var(--mono); font-size: 10.5px; font-weight: 500;
+    letter-spacing: .13em; text-transform: uppercase;
+    color: var(--walnut); padding: 6px var(--pad-x) 6px; white-space: nowrap;
+    transition: color .2s ease;
+    user-select: none;
+  }
+  .nav-other summary::-webkit-details-marker{ display: none; }
+  .nav-other summary::after{
+    content: "\25BE";
+    font-size: 8px; margin-left: 5px; vertical-align: 1px;
+    color: var(--red);
+  }
+  .nav-other summary:hover, .nav-other[open] summary{ color: var(--ink); }
+  .nav-other .nom{
+    position: absolute; top: calc(100% + 6px); left: 0; z-index: 95;
+    min-width: 160px;
+    background: var(--paper);
+    border: 1px solid var(--walnut);
+    box-shadow: 3px 3px 0 rgba(var(--shade), .2);
+    padding: 4px 0;
+  }
+  .nav-other .nom a{
+    display: block; padding: 8px 14px 7px;
+    font-family: var(--mono); font-size: 10px; font-weight: 500;
+    letter-spacing: .13em; text-transform: uppercase;
+    text-decoration: none; color: var(--walnut);
+  }
+  .nav-other .nom a:hover, .nav-other .nom a:focus-visible{
+    color: var(--paper); background: var(--walnut);
+  }
+  @media (max-width: 720px){
+    .nav-other summary{ --pad-x: 7px; font-size: 9.5px; padding: 4px var(--pad-x) 4px; letter-spacing: .08em; }
+    /* the mobile bar's index row is an overflow-x scroller — an absolute menu
+       would be clipped inside it, so the menu pins under the two-row bar */
+    .nav-other .nom{ position: fixed; top: 74px; left: 12px; }
   }
   @media print{ .elo-promo{ display: none; } }
 
