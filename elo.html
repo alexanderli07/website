@@ -380,19 +380,20 @@
   }
   .ge-cover[hidden]{ display: none; }
   .ge-card{
+    position: relative;   /* the .cover-x pins to this box */
     background: var(--paper);
     border: 3px double var(--ink);
     box-shadow: 6px 6px 0 rgba(var(--shade), .25);
     padding: 22px 24px 20px;
-    max-width: 380px; width: 100%;
+    max-width: 400px; width: 100%;
   }
-  .ge-card .ck{
-    display: block; font-family: var(--mono); font-size: 9px; font-weight: 600;
-    letter-spacing: .3em; text-transform: uppercase; color: var(--red);
-    margin: 0 0 8px;
-  }
+  /* .sc-kicker and .cover-x come straight from styles.css — the front page's
+     own scoresheet chrome, reused verbatim */
+  .ge-card .sc-kicker{ padding-right: 24px; margin: 0 0 12px; }
   .ge-card h2{ margin: 0 0 8px; font-size: 26px; }
-  .ge-card p{ font-size: 14px; line-height: 1.55; margin: 0 0 14px; }
+  .ge-card p{ font-size: 14px; line-height: 1.55; margin: 0 0 12px; }
+  .ge-card p b{ font-weight: 700; }
+  .ge-card .ge-rules{ margin: 0 0 16px; }
   .ge-card input{
     display: block; width: 100%;
     font-family: var(--mono); font-size: 15px; font-weight: 600;
@@ -473,6 +474,7 @@
   </div>
 
   <div class="nav-right">
+    <button class="nav-btn" id="btn-rules" type="button" aria-haspopup="dialog">Rules</button>
     <button class="nav-btn side-btn" id="btn-side" type="button" aria-pressed="false" aria-label="Dark mode">
       <svg class="sb-moon" aria-hidden="true" viewBox="0 0 24 24" focusable="false">
         <path fill="currentColor" d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/>
@@ -500,18 +502,9 @@
 
   <div class="ge-arena">
 
-    <!-- left rail: the wager + your standing -->
-    <aside class="ge-rail-l" aria-label="Scoring and your standing">
-      <div class="ge-rail">
-        <span class="ge-rt">The wager</span>
-        <ul class="ge-rules">
-          <li><span>everyone starts at</span><b>1000</b></li>
-          <li><span>dead-on call</span><b class="pos">+30</b></li>
-          <li><span>300 off breaks even</span><b>&plusmn;0</b></li>
-          <li><span>600+ off</span><b>&minus;30</b></li>
-          <li><span>each game</span><b>one guess</b></li>
-        </ul>
-      </div>
+    <!-- left rail: your standing + recent calls (the wager lives in the
+         rules dialog, same as the front page keeps its rules) -->
+    <aside class="ge-rail-l" aria-label="Your standing">
       <div class="ge-rail">
         <span class="ge-rt">Your standing</span>
         <ul class="ge-me">
@@ -610,13 +603,27 @@
 
 </main>
 
-<!-- sign the scoresheet -->
+<!-- the rules / entry dialog — same pattern as the front page's cover: shown
+     on the first visit, reopenable any time from the Rules button in the bar -->
 <div class="ge-cover" id="cover" role="dialog" aria-modal="true" aria-labelledby="cover-h" hidden>
   <div class="ge-card">
-    <span class="ck">Official entry form</span>
-    <h2 id="cover-h">Sign the scoresheet<span class="dot" style="color:var(--red)">.</span></h2>
-    <p>A name for the standings &mdash; that&rsquo;s the whole form. Your rating starts at 1000
-    and every call moves it.</p>
+    <!-- the X only exists once a name is signed — a first-time visitor has
+         no game to go back to -->
+    <button class="cover-x" id="cover-x" type="button" aria-label="Close the rules" hidden>&times;</button>
+    <div class="sc-kicker">
+      <span>Official wager sheet</span>
+      <span class="red">Call it, climb</span>
+    </div>
+    <h2 id="cover-h">Guess the Elo<span class="dot" style="color:var(--red)">.</span></h2>
+    <p>One real game &mdash; no names, no ratings, just the moves and the real clocks.
+    Watch it, then call the players&rsquo; <b>average rating</b>. The standings remember.</p>
+    <ul class="ge-rules">
+      <li><span>everyone starts at</span><b>1000</b></li>
+      <li><span>dead-on call</span><b class="pos">+30</b></li>
+      <li><span>300 off breaks even</span><b>&plusmn;0</b></li>
+      <li><span>600+ off</span><b>&minus;30</b></li>
+      <li><span>each game</span><b>one guess</b></li>
+    </ul>
     <input id="name-input" type="text" maxlength="20" placeholder="your name"
            autocomplete="nickname" aria-label="Your name for the standings" />
     <p class="ge-err" id="name-err"></p>
@@ -1057,6 +1064,7 @@
   function showCover() {
     $("name-input").value = state.name;
     $("name-err").textContent = "";
+    $("cover-x").hidden = !state.name;
     $("cover").hidden = false;
     $("name-input").focus();
   }
@@ -1085,6 +1093,8 @@
   $("name-join").onclick = join;
   $("name-input").addEventListener("keydown", function (e) { if (e.key === "Enter") join(); });
   $("me-name").onclick = showCover;
+  $("btn-rules").onclick = showCover;
+  $("cover-x").onclick = hideCover;
   /* aria-modal promises the background is inert — keep Tab inside the card,
      and let Escape / a backdrop click cancel once a name already exists
      (a first-time visitor has nothing to cancel back to) */
@@ -1095,7 +1105,7 @@
     if ($("cover").hidden) return;
     if (e.key === "Escape" && state.name) { hideCover(); return; }
     if (e.key === "Tab") {
-      var stops = [$("name-input"), $("name-join")];
+      var stops = [$("cover-x"), $("name-input"), $("name-join")].filter(function (el) { return !el.hidden; });
       var i = stops.indexOf(document.activeElement);
       e.preventDefault();
       stops[(i + (e.shiftKey ? -1 : 1) + stops.length) % stops.length].focus();
