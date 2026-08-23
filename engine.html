@@ -189,11 +189,11 @@
     color: var(--red); font-family: var(--serif); font-weight: 700;
   }
 
-  /* Sign-off — a proper letterpress tailpiece: everything on the centre axis,
-     the knight (the piece that does the deed in the intro) as the ornament. */
+  /* Sign-off — the knight (the piece that does the deed in the intro) over
+     the way back. No rule of its own: the site footer right below carries
+     the double rule, same as every page. */
   .eg-foot{
-    margin: 52px 0 0; padding: 26px 0 0;
-    border-top: 3px double var(--ink);
+    margin: 52px 0 8px;
     text-align: center;
   }
   .eg-foot::before{
@@ -203,11 +203,6 @@
     font-size: 22px; line-height: 1;
     color: var(--red);
     margin: 0 0 16px;
-  }
-  .eg-foot p{ margin: 0 auto 8px; max-width: 54ch; }
-  .eg-foot .fx{
-    font-family: var(--mono); font-size: 10px; letter-spacing: .1em;
-    color: var(--walnut-2);
   }
   /* Same press as every button on the front page: hard offset shadow, the
      lift on hover, the push-in on click. No rest-state transform on purpose —
@@ -577,11 +572,18 @@
     </p>
   </section>
 
-  <footer class="eg-foot">
+  <!-- a div, NOT a footer element — styles.css's colophon rules target bare
+       `footer`, and the real one follows right below -->
+  <div class="eg-foot">
     <a class="eg-back" href="/#board-arena"><span class="ar" aria-hidden="true">&larr;</span>Back to the board</a>
-  </footer>
+  </div>
 
 </main>
+
+<!-- the front page's footer, verbatim minus its game-state links -->
+<footer>
+  GAMBIT <span class="r">&middot;</span> made with <span class="r" aria-hidden="true">&hearts;</span><span class="vh">love</span> by Alex
+</footer>
 
 <!-- The theme chip, standalone. The front page's app.js owns the full swap
      (palette AND seat); here there is no board, so this only flips the
