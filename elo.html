@@ -61,17 +61,22 @@
     justify-content: center;
     align-items: start;
   }
+  /* The rails wear the front page's exact rail dress: walnut border, linen
+     fill, hard offset shadow — and each section leads with the same walnut
+     title band (paper text, full bleed via negative margins). */
   .ge-rail{
-    border: 1px solid var(--walnut-3);
-    padding: 12px 14px;
-    background: rgba(var(--linen), .5);
+    border: 1px solid var(--walnut);
+    background: rgba(var(--linen), .62);
+    box-shadow: 3px 3px 0 rgba(var(--shade), .16);
+    padding: 0 12px 12px;
   }
   .ge-rail + .ge-rail{ margin-top: 16px; }
   .ge-rt{
     display: block;
-    font-family: var(--mono); font-size: 9px; font-weight: 600;
-    letter-spacing: .26em; text-transform: uppercase;
-    color: var(--red); margin: 0 0 8px;
+    margin: 0 -12px 10px; padding: 7px 12px;
+    font-family: var(--mono); font-size: 9.5px; font-weight: 600;
+    letter-spacing: .24em; text-transform: uppercase;
+    color: var(--paper); background: var(--walnut);
   }
   .ge-rail p{ font-size: 13.5px; line-height: 1.5; margin: 0 0 8px; }
   .ge-rules{ list-style: none; margin: 0; padding: 0; }
@@ -145,9 +150,13 @@
     grid-template-columns: repeat(8, minmax(0, 1fr));
     grid-template-rows: repeat(8, minmax(0, 1fr));
     width: 100%; aspect-ratio: 1;
+    /* the front board's frame, verbatim: rule, double outline, soft drop —
+       and the same conic pre-paint so the shell is a board before JS runs */
     border: 2px solid var(--walnut);
-    outline: 1px solid rgba(var(--hatch), .25);
-    outline-offset: 3px;
+    outline: 3px double var(--walnut); outline-offset: 3px;
+    box-shadow: 0 14px 34px -14px rgba(36,26,15,.4);
+    background-image: repeating-conic-gradient(#c8a878 0 25%, #f3e8cf 0 50%);
+    background-size: 25% 25%;
     container-type: inline-size;
   }
   .ge-sq{ position: relative; display: flex; align-items: center; justify-content: center; }
@@ -182,6 +191,9 @@
   }
   .ge-coord.f{ right: 2px; bottom: 1px; }
   .ge-coord.r{ left: 2px; top: 1px; }
+  html[data-theme="dark"] .ge-board{
+    background-image: repeating-conic-gradient(#48341e 0 25%, #7b6040 0 50%);
+  }
   html[data-theme="dark"] .ge-sq.l{ background: #7b6040; }
   html[data-theme="dark"] .ge-sq.d{ background: #48341e; }
   html[data-theme="dark"] .ge-pc.b{
@@ -504,6 +516,7 @@
         </div>
 
         <div class="ge-guess ge-reveal" id="reveal-panel" hidden>
+          <span class="ge-rt">The verdict</span>
           <div class="ge-verdict">
             <span class="vt">The ratings, unsealed</span>
             <span class="vn" id="r-actual">&mdash;</span>
