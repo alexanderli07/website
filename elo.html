@@ -47,6 +47,11 @@
     max-width: 1180px;
     margin: 0 auto;
     padding: 100px 22px 40px;
+    /* the board size, like the front page's --board: capped by the viewport
+       HEIGHT (nav + clock bar + white clock row + paddings ≈ 220px of chrome)
+       and by the viewport WIDTH (rails + gaps ≈ 640px), so the whole arena
+       fits the page instead of running off it */
+    --geb: clamp(280px, min(100svh - 220px, 100vw - 640px), 560px);
   }
   .ge-stand{
     font-size: 17px; line-height: 1.55; font-style: italic;
@@ -56,10 +61,26 @@
   /* ---------- the arena: rail / board / scoresheet ---------- */
   .ge-arena{
     display: grid;
-    grid-template-columns: minmax(0, 240px) minmax(280px, 560px) minmax(0, 300px);
+    /* the middle track IS the board variable — board, clock strip and rails
+       all key off the same width */
+    grid-template-columns: minmax(0, 240px) var(--geb) minmax(0, 300px);
     gap: 22px;
     justify-content: center;
     align-items: start;
+  }
+  /* rails share the board's height; their long lists scroll inside */
+  .ge-rail-l, .ge-rail-r{
+    display: flex; flex-direction: column;
+    height: var(--geb); min-width: 0;
+  }
+  .ge-rail-l .ge-rail:last-child{
+    flex: 1; min-height: 0;
+    display: flex; flex-direction: column;
+  }
+  .ge-hist{ flex: 1; min-height: 0; overflow-y: auto; }
+  .ge-rail-r .ge-rail{
+    flex: 1; min-height: 0;
+    display: flex; flex-direction: column;
   }
   /* The rails wear the front page's exact rail dress: walnut border, linen
      fill, hard offset shadow — and each section leads with the same walnut
@@ -111,7 +132,7 @@
      under the board, like a board seat. */
   .ge-clockbar{
     display: grid;
-    grid-template-columns: minmax(0, 240px) minmax(280px, 560px) minmax(0, 300px);
+    grid-template-columns: minmax(0, 240px) var(--geb) minmax(0, 300px);
     gap: 22px;
     justify-content: center;
     margin: 0 0 10px;
@@ -236,7 +257,7 @@
        without it the auto-scroll math reads page coordinates and pins the
        sheet to its bottom from the first move. */
     position: relative;
-    height: 218px; overflow-y: auto;
+    flex: 1; min-height: 0; overflow-y: auto;
     margin: 8px 0 0;
     font-family: var(--mono); font-size: 11px;
   }
@@ -433,11 +454,14 @@
   @media (max-width: 1000px){
     .ge-arena, .ge-clockbar{ grid-template-columns: minmax(0, 560px); justify-content: center; }
     .ge-clockbar .ge-clockrow{ grid-column: 1; }
-    /* stacked: board first, then the guess (the point of the page), then the log */
+    /* stacked: board first, then the guess (the point of the page), then the log —
+       and the rails go back to natural height (nothing beside them to match) */
     .ge-center{ order: 1; }
     .ge-rail-l{ order: 2; }
     .ge-rail-r{ order: 3; }
-    .ge-moves{ height: 150px; }
+    .ge-rail-l, .ge-rail-r{ height: auto; }
+    .ge-moves{ flex: none; height: 150px; }
+    .ge-hist{ flex: none; max-height: 150px; }
   }
   @media (prefers-reduced-motion: reduce){
     .ge-btn, .ge-tbtn{ transition: none; }
