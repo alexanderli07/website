@@ -770,6 +770,20 @@
                 { label: "4×", ms: 400 }, { label: "8×", ms: 200 }];
   var NAME_RE = /^\w[\w .-]{0,19}$/;
   var NAME_KEY = "gambit-elo-name";
+  /* The name's claim: a random token this browser generated once. The Worker
+     stores it against the name on first play; from then on only requests
+     carrying it may play as that name — so nobody on another device can sit
+     down at your name. Lost storage = lost claim (accepted trade-off). */
+  var SECRET_KEY = "gambit-elo-secret";
+  var secret = "";
+  try {
+    secret = localStorage.getItem(SECRET_KEY) || "";
+    if (!secret) {
+      secret = (window.crypto && crypto.randomUUID) ? crypto.randomUUID()
+        : "s-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 12);
+      localStorage.setItem(SECRET_KEY, secret);
+    }
+  } catch (e) {}
 
   var state = {
     name: "",
@@ -943,7 +957,7 @@
     $("guess-panel").hidden = false;
     state.guessed = false;
 
-    return api("/api/game?player=" + encodeURIComponent(state.name)).then(function (g) {
+    return api("/api/game?player=" + encodeURIComponent(state.name) + "&secret=" + encodeURIComponent(secret)).then(function (g) {
       if (g.done) {
         /* nothing left to guess — clear the table rather than leaving the
            last game's final position sitting there looking sealed */
@@ -986,7 +1000,7 @@
     api("/api/guess", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ player: state.name, gameId: state.game.id, guess: guess }),
+      body: JSON.stringify({ player: state.name, gameId: state.game.id, guess: guess, secret: secret }),
     }).then(function (r) {
       state.guessed = true;
       $("elo-w").textContent = r.whiteElo;
@@ -1004,6 +1018,7 @@
       goto(state.replay.labels.length);
       loadHistory();
     }).catch(function (err) {
+      if (/name taken/.test(err.message)) return nameTaken();
       /* "already guessed" = another tab under this name beat us to this game
          (or it vanished) — retrying the same id can never succeed, deal fresh */
       if (/already guessed|no such game/.test(err.message)) {
@@ -1018,7 +1033,7 @@
 
 
   function loadHistory() {
-    return api("/api/history?player=" + encodeURIComponent(state.name)).then(function (rows) {
+    return api("/api/history?player=" + encodeURIComponent(state.name) + "&secret=" + encodeURIComponent(secret)).then(function (rows) {
       var list = $("hist");
       list.textContent = "";
       if (!rows.length) {
@@ -1104,8 +1119,16 @@
     try { localStorage.setItem(NAME_KEY, name); } catch (e) {}
     hideCover();
     if (!changed && state.game) return; /* reopened just to look — nothing to redo */
-    loadGame().catch(function (err) { toast("Could not load a game: " + err.message); });
+    loadGame().catch(function (err) {
+      if (/name taken/.test(err.message)) return nameTaken();
+      toast("Could not load a game: " + err.message);
+    });
     loadHistory();
+  }
+  /* someone else's browser holds this name's claim — back to the pen */
+  function nameTaken() {
+    showCover();
+    $("name-err").textContent = "that name is already claimed on another device — pick a different one.";
   }
   $("name-join").onclick = join;
   $("name-input").addEventListener("keydown", function (e) { if (e.key === "Enter") join(); });
@@ -1131,7 +1154,10 @@
   /* ---- boot ---- */
   renderBoard();
   if (state.name) {
-    loadGame().catch(function (err) { toast("Could not load a game: " + err.message); });
+    loadGame().catch(function (err) {
+      if (/name taken/.test(err.message)) return nameTaken();
+      toast("Could not load a game: " + err.message);
+    });
     loadHistory();
   } else {
     showCover();
