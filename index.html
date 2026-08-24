@@ -44,7 +44,7 @@
 <!-- ?v= busts stale caches: the page and its stylesheet must arrive as a pair,
      or new markup renders with old rules (an unstyled nav menu, once). Bump it
      whenever an HTML change depends on a styles.css change. -->
-<link rel="stylesheet" href="styles.css?v=7" />
+<link rel="stylesheet" href="styles.css?v=8" />
 
 <!-- With scripting off, the <noscript> block in the body carries the real
      content — but the shell around it would still paint: a nav whose buttons do
@@ -588,21 +588,25 @@
     function openMenu() {
       d.setAttribute("open", "");
       if (!noMotion())
-        m.animate(
-          { opacity: [0, 1], transform: ["translateY(-8px)", "none"],
-            clipPath: ["inset(0 0 100% 0)", "inset(0 0 -14px 0)"] },
-          { duration: 200, easing: EASE });
+        try {
+          m.animate(
+            { opacity: [0, 1], transform: ["translateY(-8px)", "none"],
+              clipPath: ["inset(0 0 100% 0)", "inset(0 0 -14px 0)"] },
+            { duration: 200, easing: EASE });
+        } catch (err) {}
     }
     function closeMenu() {
       if (!d.open || closing) return;
       if (noMotion()) { d.removeAttribute("open"); return; }
       closing = true;
       var done = function () { if (closing) { closing = false; d.removeAttribute("open"); } };
-      var a = m.animate(
-        { opacity: [1, 0], transform: ["none", "translateY(-8px)"],
-          clipPath: ["inset(0 0 -14px 0)", "inset(0 0 100% 0)"] },
-        { duration: 160, easing: EASE });
-      a.onfinish = a.oncancel = done;
+      try {
+        var a = m.animate(
+          { opacity: [1, 0], transform: ["none", "translateY(-8px)"],
+            clipPath: ["inset(0 0 -14px 0)", "inset(0 0 100% 0)"] },
+          { duration: 160, easing: EASE });
+        a.onfinish = a.oncancel = done;
+      } catch (err) { done(); return; }
       setTimeout(done, 280);   /* a hidden tab pauses animations — never strand it open */
     }
     sum.addEventListener("click", function (e) {

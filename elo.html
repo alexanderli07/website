@@ -29,7 +29,10 @@
 <!-- ?v= busts stale caches: the page and its stylesheet must arrive as a pair,
      or new markup renders with old rules (an unstyled nav menu, once). Bump it
      whenever an HTML change depends on a styles.css change. -->
-<link rel="stylesheet" href="styles.css?v=7" />
+<link rel="stylesheet" href="styles.css?v=8" />
+<noscript><style>
+  .ge-clockbar, .ge-arena, .ge-cover, .ge-toast{ display: none !important; }
+</style></noscript>
 
 <!-- Same theme gate as every page, same key, before anything paints. -->
 <script>
@@ -447,7 +450,7 @@
     .ge-btn, .ge-tbtn{ transition: none; }
   }
   @media print{
-    .ge-cover, .ge-toast, .ge-transport{ display: none !important; }
+    .ge-cover, .ge-toast, .ge-transport, #guess-panel, #g-next{ display: none !important; }
     .ge{ padding-top: 0; }
     /* styles.css re-pins the tokens to light for print, but these literals
        would survive it — re-pin the board too */
@@ -552,7 +555,7 @@
     <details class="nav-other" id="nav-other">
       <summary><span class="lbl">Other</span></summary>
       <div class="nom">
-        <a href="elo.html"><span class="lbl">Guess the Elo</span><sup class="nv">new</sup></a>
+        <span class="nom-here"><span class="lbl">Guess the Elo</span><sup class="nv">new</sup></span>
         <a href="engine.html"><span class="lbl">The engine</span></a>
       </div>
     </details>
@@ -677,7 +680,8 @@
       <span class="red">Call it, climb</span>
     </div>
     <h2 id="cover-h">Guess the Elo<span class="dot" style="color:var(--red)">.</span></h2>
-    <p>One real game &mdash; no names, no ratings, just the moves and the real clocks.
+    <p>Your name belongs to this browser once you play &mdash; nobody else can take it.
+    One real game &mdash; no names, no ratings, just the moves and the real clocks.
     Watch it, then call the players&rsquo; <b>average rating</b>.</p>
     <ul class="ge-rules">
       <li><span>everyone starts at</span><b>1000</b></li>
@@ -949,7 +953,9 @@
     toastTimer = setTimeout(function () { t.classList.remove("show"); }, 2800);
   }
 
+  var loadSeq = 0;
   function loadGame() {
+    var seq = ++loadSeq;
     pause();
     $("elo-w").textContent = "????";
     $("elo-b").textContent = "????";
@@ -958,6 +964,7 @@
     state.guessed = false;
 
     return api("/api/game?player=" + encodeURIComponent(state.name) + "&secret=" + encodeURIComponent(secret)).then(function (g) {
+      if (seq !== loadSeq) return;   /* superseded by a newer deal (rename race) */
       if (g.done) {
         /* nothing left to guess — clear the table rather than leaving the
            last game's final position sitting there looking sealed */
@@ -987,7 +994,11 @@
     if (!state.game) {
       /* a failed boot-time deal left the panel up with nothing behind it —
          make the button the retry */
-      loadGame().catch(function (err) { toast("Could not load a game: " + err.message); });
+      loadGame().catch(function (err) {
+        if (/name taken/.test(err.message)) return nameTaken();
+        if (/name not allowed/.test(err.message)) return nameRejected();
+        toast("Could not load a game: " + err.message);
+      });
       return;
     }
     var guess = Number($("g-num").value);
@@ -1010,8 +1021,8 @@
       $("r-guess").textContent = r.guess;
       $("r-err").textContent = r.err;
       var d = $("r-delta");
-      d.textContent = (r.delta >= 0 ? "+" : "−") + Math.abs(r.delta);
-      d.className = r.delta >= 0 ? "d-pos" : "";
+      d.textContent = r.delta === 0 ? "±0" : (r.delta > 0 ? "+" : "−") + Math.abs(r.delta);
+      d.className = r.delta > 0 ? "d-pos" : "";
       $("r-rating").textContent = r.rating;
       $("guess-panel").hidden = true;
       $("reveal-panel").hidden = false;
@@ -1034,7 +1045,9 @@
 
 
   function loadHistory() {
+    var seq = loadSeq;
     return api("/api/history?player=" + encodeURIComponent(state.name) + "&secret=" + encodeURIComponent(secret)).then(function (rows) {
+      if (seq !== loadSeq) return;
       var list = $("hist");
       list.textContent = "";
       if (!rows.length) {
@@ -1049,8 +1062,8 @@
         var a = document.createElement("span");
         a.textContent = "called " + h.guess + ", was " + h.actual;
         var b = document.createElement("span");
-        b.className = h.delta >= 0 ? "d-pos" : "d-neg";
-        b.textContent = (h.delta >= 0 ? "+" : "−") + Math.abs(h.delta);
+        b.className = h.delta > 0 ? "d-pos" : "d-neg";
+        b.textContent = h.delta === 0 ? "±0" : (h.delta > 0 ? "+" : "−") + Math.abs(h.delta);
         li.appendChild(a); li.appendChild(b);
         list.appendChild(li);
       });
@@ -1067,16 +1080,19 @@
   $("t-play").onclick = function () { state.playing ? pause() : play(); };
   $("t-speed").onclick = function () {
     state.speedIdx = (state.speedIdx + 1) % SPEEDS.length;
-    $("t-speed").textContent = SPEEDS[state.speedIdx].label;
+    $("t-speed").querySelector(".g").textContent = SPEEDS[state.speedIdx].label;
     if (state.playing) play();
   };
 
   $("g-slider").oninput = function (e) { $("g-num").value = e.target.value; };
   $("g-num").oninput = function (e) { $("g-slider").value = e.target.value; };
   $("g-submit").onclick = submitGuess;
+  $("g-num").addEventListener("keydown", function (e) { if (e.key === "Enter") submitGuess(); });
   $("g-next").onclick = function () {
     $("g-slider").value = 1800; $("g-num").value = 1800;
     loadGame().catch(function (err) {
+      if (/name taken/.test(err.message)) return nameTaken();
+      if (/name not allowed/.test(err.message)) return nameRejected();
       /* put the reveal (and its Deal button) back so there is still a
          control on screen to retry with */
       $("guess-panel").hidden = true;
@@ -1086,10 +1102,10 @@
   };
 
   document.addEventListener("keydown", function (e) {
-    /* BUTTON and SUMMARY exempt too: Space on a focused control must activate
-       it, not hijack the replay (preventDefault on keydown suppresses it) */
-    if (e.target.tagName === "INPUT" || e.target.tagName === "BUTTON" ||
-        e.target.tagName === "SUMMARY" || !$("cover").hidden) return;
+    if (e.target.tagName === "INPUT" || e.target.tagName === "SUMMARY" || !$("cover").hidden) return;
+    /* Space on a focused button must activate the button, not the replay —
+       but arrows/Home/End should still step it */
+    if (e.target.tagName === "BUTTON" && e.key === " ") return;
     if (e.key === "ArrowLeft") { pause(); goto(state.ply - 1); }
     else if (e.key === "ArrowRight") { pause(); goto(state.ply + 1); }
     else if (e.key === " ") { e.preventDefault(); state.playing ? pause() : play(); }
@@ -1127,16 +1143,19 @@
     });
     loadHistory();
   }
-  /* someone else's browser holds this name's claim — back to the pen */
-  function nameTaken() {
+  /* The stored name failed server-side. Forget it entirely: the cover then
+     behaves like a first visit (no dismiss paths), reloads can't loop on the
+     bounce, and the guess button comes back for the next name. */
+  function backToPen(msg) {
+    state.name = "";
+    try { localStorage.removeItem(NAME_KEY); } catch (e) {}
+    state.guessed = true;              /* no accidental posts under the dead name */
+    $("g-submit").disabled = false;
     showCover();
-    $("name-err").textContent = "that name is already claimed on another device — pick a different one.";
+    $("name-err").textContent = msg;
   }
-  /* the server's language filter said no */
-  function nameRejected() {
-    showCover();
-    $("name-err").textContent = "that name won't fly here — pick a different one.";
-  }
+  function nameTaken() { backToPen("that name is already claimed in another browser — pick a different one."); }
+  function nameRejected() { backToPen("that name won't fly here — pick a different one."); }
   $("name-join").onclick = join;
   $("name-input").addEventListener("keydown", function (e) { if (e.key === "Enter") join(); });
   $("btn-rules").onclick = showCover;
@@ -1235,21 +1254,25 @@
     function openMenu() {
       d.setAttribute("open", "");
       if (!noMotion())
-        m.animate(
-          { opacity: [0, 1], transform: ["translateY(-8px)", "none"],
-            clipPath: ["inset(0 0 100% 0)", "inset(0 0 -14px 0)"] },
-          { duration: 200, easing: EASE });
+        try {
+          m.animate(
+            { opacity: [0, 1], transform: ["translateY(-8px)", "none"],
+              clipPath: ["inset(0 0 100% 0)", "inset(0 0 -14px 0)"] },
+            { duration: 200, easing: EASE });
+        } catch (err) {}
     }
     function closeMenu() {
       if (!d.open || closing) return;
       if (noMotion()) { d.removeAttribute("open"); return; }
       closing = true;
       var done = function () { if (closing) { closing = false; d.removeAttribute("open"); } };
-      var a = m.animate(
-        { opacity: [1, 0], transform: ["none", "translateY(-8px)"],
-          clipPath: ["inset(0 0 -14px 0)", "inset(0 0 100% 0)"] },
-        { duration: 160, easing: EASE });
-      a.onfinish = a.oncancel = done;
+      try {
+        var a = m.animate(
+          { opacity: [1, 0], transform: ["none", "translateY(-8px)"],
+            clipPath: ["inset(0 0 -14px 0)", "inset(0 0 100% 0)"] },
+          { duration: 160, easing: EASE });
+        a.onfinish = a.oncancel = done;
+      } catch (err) { done(); return; }
       setTimeout(done, 280);   /* a hidden tab pauses animations — never strand it open */
     }
     sum.addEventListener("click", function (e) {
