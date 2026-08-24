@@ -1019,6 +1019,7 @@
       loadHistory();
     }).catch(function (err) {
       if (/name taken/.test(err.message)) return nameTaken();
+      if (/name not allowed/.test(err.message)) return nameRejected();
       /* "already guessed" = another tab under this name beat us to this game
          (or it vanished) — retrying the same id can never succeed, deal fresh */
       if (/already guessed|no such game/.test(err.message)) {
@@ -1121,6 +1122,7 @@
     if (!changed && state.game) return; /* reopened just to look — nothing to redo */
     loadGame().catch(function (err) {
       if (/name taken/.test(err.message)) return nameTaken();
+      if (/name not allowed/.test(err.message)) return nameRejected();
       toast("Could not load a game: " + err.message);
     });
     loadHistory();
@@ -1129,6 +1131,11 @@
   function nameTaken() {
     showCover();
     $("name-err").textContent = "that name is already claimed on another device — pick a different one.";
+  }
+  /* the server's language filter said no */
+  function nameRejected() {
+    showCover();
+    $("name-err").textContent = "that name won't fly here — pick a different one.";
   }
   $("name-join").onclick = join;
   $("name-input").addEventListener("keydown", function (e) { if (e.key === "Enter") join(); });
@@ -1156,6 +1163,7 @@
   if (state.name) {
     loadGame().catch(function (err) {
       if (/name taken/.test(err.message)) return nameTaken();
+      if (/name not allowed/.test(err.message)) return nameRejected();
       toast("Could not load a game: " + err.message);
     });
     loadHistory();
