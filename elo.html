@@ -244,8 +244,12 @@
   .ge-tbtn{
     flex: 1; min-width: 0;
     font-size: 12px; font-weight: 600;
+    line-height: 14px;   /* one line box for every glyph size below */
     padding: 7px 4px 6px;
   }
+  /* one guillemet family: bigger singles for the steps, doubles for the ends */
+  #t-prev, #t-next{ font-size: 17px; }
+  #t-start, #t-end{ font-size: 14px; }
   .ge-tbtn[aria-pressed="true"]{ background: var(--ink); color: var(--paper); border-color: var(--ink); }
   .ge-ply{
     display: block; text-align: center; margin-top: 7px;
@@ -544,11 +548,11 @@
         <div class="ge-meta"><span id="meta-tc">&mdash;</span><b id="meta-result">&mdash;</b></div>
         <div class="ge-moves" id="moves"></div>
         <div class="ge-transport" role="group" aria-label="Replay controls">
-          <button class="gbtn ge-tbtn" id="t-start" type="button" title="Start (Home)">&#8676;</button>
+          <button class="gbtn ge-tbtn" id="t-start" type="button" title="Start (Home)">&#171;</button>
           <button class="gbtn ge-tbtn" id="t-prev" type="button" title="Back one (&larr;)">&#8249;</button>
           <button class="gbtn ge-tbtn" id="t-play" type="button" title="Play / pause (Space)" aria-pressed="false">&#9654;</button>
           <button class="gbtn ge-tbtn" id="t-next" type="button" title="Forward one (&rarr;)">&#8250;</button>
-          <button class="gbtn ge-tbtn" id="t-end" type="button" title="End (End)">&#8677;</button>
+          <button class="gbtn ge-tbtn" id="t-end" type="button" title="End (End)">&#187;</button>
           <button class="gbtn ge-tbtn" id="t-speed" type="button" title="Playback speed">1&times;</button>
         </div>
         <span class="ge-ply" id="ply">move 0 / 0</span>
