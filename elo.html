@@ -37,6 +37,16 @@
     if (localStorage.getItem("gambit-theme") === "dark")
       document.documentElement.setAttribute("data-theme", "dark");
   } catch (e) {}
+  /* the knight curtain plays only when a sibling page sent us here — the
+     seen-intro class is what the stylesheet uses to suppress it entirely */
+  (function () {
+    var cross = false;
+    try {
+      cross = sessionStorage.getItem("gambit-cross") === "1";
+      if (cross) sessionStorage.removeItem("gambit-cross");
+    } catch (e) {}
+    if (!cross) document.documentElement.classList.add("seen-intro");
+  })();
 </script>
 
 <style>
@@ -448,6 +458,88 @@
 </style>
 </head>
 <body>
+
+<!-- The knight curtain, verbatim from the front page (its CSS lives in
+     styles.css). Plays only on cross-page arrival; suppressed otherwise by
+     the seen-intro class the head gate sets. -->
+<div class="intro" id="intro" aria-hidden="true">
+  <!-- Four layers, not two. The grounds and the king are separate elements cut by
+       the SAME diagonal, rather than the king living inside each ground — that is
+       what lets them travel at different rates. With the king as a child it
+       inherited the ground's transform exactly, so it was welded to it; and
+       moving it within its parent is not an option either, because the clip is
+       fixed in the parent's space, so the king would slide under its own cut.
+       The grounds are EMPTY: whatever they carry is painted, never marked up, so
+       swapping the whole backdrop is a stylesheet change and the choreography
+       below never has to know which one is up. -->
+  <div class="intro-half intro-top"></div>
+  <div class="intro-half intro-bot"></div>
+  <div class="intro-kh intro-kh-top"><span class="intro-king">&#9818;&#xFE0E;</span></div>
+  <div class="intro-kh intro-kh-bot"><span class="intro-king">&#9818;&#xFE0E;</span></div>
+  <span class="intro-knight">&#9822;&#xFE0E;</span>
+  <!-- The blade is an SVG in the SAME percentage space as the cut, not a rotated
+       bar. The cut drops 16% of the HEIGHT across the full WIDTH, so its real
+       angle depends on the aspect ratio — about 6deg on a desktop but 19deg on a
+       phone. No single `rotate()` can match that. viewBox 0..100 with
+       preserveAspectRatio="none" maps these units onto the same percentages the
+       clip-paths use, so the blade sits exactly on the seam at every size. -->
+  <svg class="intro-slash" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+    <defs>
+      <linearGradient id="is-gash" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="100" y2="0">
+        <stop offset="0" stop-color="#0d0805" stop-opacity=".32"/>
+        <stop offset=".5" stop-color="#0d0805" stop-opacity=".95"/>
+        <stop offset="1" stop-color="#0d0805" stop-opacity=".32"/>
+      </linearGradient>
+    </defs>
+    <!-- ONE path, and that is the whole point of this version. It used to be three
+         stacked lenses — a dark gash with a solid white lip along its upper edge and
+         a white haze around both — which on a DARK ground read as light catching the
+         edge of a cut. On paper it reads as exactly what it is: a white band butted
+         against a black band, with a hard boundary down the middle of the mark.
+         The white is not needed here at all. The ground is already the white, so ink
+         alone on paper IS black and white — a highlight only made sense when the
+         thing behind the mark was dark.
+         The shape is a lens: it comes to a POINT at both ends of the cut and is
+         thickest in the middle, which is what makes it read as a slash rather than a
+         ruled line. The shading runs along its LENGTH, never across it: dark in the
+         middle where the blade bit deepest, fading at the tips. A cross-wise
+         gradient is what would bring the banding back.
+         THICKNESS. The controls sit at twice the intended bulge, because a quadratic
+         passes through only half of it (midpoint = (P0 + 2C + P2) / 4). So for a
+         total thickness T at centre, measured against the cut's straight midline of
+         50, the two controls are simply 50 - T and 50 + T.
+         T is 1.5 here, down from 3.2: about 13px on a laptop and 13 on a phone. At
+         3.2 it was a 29px wedge and read as a painted stripe rather than something a
+         blade did. Thin enough that the ink halo around it does real work now.
+         LENGTH. The mark spans x 16..84, so about two thirds of the width, while the
+         CUT it belongs to still runs edge to edge — the blade is the visible stroke,
+         not the seam, and a stroke that reaches both edges reads as a rule drawn
+         across the page rather than as something swung through the middle of it.
+         Its endpoints ride the cut's own line, y = 58 - 0.16x, which is what keeps it
+         collinear with the seam it is about to open: 55.44 at x=16, 44.56 at x=84.
+         The controls do not change with the span. Any range symmetric about x=50 has
+         endpoints averaging 50, so 50 -/+ T holds however short the mark gets. -->
+    <path fill="url(#is-gash)" d="M16,55.44 Q50,48.5 84,44.56 Q50,51.5 16,55.44 Z"/>
+  </svg>
+  <span class="intro-burst"></span>
+  <!-- The king comes apart. Fourteen chips thrown from the point of impact, timed to
+       the flash rather than to the blade's entry, so the debris is the CONSEQUENCE of
+       the strike and not part of the stroke itself.
+       They are siblings of the grounds, not children, so the parting leaves them
+       behind — they hang in the air over the opening page for a beat and fade, the
+       same trick the king's halves use to read as further away. All of it is done and
+       invisible by 1.25s, well before the curtain goes inert at 1.7s.
+       Empty spans with no text: each is a small ink shard, and its flight vector,
+       spin, size and stagger are all in the stylesheet with the rest of the
+       choreography. Nothing here needs a script. -->
+  <span class="intro-debris" aria-hidden="true">
+    <span class="sh sh1"></span><span class="sh sh2"></span><span class="sh sh3"></span>
+    <span class="sh sh4"></span><span class="sh sh5"></span><span class="sh sh6"></span>
+    <span class="sh sh7"></span><span class="sh sh8"></span><span class="sh sh9"></span>
+    <span class="sh sh10"></span><span class="sh sh11"></span><span class="sh sh12"></span>
+    <span class="sh sh13"></span><span class="sh sh14"></span>
+  </span>
+</div>
 
 <nav class="topnav" aria-label="Sections">
   <a class="brand" href="/"><span class="bw">GAMBIT<span class="dot">.</span></span><span class="bsub">Alexander Li</span></a>
@@ -1069,6 +1161,28 @@
       paint();
     });
     paint();
+  })();
+</script>
+
+
+<!-- Any hop between the three pages plays the knight curtain on ARRIVAL: the
+     click arms a per-tab flag, the destination's head gate reads it before
+     first paint. Same-page anchors and modified clicks (new tab) don't arm. -->
+<script>
+  (function () {
+    var PAGES = { "index.html": 1, "engine.html": 1, "elo.html": 1 };
+    var here = location.pathname.split("/").pop() || "index.html";
+    document.addEventListener("click", function (e) {
+      if (e.ctrlKey || e.metaKey || e.shiftKey || e.altKey) return;
+      var a = e.target && e.target.closest ? e.target.closest("a[href]") : null;
+      if (!a || a.target === "_blank") return;
+      var url;
+      try { url = new URL(a.getAttribute("href"), location.href); } catch (err) { return; }
+      if (url.origin !== location.origin) return;
+      var page = url.pathname.split("/").pop() || "index.html";
+      if (!(page in PAGES) || page === here) return;
+      try { sessionStorage.setItem("gambit-cross", "1"); } catch (err) {}
+    }, true);
   })();
 </script>
 

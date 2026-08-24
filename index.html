@@ -89,8 +89,14 @@
      Wrapped in try/catch because localStorage throws outright in some privacy modes;
      failing there means light theme and the curtain plays — the harmless defaults. -->
 <script>
+  /* a hop from a sibling page asks for the curtain once, even for returners */
+  var GAMBIT_CROSS = false;
   try {
-    if (localStorage.getItem("gambit-intro-seen") === "1")
+    GAMBIT_CROSS = sessionStorage.getItem("gambit-cross") === "1";
+    if (GAMBIT_CROSS) sessionStorage.removeItem("gambit-cross");
+  } catch (e) {}
+  try {
+    if (!GAMBIT_CROSS && localStorage.getItem("gambit-intro-seen") === "1")
       document.documentElement.classList.add("seen-intro");
     if (localStorage.getItem("gambit-theme") === "dark")
       document.documentElement.setAttribute("data-theme", "dark");
@@ -544,6 +550,28 @@
      Both scripts are same-origin and only exist ON Vercel, and only once the
      matching toggles are on in the dashboard; on localhost they 404 and `defer`
      keeps that silent. Last in the body so they can never delay the game. -->
+
+<!-- Any hop between the three pages plays the knight curtain on ARRIVAL: the
+     click arms a per-tab flag, the destination's head gate reads it before
+     first paint. Same-page anchors and modified clicks (new tab) don't arm. -->
+<script>
+  (function () {
+    var PAGES = { "index.html": 1, "engine.html": 1, "elo.html": 1 };
+    var here = location.pathname.split("/").pop() || "index.html";
+    document.addEventListener("click", function (e) {
+      if (e.ctrlKey || e.metaKey || e.shiftKey || e.altKey) return;
+      var a = e.target && e.target.closest ? e.target.closest("a[href]") : null;
+      if (!a || a.target === "_blank") return;
+      var url;
+      try { url = new URL(a.getAttribute("href"), location.href); } catch (err) { return; }
+      if (url.origin !== location.origin) return;
+      var page = url.pathname.split("/").pop() || "index.html";
+      if (!(page in PAGES) || page === here) return;
+      try { sessionStorage.setItem("gambit-cross", "1"); } catch (err) {}
+    }, true);
+  })();
+</script>
+
 <!-- the "Other" nav menu closes on outside click / Escape — the <details>
      handles opening by itself -->
 <script>
