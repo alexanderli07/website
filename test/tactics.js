@@ -5,7 +5,7 @@
  * is supposed to understand:
  *
  *   1. the engine can see a mate delivered AGAINST it (the original bug: a
- *      2-ply search can only see mates it delivers, so AL-1600 walked into
+ *      2-ply search can only see mates it delivers, so AL-1800 walked into
  *      Qd8# to win a pawn),
  *   2. mate scores carry their distance, so it mates fast and resists slow,
  *   3. quiescence resolves exchanges instead of scoring mid-trade,
@@ -181,7 +181,7 @@ console.log("\nweakness model\n--------------");
 }
 
 /* The general form of the safety guarantee, audited over real games instead of
-   one hand-picked position: for every move AL-1600 actually plays, the search's
+   one hand-picked position: for every move AL-1800 actually plays, the search's
    own score for it must be within BOT_MAX_LOSS of the best move, and must not
    be a forced loss — unless the position was already lost whatever it played.
    This is the invariant that replaces the old uniform-random blunder branch. */
@@ -189,7 +189,9 @@ console.log("\nsafety invariant over self-play\n-------------------------------"
 {
   function lcg2(seed) { let s = seed >>> 0; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
   let decisions = 0, lossViol = 0, mateViol = 0, alreadyLost = 0, worst = 0, detail = "";
-  for (const seed of [11, 22, 33, 44]) {
+  /* six seeds, not four: the 0.70-decay bot finishes games faster, and four
+     games stopped clearing the 100-decision floor below */
+  for (const seed of [11, 22, 33, 44, 55, 66]) {
     const rnd = lcg2(seed);
     const g = G(null);
     for (let ply = 0; ply < 70; ply++) {

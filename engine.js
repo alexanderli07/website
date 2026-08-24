@@ -23,7 +23,7 @@ var PIECE_CHARS = " PNBRQK";
 var FILES = "abcdefgh";
 
 /* ============================================================
-   TUNING KNOBS — everything that decides how strong AL-1600 is
+   TUNING KNOBS — everything that decides how strong AL-1800 is
    lives here, one line each.
    ------------------------------------------------------------
    SEARCH
@@ -88,14 +88,17 @@ var FILES = "abcdefgh";
                    Accepted consequence, unchanged: it can still be baited by a
                    sacrifice deeper than the horizon; BOT_MAX_LOSS filters
                    anything catastrophic.
-     BOT_RANK_DECAY  multiplies a move's weight by DECAY^rank — THE strength dial,
-                   set to 0.74 when Alex asked the bot to play at his own rating
-                   (~1600: his blitz 1542 / bullet 1665 / rapid 1716). At 0.74,
-                   measured in self-play: ~14cp average loss, best move 44% of the
-                   time, and it no longer sheds 300cp+ for nothing (0 of 237). That
-                   sits just under its own honest search, and depth-4 + quiescence
-                   on fast time controls is commonly reckoned high-1500s to 1700s —
-                   "1600-ish" by construction, not a certified Elo.
+     BOT_RANK_DECAY  multiplies a move's weight by DECAY^rank — THE strength dial.
+                   The bot tracks Alex: it shipped at 0.78 in the AL-1600 era
+                   (his blitz was 1542 then), and moved to 0.70 on 2026-08-24
+                   when his ratings climbed (blitz 1653 / bullet 1708 / rapid
+                   1716 that day, peaks 2000/2002/2188). At 0.70, measured in
+                   self-play: ~12cp average loss, best move 52% of the time —
+                   nearly its own honest search, which for depth-4 + quiescence
+                   at fast time controls is reckoned anywhere in the 1600s-1800s
+                   depending on who is counting. "~1800" by construction, not a
+                   certified Elo; it never sheds 300cp+ for nothing (the
+                   gauntlet's zero->=300cp assertion, re-run at this setting).
                    Why the knob exists: a plain softmax has no term for HOW MANY
                    candidates there are, so in a bushy 32-move position the near-best
                    tail outvoted the best move ~20:1 and the bot played its own best
@@ -106,7 +109,7 @@ var FILES = "abcdefgh";
                        avg loss cp  52.4  32.9  22.0  17.4  13.6  11.6   8.1
                        plays best   12%   22%   30%   43%   44%   52%   60%
                    THE UNLOCK ECONOMY SURVIVES the buff: unlocks pay on ANY capture
-                   of a bot piece, equal trades included, and a 1600 plays plenty of
+                   of a bot piece, equal trades included, and an 1800 plays plenty of
                    trades — what visitors lose is free material, not captures. The
                    roll-up, the checkmate jackpot and the Unlock-everything button
                    still cover weaker visitors. Restore 1.0 for the old soft bot.
@@ -116,8 +119,8 @@ var FILES = "abcdefgh";
                    piece is structurally impossible, not just unlikely — the
                    gauntlet asserts zero >=300cp choices across every flagged
                    position. What remains possible is the 200-299cp slip, a
-                   two-pawn misjudgement, which is the mistake a real 1600
-                   actually makes. (It was 350 in the AL-1200 era, when "can
+                   two-pawn misjudgement, which is a mistake real club players
+                   still make. (It was 350 in the AL-1200 era, when "can
                    drop a piece, and does" was the point.)
                    It is also the ONLY guarantee here that does not depend on the
                    knobs above: test/recapture.js keeps a position whose recapture
@@ -134,7 +137,7 @@ var MATE_MIN = MATE - 1000;
 
 var BOT_DEPTH = 4;
 var BOT_TEMP = 130;
-var BOT_RANK_DECAY = 0.78;     /* the ~1600 setting — the note above is the dial */
+var BOT_RANK_DECAY = 0.70;     /* the ~1800 setting — the note above is the dial */
 var BOT_RECAPTURE_BIAS = 40;
 var BOT_MAX_LOSS = 300;
 
@@ -972,7 +975,7 @@ function sampleWeighted(w, n, tot) {
 var BOT_TRIES = 8;
 
 /**
- * AL-1600's move: a full-strength search, then a deliberately fallible choice.
+ * AL-1800's move: a full-strength search, then a deliberately fallible choice.
  *
  * The old model rolled a 20% chance of a uniformly random legal move, which is
  * how a four-move mate worked on it and why it sometimes parked a rook on a

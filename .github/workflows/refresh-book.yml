@@ -1,4 +1,4 @@
-# AL-1600 keeps up with Alex. Every Monday this fetches his latest chess.com
+# AL-1800 keeps up with Alex. Every Monday this fetches his latest chess.com
 # games, regenerates the opening book from them, proves the artifact against
 # the engine, and pushes only when something actually changed — the push then
 # triggers the normal Vercel deploy. Run it by hand from the Actions tab any
@@ -50,5 +50,5 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add book.js
-          git commit -m "Refresh AL-1600's opening book from TheFaix's latest games"
+          git commit -m "Refresh AL-1800's opening book from TheFaix's latest games"
           git push

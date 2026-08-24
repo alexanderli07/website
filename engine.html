@@ -4,8 +4,8 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-<title>How AL-1600 works — the engine behind GAMBIT</title>
-<meta name="description" content="Build notes for AL-1600, the from-scratch JavaScript chess engine on alexanderli.dev: the search, the deliberately fallible move choice, and an opening book distilled from Alexander Li's own games." />
+<title>How AL-1800 works — the engine behind GAMBIT</title>
+<meta name="description" content="Build notes for AL-1800, the from-scratch JavaScript chess engine on alexanderli.dev: the search, the deliberately fallible move choice, and an opening book distilled from Alexander Li's own games." />
 <meta name="author" content="Alexander Li" />
 <meta name="color-scheme" content="light" />
 <meta name="theme-color" content="#f4ecd9" />
@@ -19,7 +19,7 @@
 <meta property="og:type" content="article" />
 <meta property="og:site_name" content="Alexander Li" />
 <meta property="og:url" content="https://alexanderli.dev/engine.html" />
-<meta property="og:title" content="How AL-1600 works — the engine behind GAMBIT" />
+<meta property="og:title" content="How AL-1800 works — the engine behind GAMBIT" />
 <meta property="og:description" content="No library, no Stockfish behind a curtain. Build notes for the from-scratch engine trained on Alexander Li's own games." />
 <meta property="og:image" content="https://alexanderli.dev/assets/og-card.png" />
 
@@ -365,21 +365,21 @@
 
   <header>
     <p class="eg-kicker">The engine room &middot; build notes</p>
-    <h1>How AL&#8209;1600 works<span class="dot">.</span></h1>
+    <h1>How AL&#8209;1800 works<span class="dot">.</span></h1>
     <p class="eg-stand">
       No chess library, no Stockfish behind a curtain, no server doing the thinking.
-      AL&#8209;1600 is under 1,200 lines of plain JavaScript in a single hand-written file,
+      AL&#8209;1800 is under 1,200 lines of plain JavaScript in a single hand-written file,
       running entirely in your browser &mdash; and the reason it feels like playing Alex
       is everything wrapped <em>around</em> the search. These are the build notes.
     </p>
 
     <div class="eg-plate" role="group" aria-label="Engine specification plate">
-      <p class="eg-plate-title"><span>AL&#8209;1600 &middot; specification</span><span class="rt">engine.js</span></p>
+      <p class="eg-plate-title"><span>AL&#8209;1800 &middot; specification</span><span class="rt">engine.js</span></p>
       <dl>
         <div><dt>Search</dt><dd>4 plies <i>+6 quiescence</i></dd></div>
         <div><dt>Hash table</dt><dd>65,536 <i>entries</i></dd></div>
         <div><dt>Temperature</dt><dd>130 <i>centipawns</i></dd></div>
-        <div><dt>Rank decay</dt><dd>&times;0.78 <i>per rank</i></dd></div>
+        <div><dt>Rank decay</dt><dd>&times;0.70 <i>per rank</i></dd></div>
         <div><dt>Blunder ceiling</dt><dd>300 cp <i>&lt; one knight</i></dd></div>
         <div><dt>Opening book</dt><dd>293 <i>positions, his games</i></dd></div>
       </dl>
@@ -505,7 +505,7 @@
       A chess engine&rsquo;s natural state is <i>far</i> stronger than any human it imitates,
       so the interesting problem runs backwards: how do you make it fallible without making
       it embarrassing? The usual trick &mdash; searching shallower, or mixing in random moves
-      &mdash; produces blunders no human would make. AL&#8209;1600 does it differently:
+      &mdash; produces blunders no human would make. AL&#8209;1800 does it differently:
       <b>it always searches at full strength, then chooses imperfectly.</b> Its mistakes are
       mistakes of choice, never of sight.
     </p>
@@ -513,7 +513,7 @@
       Every legal root move is scored by the honest search, then weighted by a
       <b>softmax</b>: a move&rsquo;s weight is <code>exp((score &minus; best) / 130)</code>,
       so near-equal moves stay live and clearly-worse ones fade exponentially. Each weight is
-      then multiplied by <b>0.78 per rank</b> down the list &mdash; and that rank decay, not
+      then multiplied by <b>0.70 per rank</b> down the list &mdash; and that rank decay, not
       the temperature, is the real strength dial. A plain softmax has no term for <i>how many</i>
       near-ties exist: in a bushy 32-move position the long tail of &ldquo;almost as good&rdquo;
       moves collectively outvoted the best move about 20-to-1, and the old bot played its own
@@ -530,20 +530,22 @@
           <tr><td>1.00</td><td>52.4</td><td>12%</td><td>the old AL-1200</td></tr>
           <tr><td>0.92</td><td>32.9</td><td>22%</td><td>casual</td></tr>
           <tr><td>0.85</td><td>22.0</td><td>30%</td><td>club-curious</td></tr>
-          <tr class="shipped"><td>0.78</td><td>17.4</td><td>43%</td><td>~1600<span class="mark">&larr; shipped</span></td></tr>
-          <tr><td>0.74</td><td>13.6</td><td>44%</td><td>a strong day</td></tr>
-          <tr><td>0.70</td><td>11.6</td><td>52%</td><td>stronger than him</td></tr>
+          <tr><td>0.78</td><td>17.4</td><td>43%</td><td>the AL-1600 era</td></tr>
+          <tr><td>0.74</td><td>13.6</td><td>44%</td><td>warming up</td></tr>
+          <tr class="shipped"><td>0.70</td><td>11.6</td><td>52%</td><td>~1800<span class="mark">&larr; shipped</span></td></tr>
           <tr><td>0.62</td><td>8.1</td><td>60%</td><td>no longer human</td></tr>
         </tbody>
       </table>
     </div>
     <p>
-      0.78 lands the engine around Alex&rsquo;s own live ratings (blitz 1542, bullet 1665,
-      rapid 1716 when it was tuned) &mdash; <i>1600-ish by construction, not a certified Elo</i>.
+      The dial tracks Alex as he climbs: it shipped at 0.78 when his blitz was 1542, and
+      moved to 0.70 when his ratings did (blitz 1653, bullet 1708, rapid 1716 on tuning
+      day; his peaks run 2000+) &mdash; a shade above his everyday numbers, well under his
+      best: <i>~1800 by construction, not a certified Elo</i>.
       One more human touch rides on top: a move that <b>recaptures</b> on the square the
       opponent just took on gets its weight nudged &times;40. The search is often right that
       recapturing can wait a move &mdash; but a human takes back on reflex, and the bot should
-      too (measured: it recaptures 99.4% of the time).
+      too (measured: it recaptures about 99 times in 100).
     </p>
 
     <figure role="img" aria-label="Bar chart of move weights after softmax and rank decay, with everything past the 300 centipawn ceiling struck out">
@@ -612,7 +614,7 @@
     <h2 id="s5"><span class="eg-kicker"><span class="no">05</span>openings</span>The part that is actually him<span class="dot">.</span></h2>
     <hr class="eg-rule" />
     <p>
-      Out of the opening, AL&#8209;1600 does not consult theory &mdash; it consults
+      Out of the opening, AL&#8209;1800 does not consult theory &mdash; it consults
       <b>Alex&rsquo;s own games</b>. A generator replays every 2025-onward game from his
       chess.com account and distils them into a book: positions he has reached at least three
       times, replies he has played at least twice, up to sixteen plies deep. Today that is
