@@ -123,7 +123,8 @@
   .ge-rules .pos{ color: var(--red); font-weight: 600; }
 
   /* recent calls */
-  .ge-hist{ list-style: none; margin: 0; padding: 0; }
+  /* right padding keeps the delta numbers off the scrollbar */
+  .ge-hist{ list-style: none; margin: 0; padding: 0 10px 0 0; }
   .ge-hist li{
     display: flex; justify-content: space-between; gap: 8px;
     font-family: var(--mono); font-size: 10px; letter-spacing: .03em;
@@ -236,17 +237,15 @@
   html[data-theme="dark"] .ge-coord{ color: rgba(226,196,150,.5); }
 
   /* transport — lives in the game-file rail under the move sheet, so the
-     buttons share the rail's width evenly */
-  .ge-transport{ display: flex; gap: 4px; margin-top: 10px; }
+     buttons share the rail's width evenly. The face, hard shadow, lift and
+     press all come from .gbtn (the front page's New game / Takeback / Hint
+     recipe); this only sets the sizing and the playing state. */
+  .ge-transport{ display: flex; gap: 6px; margin-top: 10px; }
   .ge-tbtn{
     flex: 1; min-width: 0;
-    font-family: var(--mono); font-size: 12px; font-weight: 600;
-    color: var(--ink); background: rgba(var(--linen), .5);
-    border: 1px solid var(--walnut-3);
+    font-size: 12px; font-weight: 600;
     padding: 7px 4px 6px;
-    transition: border-color .15s ease, color .15s ease;
   }
-  .ge-tbtn:hover{ border-color: var(--red); color: var(--red); }
   .ge-tbtn[aria-pressed="true"]{ background: var(--ink); color: var(--paper); border-color: var(--ink); }
   .ge-ply{
     display: block; text-align: center; margin-top: 7px;
@@ -269,6 +268,7 @@
     position: relative;
     flex: 1; min-height: 0; overflow-y: auto;
     margin: 8px 0 0;
+    padding-right: 8px;   /* keep the move buttons off the scrollbar */
     font-family: var(--mono); font-size: 11px;
   }
   .ge-mrow{
@@ -544,12 +544,12 @@
         <div class="ge-meta"><span id="meta-tc">&mdash;</span><b id="meta-result">&mdash;</b></div>
         <div class="ge-moves" id="moves"></div>
         <div class="ge-transport" role="group" aria-label="Replay controls">
-          <button class="ge-tbtn" id="t-start" type="button" title="Start (Home)">&#8676;</button>
-          <button class="ge-tbtn" id="t-prev" type="button" title="Back one (&larr;)">&#8249;</button>
-          <button class="ge-tbtn" id="t-play" type="button" title="Play / pause (Space)" aria-pressed="false">&#9654;</button>
-          <button class="ge-tbtn" id="t-next" type="button" title="Forward one (&rarr;)">&#8250;</button>
-          <button class="ge-tbtn" id="t-end" type="button" title="End (End)">&#8677;</button>
-          <button class="ge-tbtn" id="t-speed" type="button" title="Playback speed">1&times;</button>
+          <button class="gbtn ge-tbtn" id="t-start" type="button" title="Start (Home)">&#8676;</button>
+          <button class="gbtn ge-tbtn" id="t-prev" type="button" title="Back one (&larr;)">&#8249;</button>
+          <button class="gbtn ge-tbtn" id="t-play" type="button" title="Play / pause (Space)" aria-pressed="false">&#9654;</button>
+          <button class="gbtn ge-tbtn" id="t-next" type="button" title="Forward one (&rarr;)">&#8250;</button>
+          <button class="gbtn ge-tbtn" id="t-end" type="button" title="End (End)">&#8677;</button>
+          <button class="gbtn ge-tbtn" id="t-speed" type="button" title="Playback speed">1&times;</button>
         </div>
         <span class="ge-ply" id="ply">move 0 / 0</span>
       </div>
@@ -776,7 +776,9 @@
   function play() {
     if (!state.replay || state.ply >= state.replay.labels.length) return;
     state.playing = true;
-    $("t-play").innerHTML = "&#9646;&#9646;";
+    /* two thin pipes with a hair space — the block glyphs (▮▮) read as ink
+       smears at this size */
+    $("t-play").innerHTML = "|&#8202;|";
     $("t-play").setAttribute("aria-pressed", "true");
     clearInterval(state.timer);
     state.timer = setInterval(function () {
