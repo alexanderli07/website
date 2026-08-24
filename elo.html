@@ -240,16 +240,22 @@
      buttons share the rail's width evenly. The face, hard shadow, lift and
      press all come from .gbtn (the front page's New game / Takeback / Hint
      recipe); this only sets the sizing and the playing state. */
-  .ge-transport{ display: flex; gap: 6px; margin-top: 10px; }
+  .ge-transport{ display: flex; gap: 6px; margin-top: 10px; justify-content: center; }
   .ge-tbtn{
-    flex: 1; min-width: 0;
+    flex: 1; min-width: 0; max-width: 38px;
+    aspect-ratio: 1;   /* squares that share the row, capped so they stay squares */
+    padding: 0;
+    display: flex; align-items: center; justify-content: center;
     font-size: 12px; font-weight: 600;
-    line-height: 14px;   /* one line box for every glyph size below */
-    padding: 7px 4px 6px;
   }
-  /* one guillemet family: bigger singles for the steps, doubles for the ends */
-  #t-prev, #t-next{ font-size: 17px; }
-  #t-start, #t-end{ font-size: 14px; }
+  .ge-tbtn .g{ display: block; line-height: 1; }
+  /* one guillemet family: bigger singles for the steps, doubles for the ends.
+     The translateY nudges are MEASURED ink offsets (canvas actualBoundingBox
+     vs em box, same method as the nav moon/sun): these glyphs carry their ink
+     below the em centre, so flex centring alone leaves them visibly low. */
+  #t-prev .g, #t-next .g{ font-size: 17px; transform: translateY(-1.5px); }
+  #t-start .g, #t-end .g{ font-size: 14px; transform: translateY(-1px); }
+  #t-speed .g{ transform: translateY(-.5px); }
   .ge-tbtn[aria-pressed="true"]{ background: var(--ink); color: var(--paper); border-color: var(--ink); }
   .ge-ply{
     display: block; text-align: center; margin-top: 7px;
@@ -548,12 +554,12 @@
         <div class="ge-meta"><span id="meta-tc">&mdash;</span><b id="meta-result">&mdash;</b></div>
         <div class="ge-moves" id="moves"></div>
         <div class="ge-transport" role="group" aria-label="Replay controls">
-          <button class="gbtn ge-tbtn" id="t-start" type="button" title="Start (Home)">&#171;</button>
-          <button class="gbtn ge-tbtn" id="t-prev" type="button" title="Back one (&larr;)">&#8249;</button>
-          <button class="gbtn ge-tbtn" id="t-play" type="button" title="Play / pause (Space)" aria-pressed="false">&#9654;</button>
-          <button class="gbtn ge-tbtn" id="t-next" type="button" title="Forward one (&rarr;)">&#8250;</button>
-          <button class="gbtn ge-tbtn" id="t-end" type="button" title="End (End)">&#187;</button>
-          <button class="gbtn ge-tbtn" id="t-speed" type="button" title="Playback speed">1&times;</button>
+          <button class="gbtn ge-tbtn" id="t-start" type="button" title="Start (Home)"><span class="g">&#171;</span></button>
+          <button class="gbtn ge-tbtn" id="t-prev" type="button" title="Back one (&larr;)"><span class="g">&#8249;</span></button>
+          <button class="gbtn ge-tbtn" id="t-play" type="button" title="Play / pause (Space)" aria-pressed="false"><span class="g">&#9654;</span></button>
+          <button class="gbtn ge-tbtn" id="t-next" type="button" title="Forward one (&rarr;)"><span class="g">&#8250;</span></button>
+          <button class="gbtn ge-tbtn" id="t-end" type="button" title="End (End)"><span class="g">&#187;</span></button>
+          <button class="gbtn ge-tbtn" id="t-speed" type="button" title="Playback speed"><span class="g">1&times;</span></button>
         </div>
         <span class="ge-ply" id="ply">move 0 / 0</span>
       </div>
@@ -781,8 +787,10 @@
     if (!state.replay || state.ply >= state.replay.labels.length) return;
     state.playing = true;
     /* two thin pipes with a hair space — the block glyphs (▮▮) read as ink
-       smears at this size */
-    $("t-play").innerHTML = "|&#8202;|";
+       smears at this size. The pipes ink 1px low (measured); ▶ sits true. */
+    var g = $("t-play").querySelector(".g");
+    g.innerHTML = "|&#8202;|";
+    g.style.transform = "translateY(-1px)";
     $("t-play").setAttribute("aria-pressed", "true");
     clearInterval(state.timer);
     state.timer = setInterval(function () {
@@ -792,7 +800,9 @@
   }
   function pause() {
     state.playing = false;
-    $("t-play").innerHTML = "&#9654;";
+    var g = $("t-play").querySelector(".g");
+    g.innerHTML = "&#9654;";
+    g.style.transform = "";
     $("t-play").setAttribute("aria-pressed", "false");
     clearInterval(state.timer);
   }
