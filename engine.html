@@ -4,8 +4,8 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-<title>How AL-1800 works — the engine behind GAMBIT</title>
-<meta name="description" content="Build notes for AL-1800, the from-scratch JavaScript chess engine on alexanderli.dev: the search, the deliberately fallible move choice, and an opening book distilled from Alexander Li's own games." />
+<title>How AL-1800 works — the chess engine behind GAMBIT</title>
+<meta name="description" content="Build notes for AL-1800: a from-scratch JavaScript chess engine — the search, the weakness model, and an opening book built from Alex's own games." />
 <meta name="author" content="Alexander Li" />
 <meta name="color-scheme" content="light" />
 <meta name="theme-color" content="#f4ecd9" />
@@ -19,9 +19,15 @@
 <meta property="og:type" content="article" />
 <meta property="og:site_name" content="Alexander Li" />
 <meta property="og:url" content="https://alexanderli.dev/engine.html" />
-<meta property="og:title" content="How AL-1800 works — the engine behind GAMBIT" />
-<meta property="og:description" content="No library, no Stockfish behind a curtain. Build notes for the from-scratch engine trained on Alexander Li's own games." />
+<meta property="og:title" content="How AL-1800 works — the chess engine behind GAMBIT" />
+<meta property="og:description" content="Build notes for the from-scratch chess engine trained on Alexander Li's own games." />
 <meta property="og:image" content="https://alexanderli.dev/assets/og-card.png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="How AL-1800 works — the chess engine behind GAMBIT" />
+<meta name="twitter:description" content="Build notes for the chess engine on alexanderli.dev, written from the code." />
+<meta name="twitter:image" content="https://alexanderli.dev/assets/og-card.png" />
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -30,6 +36,17 @@
      or new markup renders with old rules (an unstyled nav menu, once). Bump it
      whenever an HTML change depends on a styles.css change. -->
 <link rel="stylesheet" href="styles.css?v=8" />
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "How AL-1800 works — the chess engine behind GAMBIT",
+  "url": "https://alexanderli.dev/engine.html",
+  "image": "https://alexanderli.dev/assets/og-card.png",
+  "author": { "@type": "Person", "name": "Alexander Li", "url": "https://alexanderli.dev/" }
+}
+</script>
 
 <!-- Same theme gate as the front page, same key, before anything paints.
      There is no curtain here, so only the theme half is needed. -->
@@ -367,10 +384,10 @@
     <p class="eg-kicker">The engine room &middot; build notes</p>
     <h1>How AL&#8209;1800 works<span class="dot">.</span></h1>
     <p class="eg-stand">
-      No chess library, no Stockfish behind a curtain, no server doing the thinking.
-      AL&#8209;1800 is under 1,200 lines of plain JavaScript in a single hand-written file,
-      running entirely in your browser &mdash; and the reason it feels like playing Alex
-      is everything wrapped <em>around</em> the search. These are the build notes.
+      AL&#8209;1800 is about 1,200 lines of plain JavaScript in one hand-written file,
+      running entirely in your browser &mdash; no chess library, no server. The part
+      that makes it feel like Alex is everything wrapped <em>around</em> the search.
+      These are the build notes.
     </p>
 
     <div class="eg-plate" role="group" aria-label="Engine specification plate">
@@ -387,7 +404,7 @@
   </header>
 
   <section aria-labelledby="s1">
-    <h2 id="s1"><span class="eg-kicker"><span class="no">01</span>representation</span>The board it thinks on<span class="dot">.</span></h2>
+    <h2 id="s1"><span class="eg-kicker" aria-hidden="true"><span class="no">01</span>representation</span>The board it thinks on<span class="dot">.</span></h2>
     <hr class="eg-rule" />
     <p>
       The board is a <b>0x88 array</b> &mdash; 128 slots, laid out as if two boards sat side
@@ -406,7 +423,7 @@
   </section>
 
   <section aria-labelledby="s2">
-    <h2 id="s2"><span class="eg-kicker"><span class="no">02</span>search</span>Looking four moves ahead<span class="dot">.</span></h2>
+    <h2 id="s2"><span class="eg-kicker" aria-hidden="true"><span class="no">02</span>search</span>Looking four moves ahead<span class="dot">.</span></h2>
     <hr class="eg-rule" />
     <p>
       The core is <b>negamax with alpha&ndash;beta pruning</b>, four plies deep: assume both
@@ -478,7 +495,7 @@
   </section>
 
   <section aria-labelledby="s3">
-    <h2 id="s3"><span class="eg-kicker"><span class="no">03</span>evaluation</span>What a position is worth<span class="dot">.</span></h2>
+    <h2 id="s3"><span class="eg-kicker" aria-hidden="true"><span class="no">03</span>evaluation</span>What a position is worth<span class="dot">.</span></h2>
     <hr class="eg-rule" />
     <p>
       When the search runs out of depth it asks the evaluation for a number:
@@ -499,7 +516,7 @@
   </section>
 
   <section aria-labelledby="s4">
-    <h2 id="s4"><span class="eg-kicker"><span class="no">04</span>the weakness model</span>Playing worse, on purpose<span class="dot">.</span></h2>
+    <h2 id="s4"><span class="eg-kicker" aria-hidden="true"><span class="no">04</span>the weakness model</span>Playing worse, on purpose<span class="dot">.</span></h2>
     <hr class="eg-rule" />
     <p>
       A chess engine&rsquo;s natural state is <i>far</i> stronger than any human it imitates,
@@ -611,7 +628,7 @@
   </section>
 
   <section aria-labelledby="s5">
-    <h2 id="s5"><span class="eg-kicker"><span class="no">05</span>openings</span>The part that is actually him<span class="dot">.</span></h2>
+    <h2 id="s5"><span class="eg-kicker" aria-hidden="true"><span class="no">05</span>openings</span>The part that is actually him<span class="dot">.</span></h2>
     <hr class="eg-rule" />
     <p>
       Out of the opening, AL&#8209;1800 does not consult theory &mdash; it consults
@@ -635,7 +652,7 @@
   </section>
 
   <section aria-labelledby="s6">
-    <h2 id="s6"><span class="eg-kicker"><span class="no">06</span>verification</span>Keeping it honest<span class="dot">.</span></h2>
+    <h2 id="s6"><span class="eg-kicker" aria-hidden="true"><span class="no">06</span>verification</span>Keeping it honest<span class="dot">.</span></h2>
     <hr class="eg-rule" />
     <p>
       A bot that carries someone&rsquo;s name cannot be allowed to look stupid, so the test
@@ -653,7 +670,7 @@
       None of this asks to be taken on faith. The entire site &mdash; engine, book, generator,
       tests, this page &mdash; is public at
       <a href="https://github.com/alexanderli07/website">github.com/alexanderli07/website</a>.
-      Read the source. Then come beat it.
+      Read the source, then come beat it.
     </p>
   </section>
 

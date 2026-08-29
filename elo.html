@@ -4,8 +4,8 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-<title>Guess the Elo — Alexander Li</title>
-<meta name="description" content="Watch one real chess game — names and ratings sealed. Call the average Elo and see how far off you were. A side game on alexanderli.dev." />
+<title>Guess the Elo — a chess rating game · Alexander Li</title>
+<meta name="description" content="Watch one real chess game with the names and ratings sealed, then guess the players’ average Elo. A side game on alexanderli.dev." />
 <meta name="author" content="Alexander Li" />
 <meta name="color-scheme" content="light" />
 <meta name="theme-color" content="#f4ecd9" />
@@ -19,9 +19,15 @@
 <meta property="og:type" content="website" />
 <meta property="og:site_name" content="Alexander Li" />
 <meta property="og:url" content="https://alexanderli.dev/elo.html" />
-<meta property="og:title" content="Guess the Elo — Alexander Li" />
-<meta property="og:description" content="One real game, ratings sealed. Call the number." />
+<meta property="og:title" content="Guess the Elo — a chess rating game · Alexander Li" />
+<meta property="og:description" content="Watch one real game with the ratings sealed, then call the average Elo." />
 <meta property="og:image" content="https://alexanderli.dev/assets/og-card.png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="Guess the Elo — a chess rating game · Alexander Li" />
+<meta name="twitter:description" content="Watch a real chess game with the ratings hidden, then call the number." />
+<meta name="twitter:image" content="https://alexanderli.dev/assets/og-card.png" />
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -578,7 +584,9 @@
 
 <main class="ge" id="main">
 
-  <noscript><p class="ge-stand">This game needs JavaScript — the replay and the guessing are both live.</p></noscript>
+  <h1 class="vh">Guess the Elo</h1>
+
+  <noscript><p class="ge-stand">This game needs JavaScript: the replay and the scoring both run in your browser.</p></noscript>
 
   <!-- Black's clock, over the board column and above the arena's shared top line -->
   <div class="ge-clockbar">
@@ -677,12 +685,12 @@
     <button class="cover-x" id="cover-x" type="button" aria-label="Close the rules" hidden>&times;</button>
     <div class="sc-kicker">
       <span>Official wager sheet</span>
-      <span class="red">Call it, climb</span>
+      <span class="red">Every call moves your rating</span>
     </div>
     <h2 id="cover-h">Guess the Elo<span class="dot" style="color:var(--red)">.</span></h2>
-    <p>Your name belongs to this browser once you play &mdash; nobody else can take it.
-    One real game &mdash; no names, no ratings, just the moves and the real clocks.
-    Watch it, then call the players&rsquo; <b>average rating</b>.</p>
+    <p>Sign a name and it stays with this browser; nobody else can play under it.
+    Each deal is one real game, names and ratings sealed. Watch it on the clocks it
+    was played on, then call the players&rsquo; <b>average rating</b>.</p>
     <ul class="ge-rules">
       <li><span>everyone starts at</span><b>1000</b></li>
       <li><span>dead-on call</span><b class="pos">+30</b></li>
@@ -692,7 +700,7 @@
     <input id="name-input" type="text" maxlength="20" placeholder="your name"
            autocomplete="nickname" aria-label="Your name for the scoresheet" />
     <p class="ge-err" id="name-err"></p>
-    <button class="ge-btn" id="name-join" type="button">Take the pen &mdash; play</button>
+    <button class="ge-btn" id="name-join" type="button">Take the pen</button>
   </div>
 </div>
 
@@ -1128,7 +1136,7 @@
   function join() {
     var name = $("name-input").value.trim();
     if (!NAME_RE.test(name)) {
-      $("name-err").textContent = "letters, digits, spaces, . _ or - — up to 20 characters, starting with a letter, digit or underscore.";
+      $("name-err").textContent = "up to 20 characters: letters, digits, spaces, dots, underscores or hyphens; start with a letter, digit or underscore.";
       return;
     }
     var changed = name !== state.name;
@@ -1155,7 +1163,7 @@
     $("name-err").textContent = msg;
   }
   function nameTaken() { backToPen("that name is already claimed in another browser — pick a different one."); }
-  function nameRejected() { backToPen("that name won't fly here — pick a different one."); }
+  function nameRejected() { backToPen("that name isn't allowed — pick a different one."); }
   $("name-join").onclick = join;
   $("name-input").addEventListener("keydown", function (e) { if (e.key === "Enter") join(); });
   $("btn-rules").onclick = showCover;
