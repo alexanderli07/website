@@ -54,27 +54,32 @@
           (element.localName === "noscript" && element === document.getElementById("test-noscript"));
       }
 
+      function describeElement(element) {
+        const id = element.id ? `id=${JSON.stringify(element.id)}` : "no ID";
+        return `<${element.localName}> element (${id})`;
+      }
+
       function inspectElement(element) {
         if (isOwned(element)) {
-          if (element.shadowRoot) signals.add("Unexpected open shadow root on a page element.");
+          if (element.shadowRoot) signals.add(`Unexpected open shadow root on a page ${describeElement(element)}.`);
           return;
         }
 
         const tag = element.localName;
         if (Array.from(element.attributes).some(attribute => extensionUrl.test(attribute.value.trim()))) {
-          signals.add(`Extension URL on an unexpected <${tag}> element.`);
+          signals.add(`Extension URL on an unexpected ${describeElement(element)}.`);
         }
         if (["script", "style", "link", "iframe"].includes(tag)) {
-          signals.add(`Unexpected <${tag}> element.`);
+          signals.add(`Unexpected ${describeElement(element)}.`);
           return;
         }
         const position = element.isConnected ? getComputedStyle(element).position : element.style?.position;
         const isOpenPopup = element.matches("dialog[open]") ||
           (element.hasAttribute("popover") && element.getClientRects().length > 0);
         if (position === "fixed" || position === "sticky" || isOpenPopup) {
-          signals.add(`Unexpected overlay-like <${tag}> element.`);
+          signals.add(`Unexpected overlay-like ${describeElement(element)}.`);
         } else {
-          signals.add(`Unexpected <${tag}> element.`);
+          signals.add(`Unexpected ${describeElement(element)}.`);
         }
       }
 
@@ -100,7 +105,7 @@
         for (const record of records) {
           if (record.type === "attributes") {
             if (isOwned(record.target)) {
-              signals.add(`Attributes changed on a page <${record.target.localName}> element.`);
+              signals.add(`Attributes changed on a page ${describeElement(record.target)}.`);
             } else {
               inspectElement(record.target);
             }
@@ -113,7 +118,7 @@
           }
           for (const node of record.removedNodes) {
             if (node.nodeType === Node.ELEMENT_NODE && isOwned(node)) {
-              signals.add(`Page <${node.localName}> element removed.`);
+              signals.add(`Page ${describeElement(node)} removed.`);
             }
           }
         }
@@ -161,14 +166,18 @@
 
         function scan() {
           document.querySelectorAll("*").forEach(inspectElement);
-          if (readRules() !== originalRules || document.adoptedStyleSheets?.length) {
-            signals.add("Unexpected stylesheet rules or adopted stylesheet.");
+          if (readRules() !== originalRules) {
+            signals.add(`Unexpected stylesheet rules in ${describeElement(ownStyle)}.`);
           }
-          const pseudoElements = ["::before", "::after"];
-          if ([document.documentElement, document.body].some(element =>
-            pseudoElements.some(pseudo => !["none", "normal"].includes(getComputedStyle(element, pseudo).content))
-          )) {
-            signals.add("Unexpected content in a page-level CSS pseudo-element.");
+          if (document.adoptedStyleSheets?.length) {
+            signals.add("Unexpected document-adopted stylesheet (no DOM element).");
+          }
+          for (const element of [document.documentElement, document.body]) {
+            for (const pseudo of ["::before", "::after"]) {
+              if (!["none", "normal"].includes(getComputedStyle(element, pseudo).content)) {
+                signals.add(`Unexpected CSS content in ${pseudo} on ${describeElement(element)}.`);
+              }
+            }
           }
           if (performance.getEntriesByType("resource").some(entry => extensionUrl.test(entry.name))) {
             signals.add("Extension URL in the resource timing log.");
