@@ -4,7 +4,6 @@
   "buildCommand": null,
   "installCommand": null,
   "outputDirectory": ".",
-  "rewrites": [{ "source": "/test", "destination": "/userscript-test.html" }],
   "headers": [
     {
       "source": "/(.*)",
